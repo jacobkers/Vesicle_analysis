@@ -5,6 +5,7 @@ function initval=A000__WF_Get_FF_PathsandExperiments(batchrunindex);
 %% Paths
 if ismac, initval.DirSep='/';else initval.DirSep='\';end;
 initval.codepth='D:\jkerssemakers\My Documents\BN CD Recent\BN_CD16_Fede\Matlabcode_Fedalyzer\';
+
 initval.projectpath='D:\jkerssemakers\My Documents\BN CD Data\2016_Fede\'; 
 %initval.codepth=pwd;
 addpath(initval.codepth);
@@ -13,10 +14,9 @@ addpath(strcat(initval.codepth,initval.DirSep,'CommonTools',initval.DirSep));
 
 %% Experiment labels
 switch batchrunindex
-    case 1, initval.expi='VersionTest'
+    case 1, initval.expi='VersionTest'  %local Jacob
     case 2, initval.expi='17-08-16 12uM FtsZ';   
 end
-
 
 %common props
 initval.dummy=1;
