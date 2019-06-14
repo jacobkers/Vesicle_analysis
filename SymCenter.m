@@ -1,6 +1,5 @@
 function x=SymCenter(prf);
-    %this function find the symmetry center of an array.  
-    %Jacob Kerssemakers-----------------------------------
+    %this function find the symmetry center of an array
     mp=nanmean(prf);
     sel=find(isnan(prf)); prf(sel)=mp;  %padding nans
     fw=prf-nanmean(prf);             %forward
@@ -9,7 +8,19 @@ function x=SymCenter(prf);
     ld=ceil(length(d)/2);
     d=[d(ld+1:length(d)) d(1:ld)]';   %swap first and second half 
     [val,x]=max(d);
-    x=(subpix_step(d)+length(prf)/2)/2;    
+    x=(subpix_step(d)+length(prf)/2)/2;
+    if 0
+    figure(5);
+    subplot(2,1,1);
+    plot(prf);
+    
+    subplot(2,1,2);
+    plot(d);
+    
+    [~]=ginput(1);
+    
+    close(gcf); 
+    end
   
  function x=subpix_step(d);
     %this function performs a subpixel step by parabolic fitting
