@@ -1,4 +1,4 @@
-function [xnw,ynw]=TrackXY_by_QI(im,QI,sho)
+function [xnw,ynw, Qiprofs, allprofiles]=TrackXY_by_QI(im,QI,sho)
 %JWJK:
 %------------------------------------------------------------
 %This function prepares a sub-pixel XY fit by making 4 profiles in QI
