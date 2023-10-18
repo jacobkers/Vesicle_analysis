@@ -1,33 +1,54 @@
 function A20_get_areas(init);
-% identify vesicles
+% identify vesicles per image by binary image analysis
+% we apply pre-made ROIs for initial selection, one ROI is assumed to contain the life
+% of one vesicle (the largest one in the box)
 
-source=[init.exp_path,init.filename];
+source=[init.exp_path,init.filename_green];
+%image info:
 first_im=imread(source,'Index',1);
 [rr,cc]=size(first_im);
+[XX,YY]=meshgrid(1:cc,1:rr);
 info = imfinfo(source);    
 [ff,~]=size(info); 
 
-if 1    
-    all_areas=struct('this_image',[]);
-    for fri=1:ff+1-init.look_ahead
-        disp(fri);
-        st=[];
-        for sti=1:init.look_ahead
-            st(:,:,sti)=((imread(source, fri+sti-1)));
-        end
-        im_ori=sum(st,3);
-        [props,label_im]=get_guvs(im_ori);
-        all_areas(fri).this_image=props;
-        if fri==1
-            example_im=label_im;
-        end
-        dum=1;
+%pre-chosen Rois:
+roidata=readtable([init.exp_path, init.filename_rois]);
+pos_xx=roidata.X+roidata.Width/2;  %corner point plus half-width
+pos_yy=roidata.Y+roidata.Height/2;  %analogous
+pos_rr=roidata.Width/2; % app.radius
+N_rois=length(pos_xx);
+    
+all_frames=struct('roi',[]);
+for fri=1:ff+1-init.look_ahead
+    disp(fri);
+    %collect multiple images to suppress artefacts
+    st=[];
+    for sti=1:init.look_ahead
+        st(:,:,sti)=((imread(source, fri+sti-1)));
     end
-    save([init.savepath, 'areadata.mat'],'all_areas', 'example_im', 'first_im');
+    im_ori=sum(st,3);
+
+    for roi_i=1:N_rois
+        im_buf=im_ori;
+        xi=pos_xx(roi_i);
+        yi=pos_yy(roi_i);
+        roi_radius=pos_rr(roi_i);
+        RR=((XX-xi).^2+(YY-yi).^2).^0.5;
+        im_buf(RR>roi_radius)=0;       
+        [props,label_im]=get_guvs(im_buf,'single');
+        all_frames(fri).roi(roi_i).props=props;
+        dum=1;
+     end
+    
+    if fri==1
+        example_im=label_im;
+    end
+    dum=1;
 end
+save([init.savepath, 'areadata.mat'], 'all_frames', 'example_im', 'first_im', 'roidata');
 
 %get_guvs:
-function [GUVs,labelmat]=get_guvs(im_ori);
+function [GUVs,labelmat]=get_guvs(im_ori, modus);
     minradius=25;
     minarea=pi*minradius.^2;
     minarea=250;
@@ -53,11 +74,15 @@ function [GUVs,labelmat]=get_guvs(im_ori);
     end
     %run 2
     BW2=BW2_buf;
-     bwstruct=bwconncomp(BW2,8);    %finds 8-fold connected regions.
+    bwstruct=bwconncomp(BW2,8);    %finds 8-fold connected regions.
     GUVs=regionprops(bwstruct,...
         'Centroid', 'Area','MajorAxisLength',...
         'MinorAxisLength','Eccentricity','PixelIdxList','BoundingBox','Circularity'); 
     labelmat=labelmatrix(bwstruct); %label all the points in regions with the region nr
+    
+    if strcmp(modus, 'single')
+        [GUVs, labelmat]=keep_largest(GUVs,labelmat);      
+    end
     
     if 0
         figure;
@@ -67,6 +92,20 @@ function [GUVs,labelmat]=get_guvs(im_ori);
         subplot(2,3,4); imshow(double(BW2)); title('filled');
         subplot(2,3,5); pcolor(double(labelmat)); title('labeled'); shading flat, axis equal;
         pause(0.3);
-        %[~]=ginput(1);
+        [~]=ginput(1);
     end
 
+function [GUVs, labelmat]=keep_largest(GUVs,labelmat);
+    areas=[]; 
+    [N_guvs,~]=size(GUVs);
+    for gi=1:N_guvs
+        areas(gi)=GUVs(gi).Area;            
+    end
+    [~, largest_guv_idx]=max(areas);
+    labelmat(labelmat~=largest_guv_idx)=0;
+    labelmat(labelmat==largest_guv_idx)=1;
+    bwstruct=bwconncomp(labelmat,8);    %finds 8-fold connected regions.
+    GUVs=regionprops(bwstruct,...
+    'Centroid', 'Area','MajorAxisLength',...
+    'MinorAxisLength','Eccentricity','PixelIdxList','BoundingBox','Circularity'); 
+    dum=1;

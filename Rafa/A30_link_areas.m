@@ -1,9 +1,8 @@
 function A30_link_areas(init)
 if 1
-    load([init.savepath, 'areadata.mat'],'all_areas','example_im', 'first_im');
-    
+    load([init.savepath, 'areadata.mat'],'all_frames','example_im', 'first_im');    
     %first frame define first guvs with ID and startframe:
-    %first detection counts, we fix the number
+    %first detection counts. Then we fix the number
     [~,ff]=size(all_areas);
     [N_guvs,~]=size(all_areas(1).this_image);
     Guv_list=NaN*zeros(ff,N_guvs);
