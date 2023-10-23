@@ -84,7 +84,7 @@ function [GUVs,labelmat]=get_guvs(im_ori, modus);
         [GUVs, labelmat]=keep_largest(GUVs,labelmat);      
     end
     
-    if 0
+    if 1
         figure;
         subplot(2,3,1); imshow(im_ori); title('original');
         subplot(2,3,2); imshow(im_out); title('smooth&treshold');
