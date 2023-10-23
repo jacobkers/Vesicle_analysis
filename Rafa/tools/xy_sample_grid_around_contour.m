@@ -1,4 +1,4 @@
-function contour_map=xy_sample_grid_around_contour(image, fx, fy ,hw)
+function [contour_map, xxip, yyip]=xy_sample_grid_around_contour(image, fx, fy ,hw)
 %Build an interpolation grid pependicular to a filament-----------------------------------------
 %First, define perpendicular directions for the filament
 
@@ -14,8 +14,8 @@ tng=atan2(dy,dx);
 prp=atan2(-dx,dy);
 %Then, build a grid from this
 for i=1:lf
-xxip(:,i)=fx(i)+cos(tng(i)+pi/2)*(stepvector);
-yyip(:,i)=fy(i)+sin(tng(i)+pi/2)*(stepvector);
+    xxip(:,i)=fx(i)+cos(tng(i)+pi/2)*(stepvector);
+    yyip(:,i)=fy(i)+sin(tng(i)+pi/2)*(stepvector);
 end
 
 ipgridx=xxip;

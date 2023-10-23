@@ -34,13 +34,14 @@ for roi_i=1:N_rois
             %% find flexible edge 
             [rim,mask]=get_rim_by_radial_edge(band_msk.*roi_gr,roi_msk);
             
-            contour_map_gr=xy_sample_grid_around_contour(roi_gr, rim.x, rim.y ,10);
-            contour_map_re=xy_sample_grid_around_contour(roi_re, rim.x, rim.y ,10);
+            [contour_map_gr, xxip, yyip]=xy_sample_grid_around_contour(roi_gr, rim.x, rim.y ,3);
+            [contour_map_re, ~,~]=xy_sample_grid_around_contour(roi_re, rim.x, rim.y ,3);
             
             if 1
                 subplot(1,2,1);
-                    pcolor(band_msk.*roi_gr);  shading flat, axis equal, colormap hot, hold on;
-                    plot(rim.x,rim.y, 'w-', 'LineWidth', 2);
+                    pcolor(roi_gr);  shading flat, axis equal, colormap hot, hold on;
+                    plot(xxip(1,:),yyip(1,:), 'w-', 'LineWidth', 1);
+                    plot(xxip(end,:),yyip(end,:), 'w-', 'LineWidth', 1);
                 subplot(3,2,2);
                     pause(0.1);
                     pcolor(contour_map_gr);  
@@ -49,10 +50,10 @@ for roi_i=1:N_rois
                     pause(0.1);
                     plot(sum(contour_map_gr));  
                 subplot(3,2,6);
-                    pause(0.1);
+                    pause(0.2);
                     plot(sum(contour_map_re));  
                 if mod(fri,20)==0, close(gcf); end
-                    %[~]=ginput(1);
+                % [~]=ginput(1);
             end
             dum=1;
     end
