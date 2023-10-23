@@ -2,7 +2,8 @@ function init=A000_get_config(expno)
 %common:
 close all;
 codepth=pwd;
-cd .., addpath(genpath('vesicle_tools')), cd(codepth);
+addpath(genpath('tools'));
+cd .., addpath(genpath('common_tools')), cd(codepth);
 init.main_path=swap_path('CD_Data_in\2023_Rafa\');
 init.look_ahead=1;
 %specific:

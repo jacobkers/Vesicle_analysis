@@ -49,12 +49,13 @@ save([init.savepath, 'areadata.mat'], 'all_frames', 'example_im', 'first_im', 'r
 
 %get_guvs:
 function [GUVs,labelmat]=get_guvs(im_ori, modus);
+    im=im_ori;
     minradius=25;
     minarea=pi*minradius.^2;
     minarea=250;
-    im=matrix_blur_jk(double(im_ori),4);  %bit of smoothing
-    [im_out,thr]=Find_treshold_MD_V2020(im,0); %tresholding
-    BW1=uint16((im_out>0));
+    im=matrix_blur_jk(double(im),1);  %bit of smoothing edge
+    [im,thr]=Find_treshold_MD_V2020(im,0); %tresholding   
+    BW1=uint16((im>0));
     BW2 = uint16(imfill(BW1, 'holes'));
     BW2 = uint16(bwmorph(BW2,'erode', 3));
     BW2 = uint16(bwmorph(BW2,'dilate', 3));
@@ -84,15 +85,16 @@ function [GUVs,labelmat]=get_guvs(im_ori, modus);
         [GUVs, labelmat]=keep_largest(GUVs,labelmat);      
     end
     
-    if 1
+    if 0
         figure;
         subplot(2,3,1); imshow(im_ori); title('original');
-        subplot(2,3,2); imshow(im_out); title('smooth&treshold');
+        subplot(2,3,2); imshow(im); title('smooth&treshold');
         subplot(2,3,3); imshow(double(BW1)); title('binary');
         subplot(2,3,4); imshow(double(BW2)); title('filled');
-        subplot(2,3,5); pcolor(double(labelmat)); title('labeled'); shading flat, axis equal;
+        subplot(2,3,5); imshow(double(labelmat)); title('labeled'); shading flat, axis equal;
         pause(0.3);
         [~]=ginput(1);
+        close(gcf);
     end
 
 function [GUVs, labelmat]=keep_largest(GUVs,labelmat);
