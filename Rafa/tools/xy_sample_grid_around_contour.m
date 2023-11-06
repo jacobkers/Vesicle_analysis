@@ -3,9 +3,10 @@ function [contour_map, xxip, yyip]=xy_sample_grid_around_contour(image, fx, fy ,
 %First, define perpendicular directions for the filament
 
 lf=length(fx);
-stepvector=[-hw:hw]';
-xxip=zeros(2*hw+1,lf);
-yyip=zeros(2*hw+1,lf);
+stripwidth=hw(1)+hw(2)+1;
+stepvector=[-hw(1):hw(2)]';
+xxip=zeros(stripwidth,lf);
+yyip=zeros(stripwidth,lf);
 dx=fx(2:end)-fx(1:end-1); 
 dx=[dx(1) dx dx(end)]';
 dy=fy(2:end)-fy(1:end-1); 

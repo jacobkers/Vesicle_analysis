@@ -15,4 +15,6 @@ switch expno
         init.filename_red=[init.savename '_red.tif'];
         init.filename_rois=[init.savename '_ROIs.csv'];
         init.savepath=swap_path('Dropbox\CD_Data_out\2023_Rafael\2023_10_02 Test image analysis\');
+        mainsavepath=swap_path('M:\tnw\bn\cd\Shared\Jacob\TESTdata_out\Rafa\2023_10_02 Test image analysis\');
+        init.savepath=[mainsavepath init.savename, '\'];
 end

@@ -29,24 +29,32 @@ hf=10;
 [aa2,r0]=size(allprofiles_expanded);
 cnt=0;
 
-%% find edge of ring
+%% find ring
 for ai=hf+1:aa2-hf
    cnt=cnt+1;
    ai_padd=ai+paddit;
-   prf=(nanmean(allprofiles_expanded(ai-hf:ai+hf,:)));
+   prf=(nanmean(allprofiles_expanded(ai-hf:ai+hf,:)));  
+    %this is the averaged cross-profile
+    %get main props:
    [val,ix]=max(prf);
    r_rim_rw(cnt)=ix;
    dum=1;
-end       
-r_rim_cln=clean_rim(r_rim_rw,hf);
+end 
 
-%% re-cut section matching original angle axis:
+
+r_rim_cln=clean_rim(r_rim_rw,hf);
 ax_exp=1:length(r_rim_cln);
-ax=ax_exp(paddit-hf+1:end-paddit+hf-1);
+
+pts=[ax_exp' r_rim_cln', 0*ax_exp'+1];
+
+
+% re-cut section matching original angle axis:
 r_rim_cln=r_rim_cln(paddit-hf+1:end-paddit+hf-1);       
+ax=ax_exp(paddit-hf+1:end-paddit+hf-1);
+
 
 if 0
-    figure; 
+    figure;    
     pcolor(allprofiles_expanded); colormap bone; shading flat; hold on;        
     plot(r_rim_rw,ax_exp,'r-o');
     plot(r_rim_cln,ax,'w-', 'LineWidth', 2);
@@ -56,7 +64,4 @@ end
 
 %% construct smooth contour:
 [pore_inner_rim,masked_inner_pore]=build_inner_mask(area,QI,r_rim_cln,xnw,ynw);
- 
-
-%% to do: sample image along contour to get intensity profile
  

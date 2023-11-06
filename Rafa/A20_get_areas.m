@@ -45,6 +45,7 @@ for fri=1:ff+1-init.look_ahead
     end
     dum=1;
 end
+if ~isdir(init.savepath), mkdir(init.savepath); end
 save([init.savepath, 'areadata.mat'], 'all_frames', 'example_im', 'first_im', 'roidata');
 
 %get_guvs:
