@@ -5,7 +5,7 @@ function [FWHM]=get_FWHM_mainpeak(histo,bins);
     minbin=bins(1); maxbin=bins(end);
     bins_ip=linspace(minbin,maxbin,50*LB);
     histo_ip=interp1(bins, histo,bins_ip);
-    histo_ip_smz=(smooth(histo_ip',50))'; 
+    histo_ip_smz=(JKD1_PRF_smooth(histo_ip',50))';
     
     %find max
     [pk_val, pk_idx]=max(histo_ip_smz);

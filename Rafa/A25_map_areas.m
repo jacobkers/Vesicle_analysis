@@ -18,8 +18,8 @@ for roi_i=1:N_rois
     circularity=zeros(ff,1);
     fit_bri_gr=zeros(ff,1);
     fit_bri_re=zeros(ff,1);  
-    
-    for fri=1:ff
+    skips=1; 
+    for fri=1:skips:ff
            disp(['roi' num2str(roi_i) 'frame' num2str(fri)]);
             %% get basic properties per frame
             frame_line(fri)=fri;
@@ -119,12 +119,52 @@ for roi_i=1:N_rois
             end
             dum=1;
     end
-    OutData=[frame_line area circularity contour_length fit_bri_gr fit_bri_re];
+    
+    %% save and plot
     OutName=['A25_outdata_ROI', num2str(roi_i)];
+    if ~isdir(init.savepath), mkdir(init.savepath); end
+    %jpg:
+    close all;
+    figure(123);
+    subplot(2,3,1);
+       pcolor(roi_gr);  shading flat, axis equal, axis tight, colormap hot, hold on;
+       plot(xxip(1,:),yyip(1,:), 'w-', 'LineWidth', 1);
+       plot(xxip(end,:),yyip(end,:), 'w-', 'LineWidth', 1);   
+       title(['roi' num2str(roi_i), '-last frame']);
+    subplot(2,3,2);
+        plot(frame_line, area, 'ko');
+        xlabel('frame index');
+        ylabel('area (pixels)');
+        title('area');
+    subplot(2,3,3);
+        plot(frame_line, circularity, 'mo');
+        xlabel('frame index');
+        ylabel('circularity (a.u.))');
+        title('circularity');
+    subplot(2,3,4);
+        plot(frame_line, contour_length, 'bo');
+        xlabel('frame index');
+        ylabel('length (pixels)');
+        title('contour length');
+    subplot(2,3,5);
+        plot(frame_line, fit_bri_gr, 'go');
+        xlabel('frame index');
+        ylabel('intensity (a.u.)');
+        title('brightness green');
+        ylim([0 1000]);
+    subplot(2,3,6);
+        plot(frame_line, fit_bri_re, 'ro');
+        xlabel('frame index');
+        ylabel('intensity (a.u.)');
+        title('brightness red');
+        ylim([0 1000]);
+    saveas(gcf,[init.savepath,OutName, '.jpg']);
+              
+    %excel:
+    OutData=[frame_line area circularity contour_length fit_bri_gr fit_bri_re];
     ColNames=[{'frame'}, {'area (pixels)'},{'circularity'},...
              {'contour_length (pixel units)'} , ...
-             {'green intensity'}, {'red intensity'}];
-    if ~isdir(init.savepath), mkdir(init.savepath); end
+             {'green intensity'}, {'red intensity'}];   
     xlswrite([init.savepath,OutName, '.xlsx'], ColNames, 'Roidata','A1');
     xlswrite([init.savepath,OutName, '.xlsx'], OutData, 'Roidata', 'A2');
 end
