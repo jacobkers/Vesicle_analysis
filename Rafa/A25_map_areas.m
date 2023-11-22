@@ -28,7 +28,7 @@ for roi_i=1:N_rois
             area_pixels=all_frames(fri).roi(roi_i).props.PixelIdxList;
                                    
             %% get rois:
-            [roi_gr, roi_re, roi_msk]=get_rois(all_frames,roidata, fri,roi_i,init);
+            [roi_st, roi_ref, roi_msk]=get_rois(all_frames,roidata, fri,roi_i,init);
             
             %area masking:
             rimwidth_mask=5;
@@ -43,9 +43,15 @@ for roi_i=1:N_rois
             plot_msk=band_msk.*roi_gr;
             
             %find flexible edge:
-            [rim,mask]=get_rim_by_radial_edge(band_msk.*roi_gr,roi_msk);
+            [rim,mask]=get_rim_by_radial_edge(band_msk.*roi_ref,roi_msk);
             rimwidth_sampling=[7 7];  %outer inner 
-            [contour_map_gr, xxip, yyip]=xy_sample_grid_around_contour(roi_gr, rim.x, rim.y ,rimwidth_sampling);
+            [contour_map_ref, xxip, yyip]=xy_sample_grid_around_contour(roi_gr, rim.x, rim.y ,rimwidth_sampling);
+            
+            
+            %%%EDITED UP TO HERE
+            
+            
+            
             [contour_map_re, ~,~]=xy_sample_grid_around_contour(roi_re, rim.x, rim.y ,rimwidth_sampling);
             
             %process 1-D contour properties
@@ -81,7 +87,7 @@ for roi_i=1:N_rois
             fit_bri_gr(fri)=max(map_sum_gr_fit);
             fit_bri_re(fri)=max(map_sum_re_fit);
             
-            if 0 % 0& circularity(fri)<0.7
+            if 1 % 0& circularity(fri)<0.7
                 subplot(4,2,1);
                     pcolor(roi_gr);  shading flat, axis equal, axis tight, colormap hot, hold on;
                     plot(xxip(1,:),yyip(1,:), 'w-', 'LineWidth', 1);
@@ -132,28 +138,28 @@ for roi_i=1:N_rois
        plot(xxip(end,:),yyip(end,:), 'w-', 'LineWidth', 1);   
        title(['roi' num2str(roi_i), '-last frame']);
     subplot(2,3,2);
-        plot(frame_line, area, 'ko', 'MarkerSize','2');
+        plot(frame_line, area, 'ko', 'MarkerSize',2);
         xlabel('frame index');
         ylabel('area (pixels)');
         title('area');
     subplot(2,3,3);
-        plot(frame_line, circularity, 'mo', 'MarkerSize','2');
+        plot(frame_line, circularity, 'mo', 'MarkerSize',2);
         xlabel('frame index');
         ylabel('circularity (a.u.))');
         title('circularity');
     subplot(2,3,4);
-        plot(frame_line, contour_length, 'bo', 'MarkerSize','2');
+        plot(frame_line, contour_length, 'bo', 'MarkerSize',2);
         xlabel('frame index');
         ylabel('length (pixels)');
         title('contour length');
     subplot(2,3,5);
-        plot(frame_line, fit_bri_gr, 'go', 'MarkerSize','2');
+        plot(frame_line, fit_bri_gr, 'go', 'MarkerSize',2);
         xlabel('frame index');
         ylabel('intensity (a.u.)');
         title('brightness green');
         ylim([0 1000]);
     subplot(2,3,6);
-        plot(frame_line, fit_bri_re, 'ro', 'MarkerSize','2');
+        plot(frame_line, fit_bri_re, 'ro', 'MarkerSize',2);
         xlabel('frame index');
         ylabel('intensity (a.u.)');
         title('brightness red');

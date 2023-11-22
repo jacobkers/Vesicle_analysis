@@ -3,7 +3,8 @@ function A20_get_areas(init);
 % we apply pre-made ROIs for initial selection, one ROI is assumed to contain the life
 % of one vesicle (the largest one in the box)
 
-source=[init.exp_path,init.filename_green];
+%reference channel:
+source=[init.exp_path,init.muscope_exportname,init.chan_suffixes{init.chan_ref_id}, '.tif'];
 %image info:
 first_im=imread(source,'Index',1);
 [rr,cc]=size(first_im);
