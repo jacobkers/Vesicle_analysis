@@ -27,7 +27,7 @@ function [roi_st, roi_ref, roi_msk]=get_rois(all_frames,roidata, frame_index,roi
     lox=max([1, xi-Ri]); hix=min([cc, xi+Ri]);                              
     loy=max([1, yi-Ri]); hiy=min([rr, yi+Ri]); 
     roi_msk=double(im_msk(loy:hiy, lox:hix));
-    roi_ref=im_ref(loy:hiy, lox:hix);
+    roi_ref=double(im_ref(loy:hiy, lox:hix));
     
     [rrr,ccr]=size(roi_msk);
     roi_st=zeros(rrr,ccr,N_chan);
