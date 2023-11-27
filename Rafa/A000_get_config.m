@@ -6,7 +6,7 @@ addpath(genpath('tools'));
 cd .., addpath(genpath('common_tools')), cd(codepth);
 
 init.look_ahead=1;
-init.skips=10;
+init.skips=1;
 %specific:
 switch expno
     case 1

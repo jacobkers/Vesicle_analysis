@@ -14,10 +14,10 @@
 
 ### Matlab
 * open 'A000_get_config.m'
-* check 'case 0' carefully to see how in and out paths, names are defined (see the comments per setting)
-* copy, make a new 'case' and adapt accordingly
-* for quick testing, adapt 'init.skips' (processes only one in n frames)
+	* check 'case 0' carefully to see how in and out paths, names are defined (see the comments per setting)
+	* copy, make a new 'case' and adapt accordingly
+	* for quick testing, set 'init.skips'>1 
 * open 'A10_guvalyzer_shell'
-* selct your new case to run
-* check/uncheck the 'if 0's to skip time-consuming steps (NB: first time, run always A20-25)
-* run it. Typically, you might have to correct typos in the config.
+	* select your new case to run
+	* check/uncheck the 'if 0's to skip time-consuming steps (NB: first time, always run A20-25). 
+	* run it. Typically, you might have to correct typos in the config.

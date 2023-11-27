@@ -135,7 +135,7 @@ for roi_i=1:N_rois
         plot(frame_line, fit_bri(:,chi), 'go', 'MarkerSize',2);
         xlabel('frame index');
         ylabel('intensity (a.u.)');
-        title('brightness green');
+        title(['brightness' init.chan_suffixes{chi}];
         ylim([0 1000]);
     end
     saveas(gcf,[init.savepath,OutName, '.jpg']);
