@@ -16,6 +16,7 @@ for roi_i=1:N_rois
     area=zeros(ff,1);
     contour_length=zeros(ff,1);
     circularity=zeros(ff,1);
+    axis_ratio=zeros(ff,1);
     fit_bri=zeros(ff,N_chan); 
     skips=1; 
     for fri=1:skips:ff
@@ -24,6 +25,8 @@ for roi_i=1:N_rois
             frame_line(fri)=fri;
             area(fri)=all_frames(fri).roi(roi_i).props.Area;
             circularity(fri)=all_frames(fri).roi(roi_i).props.Circularity;
+            axis_ratio= all_frames(fri).roi(roi_i).props.MajorAxisLength/...
+                        all_frames(fri).roi(roi_i).props.MinorAxisLength;
             area_pixels=all_frames(fri).roi(roi_i).props.PixelIdxList;
                                    
             %% get rois:
@@ -55,79 +58,61 @@ for roi_i=1:N_rois
             %map all channels:
             for chi=1:N_chan
                 roi=roi_st(:,:,chi);
+                %sample ring map:
                 [contour_map, ~,~]=xy_sample_grid_around_contour(roi, rim.x, rim.y ,rimwidth_sampling);
+                %get contour 1D props:
                 sumprofile=sum(contour_map);
                 widths=get_map_profiles(contour_map);
+                %get acceptable sections (keep lengths)
                 accept_idx=find(widths<2.8);
                 map_ax_acc=map_ax(accept_idx);
                 sumprofile_acc=sumprofile(accept_idx);
                 widths_acc=widths(accept_idx);
                 map_sum_fit=polyval(polyfit(map_ax_acc-mean(map_ax),sumprofile_acc,5),map_ax-mean(map_ax));
                 fit_bri(fri,chi)=max(map_sum_fit);
-            end
-            
-            
-            
-            %EDITED UP TO HERE
-            
-            
-            
-            
-            
-            %process contour profiles and process them per channel:
-                       
-            %reject budding or otherwise perturbed sections  
-            ref_id=init.chan_ref_id;
-
-    
-            
-            if 0 % 0& circularity(fri)<0.7
-                subplot(4,2,1);
-                    pcolor(roi_gr);  shading flat, axis equal, axis tight, colormap hot, hold on;
-                    plot(xxip(1,:),yyip(1,:), 'w-', 'LineWidth', 1);
-                    plot(xxip(end,:),yyip(end,:), 'w-', 'LineWidth', 1);
-                subplot(4,2,2);
-                    pcolor(roi_re);  shading flat, axis equal, axis tight, colormap hot, hold on;
-                    plot(xxip(1,:),yyip(1,:), 'w-', 'LineWidth', 1);
-                    plot(xxip(end,:),yyip(end,:), 'w-', 'LineWidth', 1);
-                subplot(4,2,3);
-                    pcolor(contour_map_gr);  axis tight, shading flat,  colormap hot, hold on;              
-                subplot(4,2,4);
-                    pcolor(contour_map_re);  axis tight, shading flat, colormap hot, hold on;                       
-                subplot(4,2,5);
-                    plot(map_ax_gr,map_sum_gr, 'o');  axis tight; hold on;
-                    plot(map_ax,map_sum_gr_fit, 'r-'); hold off;
-                    xlim([0 length(rim.x)]);
-                    ylabel('content/length, a.u.');
-                subplot(4,2,6);
-                    plot(map_ax_re,map_sum_re, 'o');  axis tight, hold on;
-                    plot(map_ax,map_sum_re_fit, 'r-'); hold off;
-                    
-                    xlim([0 length(rim.x)]);
-                    ylabel('content/length, a.u.');
-                subplot(4,2,7);
-                    plot(map_ax_gr,map_widths_gr, 'o');  axis tight,
-                    xlim([0 length(rim.x)]);
-                    ylabel('fwhm, pixels');
-                subplot(4,2,8); 
-                    plot(map_ax_re, map_widths_re, 'o'); axis tight
-                    xlim([0 length(rim.x)]);
-                    ylabel('fwhm, pixels');
+                
+                % some per_frame_plotting:
+                if 0 % 0& circularity(fri)<0.7
+                    subplot(4,N_chan,chi);
+                        pcolor(roi);  shading flat, axis equal, axis tight, colormap hot, hold on;
+                        plot(xxip(1,:),yyip(1,:), 'w-', 'LineWidth', 1);
+                        plot(xxip(end,:),yyip(end,:), 'w-', 'LineWidth', 1);
+                        title(init.chan_suffixes{chi});
+                    subplot(4,2,chi+2);
+                        pcolor(contour_map);  axis tight, shading flat,  colormap hot, hold on;                               
+                    subplot(4,N_chan,chi+4);
+                        plot(map_ax,sumprofile, 'o');  axis tight; hold on;
+                        plot(map_ax,map_sum_fit, 'r-'); hold off;
+                        xlim([0 length(rim.x)]);
+                        ylabel('content/length, a.u.');  
+                    subplot(4,2,chi+6);
+                        plot(map_ax,widths, 'k-');  axis tight,
+                        xlim([0 length(rim.x)]);
+                        ylabel('fwhm, pixels');
                 pause(0.3);
                 if mod(fri,20)==0, close(gcf); end
-                % [~]=ginput(1);
+                end     
             end
+            
+         
+            %reject budding or otherwise perturbed sections  
+            
+            
+            %plot per frame, per channel     
             dum=1;
     end
     
     %% save and plot
     OutName=['A25_outdata_ROI', num2str(roi_i)];
     if ~isdir(init.savepath), mkdir(init.savepath); end
-    %jpg:
+    
+    %% wrap up jpg:
     close all;
     figure(123);
+        ref_id=init.chan_ref_id;
+        roi_ref=roi_st(:,:,ref_id);
     subplot(2,3,1);
-       pcolor(roi_gr);  shading flat, axis equal, axis tight, colormap hot, hold on;
+       pcolor(roi);  shading flat, axis equal, axis tight, colormap hot, hold on;
        plot(xxip(1,:),yyip(1,:), 'w-', 'LineWidth', 1);
        plot(xxip(end,:),yyip(end,:), 'w-', 'LineWidth', 1);   
        title(['roi' num2str(roi_i), '-last frame']);
@@ -137,7 +122,7 @@ for roi_i=1:N_rois
         ylabel('area (pixels)');
         title('area');
     subplot(2,3,3);
-        plot(frame_line, circularity, 'mo', 'MarkerSize',2);
+        plot(frame_line, axis_ratio, 'mo', 'MarkerSize',2);
         xlabel('frame index');
         ylabel('circularity (a.u.))');
         title('circularity');
@@ -146,25 +131,21 @@ for roi_i=1:N_rois
         xlabel('frame index');
         ylabel('length (pixels)');
         title('contour length');
-    subplot(2,3,5);
-        plot(frame_line, fit_bri_gr, 'go', 'MarkerSize',2);
+    for chi=1:N_chan
+    subplot(2,3,4+chi);
+        plot(frame_line, fit_bri(:,ch), 'go', 'MarkerSize',2);
         xlabel('frame index');
         ylabel('intensity (a.u.)');
         title('brightness green');
         ylim([0 1000]);
-    subplot(2,3,6);
-        plot(frame_line, fit_bri_re, 'ro', 'MarkerSize',2);
-        xlabel('frame index');
-        ylabel('intensity (a.u.)');
-        title('brightness red');
-        ylim([0 1000]);
+    end
     saveas(gcf,[init.savepath,OutName, '.jpg']);
               
     %excel:
-    OutData=[frame_line area circularity contour_length fit_bri_gr fit_bri_re];
+    OutData=[frame_line area circularity contour_length fit_bri];
     ColNames=[{'frame'}, {'area (pixels)'},{'circularity'},...
              {'contour_length (pixel units)'} , ...
-             {'green intensity'}, {'red intensity'}];   
+             init.chan_suffixes];   
     xlswrite([init.savepath,OutName, '.xlsx'], ColNames, 'Roidata','A1');
     xlswrite([init.savepath,OutName, '.xlsx'], OutData, 'Roidata', 'A2');
 end
