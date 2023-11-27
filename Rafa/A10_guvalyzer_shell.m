@@ -1,10 +1,8 @@
 function A10_guvalyzer_shell
 
 %choose experiment:
-exp_index=0; 
-%pilot work on single vesicle
-%40 uM LUVsWITHCerC6_RealTime_Series002_t000_overlay.tif (red)-1
-
+exp_index=0;  %pilot work red/gre 
+exp_index=1;  %2nd pilot. red/blu/gre
 %set up:
 init=A000_get_config(exp_index);
 %process:
