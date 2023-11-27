@@ -18,14 +18,13 @@ for roi_i=1:N_rois
     circularity=zeros(ff,1);
     axis_ratio=zeros(ff,1);
     fit_bri=zeros(ff,N_chan); 
-    skips=1; 
-    for fri=1:skips:ff
+    for fri=1:init.skips:ff
            disp(['roi' num2str(roi_i) 'frame' num2str(fri)]);
             %% get basic properties per frame
             frame_line(fri)=fri;
             area(fri)=all_frames(fri).roi(roi_i).props.Area;
             circularity(fri)=all_frames(fri).roi(roi_i).props.Circularity;
-            axis_ratio= all_frames(fri).roi(roi_i).props.MajorAxisLength/...
+            axis_ratio(fri)= all_frames(fri).roi(roi_i).props.MajorAxisLength/...
                         all_frames(fri).roi(roi_i).props.MinorAxisLength;
             area_pixels=all_frames(fri).roi(roi_i).props.PixelIdxList;
                                    
@@ -124,8 +123,8 @@ for roi_i=1:N_rois
     subplot(2,3,3);
         plot(frame_line, axis_ratio, 'mo', 'MarkerSize',2);
         xlabel('frame index');
-        ylabel('circularity (a.u.))');
-        title('circularity');
+        ylabel('ratio (a.u.))');
+        title('axis ratio');
     subplot(2,3,4);
         plot(frame_line, contour_length, 'bo', 'MarkerSize',2);
         xlabel('frame index');
@@ -133,7 +132,7 @@ for roi_i=1:N_rois
         title('contour length');
     for chi=1:N_chan
     subplot(2,3,4+chi);
-        plot(frame_line, fit_bri(:,ch), 'go', 'MarkerSize',2);
+        plot(frame_line, fit_bri(:,chi), 'go', 'MarkerSize',2);
         xlabel('frame index');
         ylabel('intensity (a.u.)');
         title('brightness green');

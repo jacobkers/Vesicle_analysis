@@ -20,7 +20,7 @@ pos_rr=roidata.Width/2; % app.radius
 N_rois=length(pos_xx);
     
 all_frames=struct('roi',[]);
-for fri=1:ff+1-init.look_ahead
+for fri=1:init.skips:ff+1-init.look_ahead
     disp(fri);
     %collect multiple images to suppress artefacts
     st=[];
