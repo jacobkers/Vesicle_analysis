@@ -106,10 +106,11 @@ function [GUVs, labelmat]=keep_largest(GUVs,labelmat);
         areas(gi)=GUVs(gi).Area;            
     end
     [~, largest_guv_idx]=max(areas);
-    labelmat(labelmat~=largest_guv_idx)=0;
-    labelmat(labelmat==largest_guv_idx)=1;
-    bwstruct=bwconncomp(labelmat,8);    %finds 8-fold connected regions.
-    GUVs=regionprops(bwstruct,...
-    'Centroid', 'Area','MajorAxisLength',...
-    'MinorAxisLength','Eccentricity','PixelIdxList','BoundingBox','Circularity'); 
-    dum=1;
+    if ~isempty(largest_guv_idx)
+        labelmat(labelmat~=largest_guv_idx)=0;
+        labelmat(labelmat==largest_guv_idx)=1;
+        bwstruct=bwconncomp(labelmat,8);    %finds 8-fold connected regions.
+        GUVs=regionprops(bwstruct,...
+        'Centroid', 'Area','MajorAxisLength',...
+        'MinorAxisLength','Eccentricity','PixelIdxList','BoundingBox','Circularity'); 
+    end
