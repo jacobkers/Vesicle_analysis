@@ -8,13 +8,19 @@ from copy import deepcopy
 from scipy.ndimage import center_of_mass  # for calculation of image COM
 
 
-fig, axs = plt.subplots(1, 3)
+fig, axs = plt.subplots(1, 4)
 
-with nd2reader.Nd2("DOPC_DOPS_40 uM LUVs_1.nd2") as images:
-    axs[0].imshow(images[0])
-    axs[1].imshow(images[1])
-    axs[2].imshow(images[2])
+filnam="DOPC_DOPS_40 uM LUVs_1.nd2"
+coord=[[99,136],[373,326]]
 
+with nd2reader.Nd2(filnam) as images:
+    for ii, chan, in enumerate(images):
+        axs[ii].imshow(chan)
+        for cd in coord:
+            x=cd[0]
+            y=cd[1]
+            axs[ii].plot(x,y,'ro')
+            axs[ii].set_title(images.channels[ii])
     fig.tight_layout()
     fig.show()
     print("Press any key to end demo")
