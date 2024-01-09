@@ -9,7 +9,6 @@ import sys
 sys.path.insert(0, 'D:/jkerssemakers/Dropbox/CD_recent/BN_CD23_Jacob/analysis_general/code_development/python/')
 from how_to_do_it_examples.images import QI_tracker_tools, image_cuts
 
-
 if 1:
     #following should go to json or so:
     im_ori_path = str("M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/Rafa/Test Rafa_Nikon microscope/DOPC.DOPS/")
@@ -23,18 +22,17 @@ plots_out_path = Path(
 )
 
 
-
 #[x y r]:
 guv_xyr=[[99,136,150 ],[373,326, 150]]
 N_guvs, dum=np.shape(guv_xyr)
 
 fig, axs = plt.subplots(N_guvs+1, 4)
 
-with nd2reader.Nd2(source) as images:
-    for ii, chan, in enumerate(images): 
+with nd2reader.Nd2(source) as images:   
+    for ci, cd in enumerate(guv_xyr):
+        for ii, chan, in enumerate(images): 
         #plot menu:
-        axs[0, ii].imshow(chan)
-        for ci, cd in enumerate(guv_xyr):
+            axs[0, ii].imshow(chan)
             x0=cd[0]
             y0=cd[1]
             r0=cd[2]
