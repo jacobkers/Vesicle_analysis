@@ -1,7 +1,6 @@
-
 import numpy as np
 import cv2
-import pickle 
+import pickle
 import matplotlib.pyplot as plt
 
 from pathlib import Path
@@ -34,17 +33,20 @@ class Cluster:
     def __init__(self):
         self.spots = []
 
+
 class Spot:
     """
     A spot,  is a single Gaussian spot with position and amplitude
     It is used as a minimal building block for describing clusters
     """
+
     def __init__(self):
         self.x = 0  # x-position
-        self.y = 0  # y-position 
+        self.y = 0  # y-position
         self.pk = 0  # peak value, as-found
         self.pc = 0  # peak value, % of total of this image
         self.pr = 0  # peak value, relative to spot treshold of this image
+
 
 def init_cluster(inspots):
     """
@@ -57,6 +59,7 @@ def init_cluster(inspots):
     outspots = inspots[1:]
 
     return thiscluster, outspots
+
 
 def read_spotlist(spotlist):
     # flatten spotlist content for array-based actions
@@ -77,6 +80,7 @@ def read_spotlist(spotlist):
     pc = np.array(pc)
     pr = np.array(pr)
     return xx, yy, pk, pc, pr
+
 
 def grow_cluster(thiscluster, spotstock, minR):
     """
@@ -173,7 +177,7 @@ def spotpeeler(work_im):
         spot_perc = np.sum(spot_im) / Fc * 100
         build_perc = np.sum(build_im) / Fc * 100
         nextspot.pk = pk
-        nextspot.pc = spot_perc   
+        nextspot.pc = spot_perc
         # add the new spot to the lists
         spotlist.append(nextspot)
         keep_going = build_perc < 100
@@ -194,6 +198,7 @@ def split_brightlights(spotlist):
         else:
             spotlist_flutter.append(spot)
     return spotlist_fat, spotlist_flutter, treshold_perc
+
 
 psf_presmooth = 5
 psf_decompose = 3
@@ -227,8 +232,8 @@ ori_im_st = io.imread(im_ori_path / f"{im_ori_name}")
 work_im0 = ori_im_st[0, :, :]
 work_im1 = cv2.GaussianBlur(ori_im_st[0, :, :], (3, 3), 0)
 
-#crop it
-ori_im_st=ori_im_st[1:100, :, :]
+# crop it
+ori_im_st = ori_im_st[1:100, :, :]
 
 ff, rr, cc = np.shape(ori_im_st)
 global_treshold = get_treshold_data(np.reshape(work_im1, rr * cc))
@@ -238,13 +243,13 @@ LifeInABox = []
 N_clusters = []
 Content_clusters = []
 Fluorescence_all = []
-nbins=50
-minbin=0
-maxbin=5
+nbins = 50
+minbin = 0
+maxbin = 5
 binax = np.linspace(minbin, maxbin, nbins)
-midax=binax[0:-1]+np.diff(binax)
-pixels_histmap = np.zeros((ff, nbins-1))
-spot_histmap = np.zeros((ff, nbins-1))
+midax = binax[0:-1] + np.diff(binax)
+pixels_histmap = np.zeros((ff, nbins - 1))
+spot_histmap = np.zeros((ff, nbins - 1))
 
 for ori_im in ori_im_st:
     frame_index = frame_index + 1
@@ -257,7 +262,7 @@ for ori_im in ori_im_st:
     work_im = (
         cv2.GaussianBlur(ori_im, (psf_presmooth, psf_presmooth), 0) - global_treshold
     )
-    work_im[np.nonzero(work_im<  0)] = 0  #shave off
+    work_im[np.nonzero(work_im < 0)] = 0  # shave off
     # get spots:
     spotlist, build_im, residu_im = spotpeeler(work_im)
     # split:
@@ -314,7 +319,9 @@ for ori_im in ori_im_st:
                 spoty.append(spot.y)
             axs[0, 0].plot(spotx, spoty, "-o", markersize=3)
         axs[0, 0].set_title("per cluster")
-        axs[0, 1].imshow(np.transpose(spot_histmap),extent=[minbin,maxbin,0,frame_index])
+        axs[0, 1].imshow(
+            np.transpose(spot_histmap), extent=[minbin, maxbin, 0, frame_index]
+        )
         axs[0, 1].set_aspect("auto")
         axs[0, 1].set_title("intensity histogram vs time")
         axs[0, 1].set_xlabel("frame")
@@ -361,7 +368,7 @@ for ori_im in ori_im_st:
         plt.close("all")
         # badcodinghabit = 0
 
-#build a flat csv file from LifeInABox, per spot:
+# build a flat csv file from LifeInABox, per spot:
 """
 frame index
 cluster index
@@ -386,7 +393,7 @@ axs[1].set_ylabel("counts, a.u.")
 fig.tight_layout()
 fig.show()
 
-#save results
+# save results
 
 
 print("Press any key to end demo")
