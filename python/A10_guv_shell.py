@@ -63,19 +63,19 @@ for im_ori_name in movienames:
     with nd2reader.Nd2(source) as images:
         for ci, cd in enumerate(guv_xyr):  #work each GUV
             for (
-                ii,
+                color_i,
                 chan,
             ) in enumerate(images):  #work each channel
                 # plot menu:
-                axs[0, ii].imshow(chan)
+                axs[0, color_i].imshow(chan)
                 x0 = cd[0]
                 y0 = cd[1]
-                r0 = cd[2]
+                r0 = cd[2]*1.5
                 roi = image_cuts.get_roi(chan, x0, y0, r0)
                 roi_array = np.array(roi)
                 #-------------------------------------------
                 
-                if ii==0: #setup QI_track
+                if color_i==0: #setup QI_track
                     QI=qit.QI_Tracker(roi_array)
                     preset=qit.QI_Tracker.TrackXY_by_QI_Init(QI,roi_array)
                     
@@ -86,9 +86,13 @@ for im_ori_name in movienames:
                 # clean
                 xq, yq = qit.QI_Tracker.TrackXY_by_QI(QI,roi_array, preset, r0, r0)
                 #-------------------------------------------
-                axs[ci + 1, ii].imshow(roi)
-                axs[ci + 1, ii].plot(xq,yq,'rx')
-            axs[0, ii].set_title(images.channels[ii])              
+                axs[ci + 1, color_i].imshow(roi)
+                plotgridx=preset["X0samplinggrid"]+xq
+                plotgridy=preset["Y0samplinggrid"]+yq
+                lx=np.shape(plotgridx)
+                axs[ci + 1, color_i].plot(plotgridx[::10,::20],plotgridy[::10,::20],'r-',linewidth=0.3)
+                axs[ci + 1, color_i].plot(xq,yq,'rx')
+            axs[0, color_i].set_title(images.channels[color_i])              
         fig.tight_layout()
         fig.show()
         outfig = datapath_out + im_ori_name + str("frame") + str(1) + str(".png")
