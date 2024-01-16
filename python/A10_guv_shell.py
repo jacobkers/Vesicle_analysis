@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import nd2reader
+from readlif.reader import LifFile
 import csv
 from pathlib import Path
 from scipy.ndimage import sobel
@@ -22,6 +23,7 @@ mainpath_in = Experiments[expi].mainpath_in
 mainpath_out = Experiments[expi].mainpath_out
 movienames = Experiments[expi].movienames
 subdir = Experiments[expi].subdir
+suffix=Experiments[expi].suffix
 
 
 im_ori_path = mainpath_in + subdir
@@ -56,7 +58,7 @@ def sobel_it(roi):
     return magnitude
 
 for im_ori_name in movienames:
-    source = im_ori_path + im_ori_name + str(".nd2")
+    source = im_ori_path + im_ori_name + str(suffix)
     csv_source = im_ori_path + str("Overlay Elements of ") + im_ori_name + str(".csv")
 
     guv_xyr = []
@@ -69,13 +71,17 @@ for im_ori_name in movienames:
 
     fig, axs = plt.subplots(N_guvs + 1, 5)
 
+
     with nd2reader.Nd2(source) as images:
-        
         for ci, cd in enumerate(guv_xyr):  #work each GUV
             for (
                 color_i,
                 chan,
             ) in enumerate(images):  #work each channel 
+                
+                #map_and_show
+
+
                 x0 = cd[0]
                 y0 = cd[1]
                 r0 = cd[2]*1.5
