@@ -17,7 +17,7 @@ from qi_trak import QI_Tracker
 
 # local:
 from A00_init import get_exps
-
+#build paths:
 Experiments = get_exps()
 expi = 0
 mainpath_in = Experiments[expi].mainpath_in
@@ -25,8 +25,6 @@ mainpath_out = Experiments[expi].mainpath_out
 movienames = Experiments[expi].movienames
 subdir = Experiments[expi].subdir
 suffix=Experiments[expi].suffix
-
-
 im_ori_path = mainpath_in + subdir
 datapath_out = mainpath_out + subdir
 testpath = Path(datapath_out)
@@ -36,8 +34,8 @@ if not testpath.is_dir():
 
 def work_radial_pattern(im, x0,y0,r0):
     dum=1
-    return dum
-    
+    return dum   
+
 
 for im_ori_name in movienames:
     source = im_ori_path + im_ori_name + str(suffix)
@@ -49,29 +47,42 @@ for im_ori_name in movienames:
         guv_xyr.append(thisguv)
     N_guvs, dum = np.shape(guv_xyr)
     fig, axs = plt.subplots(N_guvs + 1, 5)
+    #loop: 'images' contains all colors and all frames
     with nd2reader.Nd2(source) as images:
         for ci, cd in enumerate(guv_xyr):  #work each GUV and its center coordinates:
             for (
                 color_i,
                 chan,
             ) in enumerate(images):  #work each channel                
-                #map_and_show:
+                #map, show, save:
                 x0 = cd[0]
                 y0 = cd[1]
                 r0 = cd[2]*1.5
+                
                 roi = guv_tools.get_roi(chan, x0, y0, r0)
+                
+                
+                #build a work image via the various channels-------------------------------------------   
                 if color_i==0: #setup work image for edge detection etc
                   work_image=guv_tools.sobel_it(roi)
                 else:
                   work_image=work_image+guv_tools.sobel_it(roi)
-                roi_array = np.array(roi)  #for tracking
-                #build a work image-------------------------------------------     
-                if color_i==0: #setup QI_track
+
+
+                roi_array = np.array(roi)  #for tracking                
+                if color_i==0: # QI_track on one channel
                     QI=QI_Tracker(roi_array)
-                    preset=QI_Tracker.TrackXY_by_QI_Init(QI,roi_array)                                                 
-                # sample rim
-                # clean               
-                xq, yq = QI_Tracker.TrackXY_by_QI(QI,roi_array, preset, r0, r0)   
+                    preset=QI_Tracker.TrackXY_by_QI_Init(QI,roi_array)                                                           
+                    xq, yq = QI_Tracker.TrackXY_by_QI(QI,roi_array, preset, r0, r0)                   
+                
+                #process this work image
+                work_radial_pattern(roi, x0,y0,r0)
+                roi_array = np.array(roi)  #for tracking                
+                if color_i==0: # QI_track on one channel
+                    QI=QI_Tracker(roi_array)
+                    preset=QI_Tracker.TrackXY_by_QI_Init(QI,roi_array)                                                           
+                    xq, yq = QI_Tracker.TrackXY_by_QI(QI,roi_array, preset, r0, r0)    
+
                 # plotting cosmetics:-------------------------------------------
                 axs[ci + 1, color_i].imshow(roi)
                 plotgridx=preset["X0samplinggrid"]+xq
