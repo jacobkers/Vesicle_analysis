@@ -1,5 +1,7 @@
-#guv_tools
-#tools to work with guv files:
+""" #guv_tools
+#tools to work with guv files: """
+
+import cv2
 import csv
 import numpy as np
 from scipy.ndimage import sobel

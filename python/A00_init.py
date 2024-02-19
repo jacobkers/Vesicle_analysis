@@ -21,10 +21,15 @@ class Guv_experiment:
         self.movienames = []
         self.suffix='tif'
 
-
 # overview of experiments:
 def get_exps():
     Exp1 = Guv_experiment()
+    Exp1.mainpath_in=str(
+            "D:/jkerssemakers/CD_Data_in/2023_Rafa/DOPC.DOPS/"
+        )
+    Exp1.mainpath_out = str(
+            "D:/jkerssemakers/Dropbox\CD_Data_out/2023_Rafael/DOPC.DOPS/"
+        )
     Exp1.subdir = str("60 uM_1h incubation/")
     Exp1.movienames = ["1", "2", "3", "16", "9"]  # the ones that have ROIs measured in ImageJ
     Exp1.suffix='.nd2'

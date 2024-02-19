@@ -8,12 +8,12 @@ from pathlib import Path
 
 # from my custom devlop tools:
 import sys
-import cv2
+
 
 sys.path.append(
     "D:/jkerssemakers/Dropbox/CD_recent/BN_CD23_Jacob/analysis_general/code_development/python/",
 )
-from qi_trak import QI_Tracker, image_cuts
+from qi_trak import QI_Tracker
 
 # local:
 from A00_init import get_exps
@@ -32,7 +32,6 @@ datapath_out = mainpath_out + subdir
 testpath = Path(datapath_out)
 if not testpath.is_dir():
     testpath.mkdir()
-
 
 
 def work_radial_pattern(im, x0,y0,r0):
@@ -86,7 +85,7 @@ for im_ori_name in movienames:
             axs[1, 4].set_title('work image')              
         fig.tight_layout()
         fig.show()
-        outfig = datapath_out + im_ori_name + str("frame") + str(1) + str(".png")
+        outfig = datapath_out  + str("file_")+ im_ori_name  + str("frame") + str(1) + str(".png")
         # outfig = f"frame{frame_index}_plotname.png"
         fig.savefig(outfig)
 print("Press any key to end demo")
