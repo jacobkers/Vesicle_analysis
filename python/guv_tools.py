@@ -5,7 +5,28 @@ import cv2
 import csv
 import numpy as np
 from scipy.ndimage import sobel
+from qi_trak import QI_Tracker
+import matplotlib.pyplot as plt
 
+def work_radial_pattern(roi, x0,y0,r0):
+    roi_array = np.array(roi)  #for tracking                
+    # QI_track on one channel
+    QI=QI_Tracker(roi_array)
+    preset=QI_Tracker.TrackXY_by_QI_Init(QI,roi_array)                                                           
+    xq, yq = QI_Tracker.TrackXY_by_QI(QI,roi_array, preset, x0, y0)    
+    fig, axs = plt.subplots(1,2)
+    axs[0].imshow(roi)
+    axs[0].set_title('work image') 
+    plotgridx=preset["X0samplinggrid"]+xq
+    plotgridy=preset["Y0samplinggrid"]+yq
+    axs[1].imshow(roi)
+    lx=np.shape(plotgridx)
+    axs[1].plot(plotgridx[::10,::20],plotgridy[::10,::20],'r-',linewidth=0.3)
+    axs[1].plot(xq,yq,'rx')
+    axs[1].set_title('tracked by QI') 
+    fig.tight_layout()
+    
+    return fig,axs
 
 def get_roi(image,x0,y0,r0):
     """

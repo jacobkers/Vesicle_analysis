@@ -9,7 +9,6 @@ class Guv_experiment:
     """
     sets paths, names
     """
-
     def __init__(self):
         self.mainpath_in = str(
             "M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/Rafa/Test Rafa_Nikon microscope/DOPC.DOPS/"
@@ -22,7 +21,7 @@ class Guv_experiment:
         self.suffix='tif'
 
 # overview of experiments:
-def get_exps():
+def get_exps(exp_idx):
     Exp1 = Guv_experiment()
     Exp1.mainpath_in=str(
             "D:/jkerssemakers/CD_Data_in/2023_Rafa/DOPC.DOPS/"
@@ -42,10 +41,8 @@ def get_exps():
     Exp2.suffix='.lif'
 
 
-    Experiments = [Exp1, Exp2]
+    all_Experiments = [Exp1, Exp2]
 
+    Experiment = all_Experiments[exp_idx]
 
-
-    Experiments = [Exp1]
-
-    return Experiments
+    return Experiment

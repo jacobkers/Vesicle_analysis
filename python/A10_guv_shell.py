@@ -13,20 +13,16 @@ import sys
 sys.path.append(
     "D:/jkerssemakers/Dropbox/CD_recent/BN_CD23_Jacob/analysis_general/code_development/python/",
 )
-from qi_trak import QI_Tracker
+
 
 # local:
 from A00_init import get_exps
 #build paths:
-Experiments = get_exps()
 expi = 0
-mainpath_in = Experiments[expi].mainpath_in
-mainpath_out = Experiments[expi].mainpath_out
-movienames = Experiments[expi].movienames
-subdir = Experiments[expi].subdir
-suffix=Experiments[expi].suffix
-im_ori_path = mainpath_in + subdir
-datapath_out = mainpath_out + subdir
+initval = get_exps(expi)
+
+im_ori_path = initval.mainpath_in + initval.subdir
+datapath_out = initval.mainpath_out + initval.subdir
 testpath = Path(datapath_out)
 if not testpath.is_dir():
     testpath.mkdir()
@@ -37,8 +33,8 @@ def work_radial_pattern(im, x0,y0,r0):
     return dum   
 
 
-for im_ori_name in movienames:
-    source = im_ori_path + im_ori_name + str(suffix)
+for im_ori_name in initval.movienames:
+    source = im_ori_path + im_ori_name + str(initval.suffix)
     csv_source = im_ori_path + str("Overlay Elements of ") + im_ori_name + str(".csv")
     guv_xyr = []
     XX0, YY0, RR0 = guv_tools.get_roi_info(csv_source)
@@ -46,59 +42,45 @@ for im_ori_name in movienames:
         thisguv = [int(X0), int(YY0[ii]), int(RR0[ii])]
         guv_xyr.append(thisguv)
     N_guvs, dum = np.shape(guv_xyr)
-    fig, axs = plt.subplots(N_guvs + 1, 5)
+    fig, axs = plt.subplots(N_guvs + 1, 4)
     #loop: 'images' contains all colors and all frames
     with nd2reader.Nd2(source) as images:
         for ci, cd in enumerate(guv_xyr):  #work each GUV and its center coordinates:
             for (
                 color_i,
                 chan,
-            ) in enumerate(images):  #work each channel                
+            ) in enumerate(images):  #work each color channel  per guv              
                 #map, show, save:
                 x0 = cd[0]
                 y0 = cd[1]
-                r0 = cd[2]*1.5
-                
+                r0 = cd[2]*1.5               
                 roi = guv_tools.get_roi(chan, x0, y0, r0)
-                
-                
+                              
                 #build a work image via the various channels-------------------------------------------   
-                if color_i==0: #setup work image for edge detection etc
-                  work_image=guv_tools.sobel_it(roi)
-                else:
-                  work_image=work_image+guv_tools.sobel_it(roi)
-
-
-                roi_array = np.array(roi)  #for tracking                
-                if color_i==0: # QI_track on one channel
-                    QI=QI_Tracker(roi_array)
-                    preset=QI_Tracker.TrackXY_by_QI_Init(QI,roi_array)                                                           
-                    xq, yq = QI_Tracker.TrackXY_by_QI(QI,roi_array, preset, r0, r0)                   
+                if color_i==0: #setup a work image for edge detection etc
+                  #work_image=guv_tools.sobel_it(roi)
+                  work_image=roi
+                #else:
+                  #work_image=work_image+guv_tools.sobel_it(roi)                
                 
-                #process this work image
-                work_radial_pattern(roi, x0,y0,r0)
-                roi_array = np.array(roi)  #for tracking                
-                if color_i==0: # QI_track on one channel
-                    QI=QI_Tracker(roi_array)
-                    preset=QI_Tracker.TrackXY_by_QI_Init(QI,roi_array)                                                           
-                    xq, yq = QI_Tracker.TrackXY_by_QI(QI,roi_array, preset, r0, r0)    
-
                 # plotting cosmetics:-------------------------------------------
-                axs[ci + 1, color_i].imshow(roi)
-                plotgridx=preset["X0samplinggrid"]+xq
-                plotgridy=preset["Y0samplinggrid"]+yq
-                lx=np.shape(plotgridx)
-                axs[ci + 1, color_i].plot(plotgridx[::10,::20],plotgridy[::10,::20],'r-',linewidth=0.3)
-                axs[ci + 1, color_i].plot(xq,yq,'rx')
-                axs[ci + 1, 4].imshow(work_image)
+                axs[ci + 1, color_i].imshow(roi)               
                 axs[0, color_i].imshow(chan)
                 axs[0, color_i].set_title(images.channels[color_i])
-            axs[1, 4].set_title('work image')              
+                        
         fig.tight_layout()
         fig.show()
-        outfig = datapath_out  + str("file_")+ im_ori_name  + str("frame") + str(1) + str(".png")
+        outfig_name1 = datapath_out  + str("file_")+ im_ori_name  + str("frame") + str(1) + str(".png")
         # outfig = f"frame{frame_index}_plotname.png"
-        fig.savefig(outfig)
+        fig.savefig(outfig_name1)
+                   
+        #process the work image
+        fig2, ax2 = guv_tools.work_radial_pattern(work_image, x0,y0,r0)
+        fig2.show() 
+        outfig_name2 = datapath_out  + str("file_")+ im_ori_name  + str("frame") + str(1) + str("_QI_track.png")
+        # outfig = f"frame{frame_index}_plotname.png"
+        fig2.savefig(outfig_name2)
+
 print("Press any key to end demo")
 input()
 
