@@ -3,12 +3,11 @@
 Work guv imagery
 @author: jkerssemakers
 """
-
 import guv_tools
 import guv_io
 from A00_init import get_exps
 #build paths:
-expi = 0
+expi = 1
 initval = get_exps(expi)
 
 for im_ori_name in initval.movienames:
@@ -21,8 +20,8 @@ for im_ori_name in initval.movienames:
         guv_xyr.append(thisguv)
         if initval.suffix == ".nd2":
             guv_io.cut_nd2_to_roi_tiffs(im_ori_name,guv_xyr,initval)
-
-    
+        if initval.suffix =='.lif': 
+            guv_io.cut_lif_to_roi_tiffs(im_ori_name,guv_xyr,initval)
 print("Press any key to end demo")
 input()
 

@@ -97,3 +97,94 @@ def cut_nd2_to_roi_tiffs(im_ori_name,guv_xyr,initval):
         # outfig = f"frame{frame_index}_plotname.png"
         fig2.savefig(outfig_name2)
         plt.close("all")
+
+
+def cut_lif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
+    """ use pre-set coordinates in imageJ to save standardized tif roi-stacks from .lif  format
+    #Jacob 2024 """
+    source = initval.mainpath_in + initval.subdir + im_ori_name + str(initval.suffix)
+    datapath_out_name = initval.mainpath_out + initval.subdir 
+    roipath_name = initval.mainpath_out + initval.subdir +str("/A10_rois")
+    overviewpath_name = initval.mainpath_out + initval.subdir +str("/A10_overview/")
+    outpath = Path(datapath_out_name)
+    roipath = Path(roipath_name)
+    overviewpath = Path(overviewpath_name)
+    if not outpath.is_dir():
+        outpath.mkdir()
+    if not roipath.is_dir():
+        roipath.mkdir()
+    if not overviewpath.is_dir():
+        overviewpath.mkdir()
+    N_guvs, dum = np.shape(guv_xyr)
+    fig, axs = plt.subplots(N_guvs + 1, 4)
+    #nlif _format reader:
+    #loop: 'images' contains all colors and all frames
+
+    get_lifs= LifFile(source)
+    lif_list = [i for i in get_lifs.get_iter_image()]
+
+    for roi_i, cd in enumerate(guv_xyr):  #work each GUV and its center coordinates:
+    #walk the frames:
+        for lif_objects in lif_list:
+            # Access a specific item
+            # Iterate over different items
+            frame_list   = [i for i in lif_objects.get_iter_t(c=0, z=0)]
+            z_list       = [i for i in lif_objects.get_iter_z(t=0, c=0)]
+            channel_list = [i for i in lif_objects.get_iter_c(t=0, z=0)]
+            for color_i in np.arange(len(channel_list)):
+                for fr_i in np.arange(len(frame_list)):
+                    chan_pil=lif_objects.get_frame(z=0, t=fr_i, c=color_i)
+                    #map, show, save:
+                    x0 = cd[0]
+                    y0 = cd[1]
+                    r0 = cd[2]*1.5
+                    #get image or stack:  
+                    chan = np.array(chan_pil)            
+                    roi = guv_tools.get_roi(chan, x0, y0, r0)
+                    # plotting cosmetics:-------------------------------------------
+                    axs[roi_i + 1, color_i].imshow(roi)               
+                    axs[0, color_i].imshow(chan)
+                    axs[0, color_i].set_title(color_i)
+                    #build a savename:
+                    roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
+                    io.imsave(roipath / f"{roiname}", roi, check_contrast=False)
+                    #saving of overviews:                
+        fig.tight_layout()
+        fig.show()
+        outfig_name1 = overviewpath_name  + str("file_")+ im_ori_name  + str("frame") + str(1) + str(".png")
+        # outfig = f"frame{frame_index}_plotname.png"
+        fig.savefig(outfig_name1)             
+        dum=1
+
+
+""" 
+               
+                
+                #get image or stack:              
+                roi = guv_tools.get_roi(chan, x0, y0, r0)                         
+                #build work image via the various channels-------------------------------------------   
+                if color_i==0: #setup a work image for edge detection etc
+                    #work_image=guv_tools.sobel_it(roi)
+                    work_image=roi
+                #else:
+                    #work_image=work_image+guv_tools.sobel_it(roi)                                
+                # plotting cosmetics:-------------------------------------------
+                axs[roi_i + 1, color_i].imshow(roi)               
+                axs[0, color_i].imshow(chan)
+                axs[0, color_i].set_title(images.channels[color_i])
+                #build a savename:
+                roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
+                io.imsave(roipath / f"{roiname}", roi, check_contrast=False)
+        #saving of overviews:                
+        fig.tight_layout()
+        fig.show()
+        outfig_name1 = overviewpath_name  + str("file_")+ im_ori_name  + str("frame") + str(1) + str(".png")
+        # outfig = f"frame{frame_index}_plotname.png"
+        fig.savefig(outfig_name1)             
+        #process the work image
+        fig2, ax2 = guv_tools.work_radial_pattern(work_image, x0,y0,r0)
+        fig2.show() 
+        outfig_name2 = overviewpath_name  + str("file_")+ im_ori_name  + str("frame") + str(1) + str("_QI_track.png")
+        # outfig = f"frame{frame_index}_plotname.png"
+        fig2.savefig(outfig_name2)
+        plt.close("all") """

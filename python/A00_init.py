@@ -24,19 +24,19 @@ class Guv_experiment:
 def get_exps(exp_idx):
     Exp1 = Guv_experiment()
     Exp1.mainpath_in=str(
-            "D:/jkerssemakers/CD_Data_in/2023_Rafa/DOPC.DOPS/"
+            "D:/jkerssemakers/CD_Data_in/2023_Rafa/Test_subdir_nd/"
         )
     Exp1.mainpath_out = str(
-            "D:/jkerssemakers/Dropbox\CD_Data_out/2023_Rafael/DOPC.DOPS/"
+            "D:/jkerssemakers/Dropbox/CD_Data_out/2023_Rafael/Test_subdir_nd/"
         )
     Exp1.subdir = str("60 uM_1h incubation/")
     Exp1.movienames = ["1", "2", "3", "16", "9"]  # the ones that have ROIs measured in ImageJ
     Exp1.suffix='.nd2'
 
     Exp2 = Guv_experiment()
-    Exp2.mainpath_in="M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/Rafa/Test Rafa_Lif/"
-    Exp2.mainpath_out="M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/Rafa/Test Rafa_Lif/"
-    Exp2.subdir = str("Test_subdir/")
+    Exp2.mainpath_in="D:/jkerssemakers/CD_Data_in/2023_Rafa/Test_subdir_lif/"
+    Exp2.mainpath_out="D:/jkerssemakers/Dropbox/CD_Data_out/2023_Rafael/Test_subdir_lif/"
+    Exp2.subdir = str("40mMLUVs_WITHCerC6/")
     Exp2.movienames = ["40mMLUVs_WITHCerC6"]  # the ones that have ROIs measured in ImageJ
     Exp2.suffix='.lif'
 
