@@ -220,7 +220,7 @@ class QI_Tracker():
                 xnw=xol
                 ynw=yol
          
-            return xnw,ynw
+            return xnw,ynw, allprofiles
     
     def SymCenter(self,prf): #This function is used to find the symmetry center of an array
         mp=np.nanmean(prf) #This function returns the mean of the array after removing all of the NaN values

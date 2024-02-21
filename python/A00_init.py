@@ -18,7 +18,7 @@ class Guv_experiment:
         )
         self.subdir = str()
         self.movienames = []
-        self.suffix='tif'
+        self.suffix='.tif'
 
 # overview of experiments:
 def get_exps(exp_idx):
