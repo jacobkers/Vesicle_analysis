@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-31-12-2022
+2024
 @author: jkerssemakers
+configuration of guv experiments.
+experiment run indices (add 0.1 to run on K:):
+0: .nd testfiles
+1: .lif testfiles 
 """
 
+import numpy as np
 
 class Guv_experiment:
     """
@@ -22,27 +27,32 @@ class Guv_experiment:
 
 # overview of experiments:
 def get_exps(exp_idx):
-    Exp1 = Guv_experiment()
-    Exp1.mainpath_in=str(
-            "D:/jkerssemakers/CD_Data_in/2023_Rafa/Test_subdir_nd/"
-        )
-    Exp1.mainpath_out = str(
-            "D:/jkerssemakers/Dropbox/CD_Data_out/2023_Rafael/Test_subdir_nd/"
-        )
+    #use 1st decimal to pick drive:
+    exp_idx_base=int(np.round(exp_idx))
+    exp_idx_dec=exp_idx-np.round(exp_idx)   
+    if exp_idx_dec==0:
+        in_root=str("D:/jkerssemakers/CD_Data_in/2023_Rafa/")
+        out_root=str("D:/jkerssemakers/CD_Data_out/2023_Rafa/")
+    if exp_idx_dec==0.1:
+        in_root=str("M:/tnw/bn/cd/Shared/Jacob/TESTdata_in/2023_Rafa/")
+        out_root=str("M:/tnw/bn/cd/Shared/Jacob/TESTdata_out/2023_Rafa/")
+    #set up various experiment configurations:    
+    Exp1 = Guv_experiment()   
+    Exp1.mainpath_in=in_root+ str("Test_subdir_nd/")
+    Exp1.mainpath_out =out_root + str("Test_subdir_nd/")   
     Exp1.subdir = str("60 uM_1h incubation/")
     Exp1.movienames = ["1", "2", "3", "16", "9"]  # the ones that have ROIs measured in ImageJ
     Exp1.suffix='.nd2'
 
     Exp2 = Guv_experiment()
-    Exp2.mainpath_in="D:/jkerssemakers/CD_Data_in/2023_Rafa/Test_subdir_lif/"
-    Exp2.mainpath_out="D:/jkerssemakers/Dropbox/CD_Data_out/2023_Rafael/Test_subdir_lif/"
+    Exp2.mainpath_in=in_root+ str("Test_subdir_lif/")
+    Exp2.mainpath_out=out_root+ str("Test_subdir_lif/")
     Exp2.subdir = str("40mMLUVs_WITHCerC6/")
     Exp2.movienames = ["40mMLUVs_WITHCerC6"]  # the ones that have ROIs measured in ImageJ
     Exp2.suffix='.lif'
 
-
     all_Experiments = [Exp1, Exp2]
 
-    Experiment = all_Experiments[exp_idx]
+    Experiment = all_Experiments[exp_idx_base]
 
     return Experiment

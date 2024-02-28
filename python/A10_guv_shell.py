@@ -6,8 +6,13 @@ Work guv imagery
 import guv_tools
 import guv_io
 from A00_init import get_exps
-#build paths:
-expi = 1
+
+""" 
+experiment indices (add 0.1 to run on K:):
+0: .nd testfiles
+1: .lif testfiles 
+"""
+expi = 1.1
 initval = get_exps(expi)
 
 for im_ori_name in initval.movienames:
