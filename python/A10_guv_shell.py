@@ -12,7 +12,7 @@ experiment indices (add 0.1 to run on K:):
 0: .nd testfiles
 1: .lif testfiles 
 """
-expi = 1.1
+expi = 2.1
 initval = get_exps(expi)
 
 for im_ori_name in initval.movienames:
@@ -27,6 +27,8 @@ for im_ori_name in initval.movienames:
             guv_io.cut_nd2_to_roi_tiffs(im_ori_name,guv_xyr,initval)
         if initval.suffix =='.lif': 
             guv_io.cut_lif_to_roi_tiffs(im_ori_name,guv_xyr,initval)
+        if initval.suffix =='.tif': 
+            guv_io.cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval)
 print("Press any key to end demo")
 input()
 

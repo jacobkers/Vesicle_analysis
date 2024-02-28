@@ -37,21 +37,28 @@ def get_exps(exp_idx):
         in_root=str("M:/tnw/bn/cd/Shared/Jacob/TESTdata_in/2023_Rafa/")
         out_root=str("M:/tnw/bn/cd/Shared/Jacob/TESTdata_out/2023_Rafa/")
     #set up various experiment configurations:    
-    Exp1 = Guv_experiment()   
-    Exp1.mainpath_in=in_root+ str("Test_subdir_nd/")
-    Exp1.mainpath_out =out_root + str("Test_subdir_nd/")   
-    Exp1.subdir = str("60 uM_1h incubation/")
-    Exp1.movienames = ["1", "2", "3", "16", "9"]  # the ones that have ROIs measured in ImageJ
-    Exp1.suffix='.nd2'
+    Exp0 = Guv_experiment()   
+    Exp0.mainpath_in=in_root+ str("Test_subdir_nd/")
+    Exp0.mainpath_out =out_root + str("Test_subdir_nd/")   
+    Exp0.subdir = str("60 uM_1h incubation/")
+    Exp0.movienames = ["1", "2", "3", "16", "9"]  # the ones that have ROIs measured in ImageJ
+    Exp0.suffix='.nd2'
+
+    Exp1 = Guv_experiment()
+    Exp1.mainpath_in=in_root+ str("Test_subdir_lif/")
+    Exp1.mainpath_out=out_root+ str("Test_subdir_lif/")
+    Exp1.subdir = str("40mMLUVs_WITHCerC6/")
+    Exp1.movienames = ["40mMLUVs_WITHCerC6"]  # the ones that have ROIs measured in ImageJ
+    Exp1.suffix='.lif'
 
     Exp2 = Guv_experiment()
-    Exp2.mainpath_in=in_root+ str("Test_subdir_lif/")
-    Exp2.mainpath_out=out_root+ str("Test_subdir_lif/")
-    Exp2.subdir = str("40mMLUVs_WITHCerC6/")
-    Exp2.movienames = ["40mMLUVs_WITHCerC6"]  # the ones that have ROIs measured in ImageJ
-    Exp2.suffix='.lif'
+    Exp2.mainpath_in=in_root+ str("Test_subdir_tif1/")
+    Exp2.mainpath_out=out_root+ str("Test_subdir_tif1/")
+    Exp2.subdir = str("40 uM LUVsWITHCerC6/")
+    Exp2.movienames = ["40 uM LUVsWITHCerC6_RealTime_Series002_t000"]  # the ones that have ROIs measured in ImageJ
+    Exp2.suffix='.tif'
 
-    all_Experiments = [Exp1, Exp2]
+    all_Experiments = [Exp0, Exp1, Exp2]
 
     Experiment = all_Experiments[exp_idx_base]
 
