@@ -11,7 +11,7 @@ import csv
 from skimage import io
 import matplotlib.pyplot as plt
 import guv_tools
-from PIL import Image
+from PIL import Image, ImageSequence
 
 
 def get_roi_info(csv_source):
@@ -178,45 +178,40 @@ def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
     fig, axs = plt.subplots(N_guvs + 1, 4)
     #nlif _format reader:
     #loop: 'images' contains all colors and all frames
-    in_tif = Image.open(source)
+    RGB_tif = Image.open(source)
     # extract other basic metadata
     info_dict = {
-        "Filename": in_tif.filename.split('/')[1],
-        "Image Size": in_tif.size,
-        "Image Height": in_tif.height,
-        "Image Width": in_tif.width,
-        "Image Format": in_tif.format,
-        "Image Mode": in_tif.mode,
-        "Image is Animated": getattr(in_tif, "is_animated", False),
-        "Frames in Image": getattr(in_tif, "n_frames", 1),
+        "Filename": RGB_tif.filename.split('/')[1],
+        "Image Size": RGB_tif.size,
+        "Image Height": RGB_tif.height,
+        "Image Width": RGB_tif.width,
+        "Image Format": RGB_tif.format,
+        "Image Mode": RGB_tif.mode,
+        "Image is Animated": getattr(RGB_tif, "is_animated", False),
+        "Frames in Image": getattr(RGB_tif, "n_frames", 1),
     }
 
     #tot hier------------------------------------
     #--------------------------------------------
     #------------------------------
     for roi_i, cd in enumerate(guv_xyr):  #work each GUV and its center coordinates:
-        for frames in in_tif:
-            # Access a specific item
-            # Iterate over different items
-            
-            for color_i in np.arange(len(channel_list)):
-                for fr_i in np.arange(len(frame_list)):
-                    chan_pil=lif_objects.get_frame(z=0, t=fr_i, c=color_i)
-                    #map, show, save:
-                    x0 = cd[0]
-                    y0 = cd[1]
-                    r0 = cd[2]*1.5
-                    #get image or stack:  
-                    chan = np.array(chan_pil)            
-                    roi = guv_tools.get_roi(chan, x0, y0, r0)
-                    # plotting cosmetics:-------------------------------------------
-                    axs[roi_i + 1, color_i].imshow(roi)               
-                    axs[0, color_i].imshow(chan)
-                    axs[0, color_i].set_title(color_i)
-                    #build a savename:
-                    roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
-                    io.imsave(roipath / f"{roiname}", roi, check_contrast=False)
-                    #saving of overviews:                
+        for color_i in np.arange(3):
+            chan_pil = RGB_tif.split()[color_i]       
+            #map, show, save:
+            x0 = cd[0]
+            y0 = cd[1]
+            r0 = cd[2]*1.5
+            #get image or stack:  
+            chan = np.array(chan_pil)            
+            roi = guv_tools.get_roi(chan, x0, y0, r0)
+            # plotting cosmetics:-------------------------------------------
+            axs[roi_i + 1, color_i].imshow(roi)               
+            axs[0, color_i].imshow(chan)
+            axs[0, color_i].set_title(color_i)
+            #build a savename:
+            roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
+            io.imsave(roipath / f"{roiname}", roi, check_contrast=False)
+            #saving of overviews:                
         fig.tight_layout()
         fig.show()
         outfig_name1 = overviewpath_name  + str("file_")+ im_ori_name  + str("frame") + str(1) + str(".png")

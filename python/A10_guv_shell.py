@@ -3,7 +3,6 @@
 Work guv imagery
 @author: jkerssemakers
 """
-import guv_tools
 import guv_io
 from A00_init import get_exps
 
