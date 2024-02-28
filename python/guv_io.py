@@ -196,16 +196,22 @@ def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
     #------------------------------
     for roi_i, cd in enumerate(guv_xyr):  #work each GUV and its center coordinates:
         for color_i in np.arange(3):
-            chan_pil = RGB_tif.split()[color_i]       
-            #map, show, save:
-            x0 = cd[0]
-            y0 = cd[1]
-            r0 = cd[2]*1.5
-            #get image or stack:  
-            chan = np.array(chan_pil)            
-            roi = guv_tools.get_roi(chan, x0, y0, r0)
+            for fri, frame in enumerate(ImageSequence.Iterator(RGB_tif)):  
+                chan_pil=frame.split()[color_i]
+                chan = np.array(chan_pil)      
+                #cut
+                x0 = cd[0]
+                y0 = cd[1]
+                r0 = cd[2]*1.5
+                #get image or stack:  
+                chan = np.array(chan_pil)            
+                roi_1frame = guv_tools.get_roi(chan, x0, y0, r0)
+                if fri==0:
+                    rr,cc=np.shape(roi_1frame)
+                    roi=np.zeros(RGB_tif.Frames in Image,rr,cc)
+                roi[fri,:,:]=roi_1frame
             # plotting cosmetics:-------------------------------------------
-            axs[roi_i + 1, color_i].imshow(roi)               
+            axs[roi_i + 1, color_i].imshow(roi[0,:,:])               
             axs[0, color_i].imshow(chan)
             axs[0, color_i].set_title(color_i)
             #build a savename:
