@@ -69,7 +69,7 @@ def cut_nd2_to_roi_tiffs(im_ori_name,guv_xyr,initval):
                 #map, show, save:
                 x0 = cd[0]
                 y0 = cd[1]
-                r0 = cd[2]*1.5
+                r0 = cd[2]*.15
                 #get image or stack:              
                 roi = guv_tools.get_roi(chan, x0, y0, r0)                         
                 #build work image via the various channels-------------------------------------------   
@@ -191,9 +191,6 @@ def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
         "Frames in Image": getattr(RGB_tif, "n_frames", 1),
     }
 
-    #tot hier------------------------------------
-    #--------------------------------------------
-    #------------------------------
     for roi_i, cd in enumerate(guv_xyr):  #work each GUV and its center coordinates:
         for color_i in np.arange(3):
             for fri, frame in enumerate(ImageSequence.Iterator(RGB_tif)):  
@@ -208,7 +205,8 @@ def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
                 roi_1frame = guv_tools.get_roi(chan, x0, y0, r0)
                 if fri==0:
                     rr,cc=np.shape(roi_1frame)
-                    roi=np.zeros(RGB_tif.Frames in Image,rr,cc)
+                    ff=int(info_dict["Frames in Image"])
+                    roi=np.zeros((ff,rr,cc),dtype=int)
                 roi[fri,:,:]=roi_1frame
             # plotting cosmetics:-------------------------------------------
             axs[roi_i + 1, color_i].imshow(roi[0,:,:])               
@@ -225,9 +223,36 @@ def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
         fig.savefig(outfig_name1)             
         dum=1
 
+def work_roi_tiffs(im_ori_name,guv_xyr,initval):
+    """ use pre-set coordinates in imageJ to save standardized tif roi-stacks from .lif  format
+    #Jacob 2024 """
+    source = initval.mainpath_in + initval.subdir + im_ori_name + str(initval.suffix)
+    datapath_out_name = initval.mainpath_out + initval.subdir 
+    roipath_name = initval.mainpath_out + initval.subdir +str("/A10_rois")
+    overviewpath_name = initval.mainpath_out + initval.subdir +str("/A10_overview/")
+    outpath = Path(datapath_out_name)
+    roipath = Path(roipath_name)
+    
+    fig, axs = plt.subplots(1, 3)
 
+    for roi_i, cd in enumerate(guv_xyr):  #work each GUV and its center coordinates:
+        for color_i in np.arange(3):
+            #load:
+            roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
+            roi_stack=io.imread(roipath / f"{roiname}")
+            roi0=roi_stack[0,:,:]
+            walk frames:
+            for roi in roi_stack:
+                dum=1
+            # plotting cosmetics:-------------------------------------------
+            axs[color_i].imshow(roi0)               
+            axs[color_i].imshow(roi0)
+            axs[color_i].set_title(color_i)
+        fig.tight_layout()
+        fig.show()
 
-
+        dum=1
+          
 """ 
                
                 

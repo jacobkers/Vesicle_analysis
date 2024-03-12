@@ -52,8 +52,8 @@ def get_exps(exp_idx):
     Exp1.suffix='.lif'
 
     Exp2 = Guv_experiment()
-    Exp2.mainpath_in=in_root+ str("Test_subdir_tif1/")
-    Exp2.mainpath_out=out_root+ str("Test_subdir_tif1/")
+    Exp2.mainpath_in=in_root+ str("Test_subdir_tif/")
+    Exp2.mainpath_out=out_root+ str("Test_subdir_tif/")
     Exp2.subdir = str("40 uM LUVsWITHCerC6/")
     Exp2.movienames = ["40 uM LUVsWITHCerC6_RealTime_Series002_t000"]  # the ones that have ROIs measured in ImageJ
     Exp2.suffix='.tif'
