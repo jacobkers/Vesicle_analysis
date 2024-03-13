@@ -58,7 +58,14 @@ def get_exps(exp_idx):
     Exp2.movienames = ["40 uM LUVsWITHCerC6_RealTime_Series002_t000"]  # the ones that have ROIs measured in ImageJ
     Exp2.suffix='.tif'
 
-    all_Experiments = [Exp0, Exp1, Exp2]
+    Exp3 = Guv_experiment()
+    Exp3.mainpath_in=in_root+ str("Test_subdir_tif/")
+    Exp3.mainpath_out=out_root+ str("Test_subdir_tif/")
+    Exp3.subdir = str("Less challenging GUV/")
+    Exp3.movienames = ["30 uM LUVs_WITHCerC6 real time_Series011_t00_overlay"]  # the ones that have ROIs measured in ImageJ
+    Exp3.suffix='.tif'
+
+    all_Experiments = [Exp0, Exp1, Exp2, Exp3]
 
     Experiment = all_Experiments[exp_idx_base]
 
