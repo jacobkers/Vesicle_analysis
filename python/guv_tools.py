@@ -12,9 +12,11 @@ from scipy.ndimage import sobel
 from qi_trak import QI_Tracker
 import matplotlib.pyplot as plt
 
-def work_radial_pattern(roi, x0,y0,r0):
+def work_radial_pattern(roi):
     roi_array = np.array(roi)  #for tracking                
     # QI_track on one channel
+    rr=np.shape(roi)[0]
+    r0=rr/2
     QI=QI_Tracker(roi_array)
     preset=QI_Tracker.TrackXY_by_QI_Init(QI,roi_array)                                                           
     xq, yq, allprofiles = QI_Tracker.TrackXY_by_QI(QI,roi_array, preset, r0, r0)    
