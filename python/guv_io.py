@@ -4,8 +4,8 @@ Jacob Kers 2024
  """
 import numpy as np
 import matplotlib.pyplot as plt
-import nd2reader
-from readlif.reader import LifFile
+#import nd2reader
+#from readlif.reader import LifFile
 from pathlib import Path
 import csv
 from skimage import io
@@ -192,9 +192,10 @@ def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
                 chan_pil=frame.split()[color_i]
                 chan = np.array(chan_pil)      
                 #cut
+                extra_space=1.5
                 x0 = cd[0]
                 y0 = cd[1]
-                r0 = cd[2]*1.5
+                r0 = cd[2]*extra_space
                 #get image or stack:  
                 chan = np.array(chan_pil)            
                 roi_1frame = guv_tools.get_roi(chan, x0, y0, r0)
@@ -244,7 +245,9 @@ def work_roi_tiffs(im_ori_name,guv_xyr,initval):
                     #process the work image
             else:
                 roi0=roi_stack #single image
-            fig2, ax2 = guv_tools.work_radial_pattern(roi0)
+            roi0=roi0-np.min(roi0)
+            msk=guv_tools.donut_mask(roi0)
+            fig2, ax2 = guv_tools.work_radial_pattern(roi0*msk)
             fig2.show() 
             outfig_name2 = overviewpath_name  + str("file_")+ im_ori_name  + str("_roi")+str(roi_i) +  str("c") + str(color_i) + str("frame") + str(0) + str("_QI_track.png")
             fig2.savefig(outfig_name2)

@@ -30,10 +30,13 @@ def get_exps(exp_idx):
     #use 1st decimal to pick drive:
     exp_idx_base=int(np.round(exp_idx))
     exp_idx_dec=int(10*(exp_idx-np.round(exp_idx))) 
-    if exp_idx_dec==0:
+    if exp_idx_dec==0: #laptop
+        in_root=str("C:/Users/jkerssemakers/CD_Data_in/2023_Rafa//")
+        out_root=str("C:/Users/jkerssemakers/Dropbox/CD_Data_out/2023_Rafa/")
+    if exp_idx_dec==1:
         in_root=str("D:/jkerssemakers/CD_Data_in/2023_Rafa/")
         out_root=str("D:/jkerssemakers/CD_Data_out/2023_Rafa/")
-    if exp_idx_dec==1:
+    if exp_idx_dec==2: #remote
         in_root=str("M:/tnw/bn/cd/Shared/Jacob/TESTdata_in/2023_Rafa/")
         out_root=str("M:/tnw/bn/cd/Shared/Jacob/TESTdata_out/2023_Rafa/")
     #set up various experiment configurations:    
@@ -55,7 +58,7 @@ def get_exps(exp_idx):
     Exp2.mainpath_in=in_root+ str("Test_subdir_tif/")
     Exp2.mainpath_out=out_root+ str("Test_subdir_tif/")
     Exp2.subdir = str("40 uM LUVsWITHCerC6/")
-    Exp2.movienames = ["40 uM LUVsWITHCerC6_RealTime_Series002_t000"]  # the ones that have ROIs measured in ImageJ
+    Exp2.movienames = ["40 uM LUVsWITHCerC6_RealTime_Series002_t000_crp"]  # the ones that have ROIs measured in ImageJ
     Exp2.suffix='.tif'
 
     Exp3 = Guv_experiment()

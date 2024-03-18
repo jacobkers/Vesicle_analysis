@@ -92,5 +92,3 @@ def donut_mask(roi):
         fig.show()
     
     return donut_mask
-
-donut_mask(roi=0)
