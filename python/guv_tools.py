@@ -2,8 +2,8 @@
 #tools to work with guv files: """
 import numpy as np
 import matplotlib.pyplot as plt
-import nd2reader
-from readlif.reader import LifFile
+#import nd2reader
+#from readlif.reader import LifFile
 from pathlib import Path
 import cv2
 import csv
@@ -64,3 +64,33 @@ def sobel_it(roi):
     #magnitude *= 255.0 / np.max(magnitude)  # normalization
     return magnitude
 
+def donut_mask(roi):
+    """
+    make donut-shaped mask to improve QI tracking of versicle edge
+    @author: jkerssemakers, 2024
+    """
+    rr,cc =np.shape(roi)
+    #rr, cc=50, 50
+    rimR=rr/2
+    rim_up=rimR/2
+    rim_down=rimR
+    rim_sharpness=rr/40
+    x, y = np.linspace(-cc / 2, cc / 2, cc), np.linspace(-rr / 2, rr / 2, rr)
+    X, Y = np.meshgrid(x, y)
+    radii = np.hypot(X, Y)
+    donut_mask=0*radii+1
+    #smooth edges:
+    donut_mask[radii<rim_up]=0
+    donut_mask[radii>rim_down]=0
+    rimsmooth_up=1-np.exp(-(radii-rim_up)/rim_sharpness)
+    rimsmooth_down=1-np.exp(-(rim_down-radii)/rim_sharpness)
+    donut_mask=donut_mask*rimsmooth_up*rimsmooth_down
+    if 0: #test
+        fig, axs = plt.subplots(1,1)
+        axs.imshow(donut_mask)
+        fig.tight_layout()
+        fig.show()
+    
+    return donut_mask
+
+donut_mask(roi=0)

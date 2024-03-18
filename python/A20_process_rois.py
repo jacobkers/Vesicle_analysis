@@ -8,7 +8,7 @@ import guv_io
 from A00_init import get_exps
 
 """ 
-experiment indices (add 0.1 to run on K:):
+experiment indices (add 0.1 to run on CD:K:):
 0: .nd testfiles
 1: .lif testfiles
 2: .tif testfiles 
