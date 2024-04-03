@@ -3,7 +3,7 @@
 Work guv imagery
 @author: jkerssemakers
 """
-import guv_tools
+import guv_process_stacks
 import guv_io
 from A00_init import get_exps
 
@@ -14,7 +14,7 @@ experiment indices (add 0.2 to run on CD:K:):
 2: .tif testfiles 
 
 """
-expi = 2.0
+expi = 3.2  #less_challenging ones
 initval = get_exps(expi)
 
 for im_ori_name in initval.movienames:
@@ -27,5 +27,6 @@ for im_ori_name in initval.movienames:
         thisguv = [int(X0), int(YY0[ii]), int(RR0[ii])]
         guv_xyr.append(thisguv)
     #access ROI-stacks per guv:
-        guv_io.work_roi_tiffs(im_ori_name,guv_xyr,initval)
+        guv_process_stacks.work_roi_tiffs(im_ori_name,guv_xyr,initval)
+        guv_process_stacks.build_coordinates(im_ori_name,guv_xyr,initval)
 

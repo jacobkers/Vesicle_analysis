@@ -24,6 +24,7 @@ class Guv_experiment:
         self.subdir = str()
         self.movienames = []
         self.suffix='.tif'
+        self.tracking_key=0  #channel index to use for obtaining geometry
 
 # overview of experiments:
 def get_exps(exp_idx):
@@ -46,6 +47,7 @@ def get_exps(exp_idx):
     Exp0.subdir = str("60 uM_1h incubation/")
     Exp0.movienames = ["1", "2", "3", "16", "9"]  # the ones that have ROIs measured in ImageJ
     Exp0.suffix='.nd2'
+    
 
     Exp1 = Guv_experiment()
     Exp1.mainpath_in=in_root+ str("Test_subdir_lif/")
@@ -67,6 +69,7 @@ def get_exps(exp_idx):
     Exp3.subdir = str("Less challenging GUV/")
     Exp3.movienames = ["30 uM LUVs_WITHCerC6 real time_Series011_t00_overlay"]  # the ones that have ROIs measured in ImageJ
     Exp3.suffix='.tif'
+    Exp3.tracking_key=2
 
     all_Experiments = [Exp0, Exp1, Exp2, Exp3]
 

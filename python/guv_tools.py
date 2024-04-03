@@ -54,41 +54,49 @@ def get_roi(image,x0,y0,r0):
 
     return roi
 
-
-
 def sobel_it(roi):
+    roi = roi.astype(float)
     roi = cv2.filter2D(roi, -1, 5)
     sobel_h = sobel(roi, 0)  # horizontal gradient
     sobel_v = sobel(roi, 1)  # vertical gradient
     magnitude = np.sqrt(sobel_h**2 + sobel_v**2)
+    magnitude=np.array(magnitude.astype(int))
     #magnitude *= 255.0 / np.max(magnitude)  # normalization
     return magnitude
 
-def donut_mask(roi):
+def donut_mask_it(roi):
     """
-    make donut-shaped mask to improve QI tracking of versicle edge
+    make donut-shaped mask to improve QI tracking of versicle edge.
+    Note: we assume a roi is taken as 3 times the approximate vesicle diameter (thus, we expet the vesicle edge at about 2/3* half the image size)
     @author: jkerssemakers, 2024
     """
     rr,cc =np.shape(roi)
     #rr, cc=50, 50
-    rimR=rr/2
-    rim_up=rimR/2
-    rim_down=rimR
+    approx_rim=rr/2*(2/3)  #see above
+    rim_lo=0.5*approx_rim
+    rim_hi=1.5*approx_rim
     rim_sharpness=rr/40
     x, y = np.linspace(-cc / 2, cc / 2, cc), np.linspace(-rr / 2, rr / 2, rr)
     X, Y = np.meshgrid(x, y)
     radii = np.hypot(X, Y)
     donut_mask=0*radii+1
-    #smooth edges:
-    donut_mask[radii<rim_up]=0
-    donut_mask[radii>rim_down]=0
-    rimsmooth_up=1-np.exp(-(radii-rim_up)/rim_sharpness)
-    rimsmooth_down=1-np.exp(-(rim_down-radii)/rim_sharpness)
-    donut_mask=donut_mask*rimsmooth_up*rimsmooth_down
+    #smooth band:
+    if 0:
+        donut_mask[radii<rim_lo]=0
+        donut_mask[radii>rim_hi]=0
+        rimsmooth_lo=1-np.exp(-(radii-rim_lo)/rim_sharpness)
+        rimsmooth_hi=1-np.exp(-(rim_hi-radii)/rim_sharpness)
+        donut_mask=donut_mask*rimsmooth_lo*rimsmooth_hi
+        roi_out=roi*donut_mask
+    else:
+        roi_out=roi
+        roi_out[radii<rim_lo]=np.median(roi[radii<rim_lo])
+        roi_out[radii>rim_hi]=np.median(roi[radii>rim_hi])
     if 0: #test
         fig, axs = plt.subplots(1,1)
-        axs.imshow(donut_mask)
+        axs.imshow(255*donut_mask)
+        #axs.plot(donut_mask)
         fig.tight_layout()
         fig.show()
-    
-    return donut_mask
+
+    return roi_out

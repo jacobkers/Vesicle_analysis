@@ -191,7 +191,7 @@ def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
             for fri, frame in enumerate(ImageSequence.Iterator(RGB_tif)):  
                 chan_pil=frame.split()[color_i]
                 chan = np.array(chan_pil)      
-                #cut
+                #cut (we assume roi just fits the vesicle)
                 extra_space=1.5
                 x0 = cd[0]
                 y0 = cd[1]
@@ -246,8 +246,8 @@ def work_roi_tiffs(im_ori_name,guv_xyr,initval):
             else:
                 roi0=roi_stack #single image
             roi0=roi0-np.min(roi0)
-            msk=guv_tools.donut_mask(roi0)
-            fig2, ax2 = guv_tools.work_radial_pattern(roi0*msk)
+            #roi0=guv_tools.donut_mask_it(roi0)
+            fig2, ax2 = guv_tools.work_radial_pattern(roi0)
             fig2.show() 
             outfig_name2 = overviewpath_name  + str("file_")+ im_ori_name  + str("_roi")+str(roi_i) +  str("c") + str(color_i) + str("frame") + str(0) + str("_QI_track.png")
             fig2.savefig(outfig_name2)
