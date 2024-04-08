@@ -114,8 +114,6 @@ def smooth_it(roi,labda=3):
 
 def sobel_it(roi):  
     # apply kernel(2d convolution matrix
-    kernel1 = np.ones((5, 5), np.float32)/(30)
-    roi = cv2.filter2D(src=roi, ddepth=-1, kernel=kernel1) 
     sobel_h = sobel(roi, 0)  # horizontal gradient
     sobel_v = sobel(roi, 1)  # vertical gradient
     magnitude = np.sqrt(sobel_h**2 + sobel_v**2)

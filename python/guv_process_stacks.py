@@ -39,13 +39,10 @@ def build_coordinates(im_ori_name,guv_xyr,initval):
         #in this section, build the 'workimage'
         roi0=roi0-np.min(roi0)
         # smooth, treshold:
-        roi0=guv_tools.smooth_it(roi0,labda=3)
+        roi0=guv_tools.smooth_it(roi0,labda=4)
         roi0= roi0.astype(int)
-        # roi0 = roi0.astype(float)
-        # kernel1 = np.ones((5, 5), np.float32)/30
-        # roi0 = cv2.filter2D(src=roi0, ddepth=-1, kernel=kernel1) 
-        roi0= guv_tools.treshold_it(roi0)[1]
-        #roi0=guv_tools.sobel_it(roi0) 
+        roi0= guv_tools.treshold_it(roi0)[0]
+        roi0=guv_tools.sobel_it(roi0) 
         fig, axs = guv_tools.work_radial_pattern(roi0)   
         #show the result
         titl = str("file_")+ im_ori_name  + str("_roi")+str(roi_i) +  str("c") + str(color_i) + str("frame") + str(0) + str("_sobel_QI_track")
