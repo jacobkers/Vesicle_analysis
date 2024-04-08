@@ -135,8 +135,8 @@ def donut_mask_it(roi):
     """
     rr,cc =np.shape(roi)
     approx_rim=rr/4  
-    rim_lo=0.3*approx_rim
-    rim_hi=1.5*approx_rim
+    rim_lo=0.1*approx_rim
+    rim_hi=1.6*approx_rim
     rim_sharpness=rr/40
     x, y = np.linspace(-cc / 2, cc / 2, cc), np.linspace(-rr / 2, rr / 2, rr)
     X, Y = np.meshgrid(x, y)

@@ -29,7 +29,7 @@ def build_coordinates(im_ori_name,guv_xyr,initval):
         roi_stack=io.imread(roipath / f"{roiname}")
         roi_shp=np.shape(roi_stack)
         if len(roi_shp)==3: #work stack
-            roi0=roi_stack[0,:,:] 
+            roi0=roi_stack[30,:,:] 
             #walk frames [empty]:
             for roi in roi_stack:
                 dum=1
@@ -43,7 +43,7 @@ def build_coordinates(im_ori_name,guv_xyr,initval):
         roi0= roi0.astype(int)
         roi0= guv_tools.treshold_it(roi0)[0]
         roi0=guv_tools.sobel_it(roi0) 
-        roi0=guv_tools.donut_mask_it(roi0)
+        #roi0=guv_tools.donut_mask_it(roi0)
         fig, axs = guv_tools.work_radial_pattern(roi0)   
         #show the result
         titl = str("file_")+ im_ori_name  + str("_roi")+str(roi_i) +  str("c") + str(color_i) + str("frame") + str(0) + str("_sobel_QI_track")
