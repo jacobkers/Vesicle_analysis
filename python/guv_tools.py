@@ -134,9 +134,8 @@ def donut_mask_it(roi):
     @author: jkerssemakers, 2024
     """
     rr,cc =np.shape(roi)
-    #rr, cc=50, 50
-    approx_rim=rr/2*(2/3)  #see above
-    rim_lo=0.5*approx_rim
+    approx_rim=rr/4  
+    rim_lo=0.3*approx_rim
     rim_hi=1.5*approx_rim
     rim_sharpness=rr/40
     x, y = np.linspace(-cc / 2, cc / 2, cc), np.linspace(-rr / 2, rr / 2, rr)
@@ -144,7 +143,7 @@ def donut_mask_it(roi):
     radii = np.hypot(X, Y)
     donut_mask=0*radii+1
     #smooth band:
-    if 0:
+    if 1:
         donut_mask[radii<rim_lo]=0
         donut_mask[radii>rim_hi]=0
         rimsmooth_lo=1-np.exp(-(radii-rim_lo)/rim_sharpness)
@@ -157,9 +156,10 @@ def donut_mask_it(roi):
         roi_out[radii>rim_hi]=np.median(roi[radii>rim_hi])
     if 0: #test
         fig, axs = plt.subplots(1,1)
-        axs.imshow(255*donut_mask)
+        axs.imshow(donut_mask)
         #axs.plot(donut_mask)
         fig.tight_layout()
         fig.show()
+        dum=1
 
     return roi_out
