@@ -192,7 +192,7 @@ def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
                 chan_pil=frame.split()[color_i]
                 chan = np.array(chan_pil)      
                 #cut (we assume roi just fits the vesicle)
-                extra_space=1.5
+                extra_space=2
                 x0 = cd[0]
                 y0 = cd[1]
                 r0 = cd[2]*extra_space

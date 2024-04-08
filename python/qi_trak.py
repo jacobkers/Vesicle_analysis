@@ -50,7 +50,7 @@ class QI_Tracker():
     
     minradius = 0.0          # float - minimum radius of polar grid
     maxradius = 0.0          # float - maxiumum radius of polar grid
-    max_radius_denom = 2.5   # By default 2.5, but should be able to be changed in the init function as kwarg.
+    max_radius_denom = 1   # By default 2.5, but should be able to be changed in the init function as kwarg.
     
     iterations = 10          # integer - no. of iterations
     spokesnoperquad = 0      # integer - no. of spokes per quadrant 

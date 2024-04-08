@@ -12,7 +12,7 @@ experiment indices (add 0.1 to run on K:):
 0: .nd testfiles
 1: .lif testfiles 
 """
-expi = 2.0
+expi = 3.2
 initval = get_exps(expi)
 
 for im_ori_name in initval.movienames:

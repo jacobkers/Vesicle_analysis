@@ -69,7 +69,7 @@ def get_exps(exp_idx):
     Exp3.subdir = str("Less challenging GUV/")
     Exp3.movienames = ["30 uM LUVs_WITHCerC6 real time_Series011_t00_overlay"]  # the ones that have ROIs measured in ImageJ
     Exp3.suffix='.tif'
-    Exp3.tracking_key=2
+    Exp3.tracking_key=1
 
     all_Experiments = [Exp0, Exp1, Exp2, Exp3]
 

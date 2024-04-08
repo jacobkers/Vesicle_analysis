@@ -12,6 +12,46 @@ from scipy.ndimage import sobel
 from qi_trak import QI_Tracker
 import matplotlib.pyplot as plt
 
+def treshold_it(im):
+    """ treshold by triangulation, following Margreet Docter 
+    JacobKerts, 2023"""
+    rr,cc=im.shape
+    # sort and scale on number of pixels (to equalize axes)
+    impixels=im.flatten()
+    impixels_sorted=np.sort(impixels)
+    Npix=len(impixels)
+    pix_ax=np.arange(0, Npix, 1)
+    Ipix=np.max(impixels)
+    impixels_sorted=impixels_sorted/Ipix*Npix
+
+    #fit on lower half of N:
+    lowerhalf_N=impixels_sorted[0:int(Npix/2)]
+    lowerhalf_pix_ax=pix_ax[0:int(Npix/2)]
+    lowerfit_p=np.polyfit(lowerhalf_pix_ax,lowerhalf_N,1)
+    lowerfit=np.polyval(lowerfit_p, pix_ax)
+
+    #fit on higher half of I:
+    upperhalf_I=impixels_sorted[impixels_sorted>Npix/2]
+    upperhalf_pix_ax=pix_ax[impixels_sorted>Npix/2]
+    upperfit_p=np.polyfit(upperhalf_pix_ax,upperhalf_I,1)
+    upperfit=np.polyval(upperfit_p, pix_ax)
+    #get cross-point
+    xc=(lowerfit_p[1]-upperfit_p[1])/(upperfit_p[0]-lowerfit_p[0])
+    yc=np.polyval(lowerfit_p,xc)
+
+    #get 'knee'
+    #rr=np.hypot((1:length(sim))-xc).'.^2, (sim-yc).^2);
+    rr=np.hypot(pix_ax-xc,impixels_sorted-yc)
+    x_kn=pix_ax[(rr== min(rr))]
+    y_kn=impixels_sorted[(rr== min(rr))]
+    #scale value back
+    treshold=y_kn/Npix*Ipix
+
+    im_BW=(im>treshold)*1.0
+    im_tres=(im>treshold)*im
+
+    return im_tres, im_BW
+
 def work_radial_pattern(roi):
     roi_array = np.array(roi)  #for tracking                
     # QI_track on one channel
@@ -21,12 +61,11 @@ def work_radial_pattern(roi):
     preset=QI_Tracker.TrackXY_by_QI_Init(QI,roi_array)                                                           
     xq, yq, allprofiles = QI_Tracker.TrackXY_by_QI(QI,roi_array, preset, r0, r0)    
     fig, axs = plt.subplots(1,2)
-    plotgridx=preset["X0samplinggrid"]+xq
-    plotgridy=preset["Y0samplinggrid"]+yq
+    plotgridy=preset["X0samplinggrid"]+xq
+    plotgridx=preset["Y0samplinggrid"]+yq
     axs[0].imshow(roi)
     lx=np.shape(plotgridx)
     axs[0].plot(plotgridx[::10,::20],plotgridy[::10,::20],'r-',linewidth=0.3)
-    axs[0].plot(xq,yq,'rx')
     axs[0].set_title('tracked by QI') 
     axs[1].imshow(allprofiles)
     axs[1].set_title('polar map') 
@@ -54,14 +93,40 @@ def get_roi(image,x0,y0,r0):
 
     return roi
 
-def sobel_it(roi):
+def smooth_it(roi,labda=3):
+    #gaussian smooth
     roi = roi.astype(float)
-    roi = cv2.filter2D(roi, -1, 5)
+    k_size=np.int(np.ceil(labda))
+    x, y = np.linspace(-k_size, k_size, 2*k_size), np.linspace(-k_size, k_size, 2*k_size)
+    KX, KY = np.meshgrid(x, y)
+    radii = np.hypot(KX, KY)
+    kernel1=np.exp(-(radii)/(2**0.5*labda))
+    kernel1=kernel1/np.sum(kernel1)
+    #kernel1 = np.ones((k_size, k_size), np.float32)/(k_size**2)
+    roi_smz = cv2.filter2D(src=roi, ddepth=-1, kernel=kernel1) 
+    if 0: #test
+        fig, axs = plt.subplots(1,1)
+        axs.imshow(roi_smz)
+        fig.tight_layout()
+        fig.show()
+        dum=1
+    return roi_smz
+
+def sobel_it(roi):  
+    # apply kernel(2d convolution matrix
+    kernel1 = np.ones((5, 5), np.float32)/(30)
+    roi = cv2.filter2D(src=roi, ddepth=-1, kernel=kernel1) 
     sobel_h = sobel(roi, 0)  # horizontal gradient
     sobel_v = sobel(roi, 1)  # vertical gradient
     magnitude = np.sqrt(sobel_h**2 + sobel_v**2)
     magnitude=np.array(magnitude.astype(int))
     #magnitude *= 255.0 / np.max(magnitude)  # normalization
+    if 0: #test
+        fig, axs = plt.subplots(1,1)
+        axs.imshow(roi)
+        fig.tight_layout()
+        fig.show()
+        dum=1
     return magnitude
 
 def donut_mask_it(roi):
