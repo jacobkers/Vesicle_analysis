@@ -68,9 +68,9 @@ def build_coordinates(im_ori_name,guv_xyr,initval):
             else:
                 all_xq.append(0)
                 all_yq.append(0)
-                all_inside_I=(0)
-                all_edge_I=(0)
-                all_outside_I=(0)
+                all_inside_I.append(0)
+                all_edge_I.append(0)
+                all_outside_I.append(0)
                 #process the work image
             if fri==0:
                 #demo_save, forced mapping on last 'work' image:
