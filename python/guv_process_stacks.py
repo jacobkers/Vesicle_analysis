@@ -29,7 +29,7 @@ def build_coordinates(im_ori_name,guv_xyr,initval):
         roi_stack=io.imread(roipath / f"{roiname}")
         roi_shp=np.shape(roi_stack)
         if len(roi_shp)==3: #work stack
-            roi0=roi_stack[30,:,:] 
+            roi0=roi_stack[0,:,:] 
             #walk frames [empty]:
             for roi in roi_stack:
                 dum=1
