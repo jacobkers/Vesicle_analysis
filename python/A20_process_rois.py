@@ -8,13 +8,13 @@ import guv_io
 from A00_init import get_exps
 
 """ 
-experiment indices (add 0.2 to run on CD:K:):
+experiment indices (int = laptop, add: 0.1 for office local, 0.2 to run on CD:K:):
 0: .nd testfiles
 1: .lif testfiles
 2: .tif testfiles 
 
 """
-expi = 3.2  #less_challenging ones
+expi = 2.0  #less_challenging ones
 initval = get_exps(expi)
 
 for im_ori_name in initval.movienames:

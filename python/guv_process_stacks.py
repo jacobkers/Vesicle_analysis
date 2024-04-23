@@ -28,15 +28,35 @@ def build_coordinates(im_ori_name,guv_xyr,initval):
         roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
         roi_stack=io.imread(roipath / f"{roiname}")
         roi_shp=np.shape(roi_stack)
-        if len(roi_shp)==3: #work stack
+        if len(roi_shp)==3: #work a stack
             roi0=roi_stack[0,:,:] 
-            #walk frames [empty]:
+            all_xq=[]
+            all_yq=[]
             for roi in roi_stack:
-                dum=1
+                # smooth, treshold:
+                roi_tr=roi-np.min(roi)
+                roi_tr=guv_tools.smooth_it(roi_tr,labda=4)
+                roi_tr= roi.astype(int)
+                roi_tr= guv_tools.treshold_it(roi)[0]
+                roi_tr=guv_tools.sobel_it(roi) 
+                #track!:
+                xq,yq, map = guv_tools.work_radial_pattern(roi_tr, runmodus=1, demo=0)
+                #map on original roi using these coordinates:
+                map = guv_tools.work_radial_pattern(roi_tr, runmodus=0, x0=xq, y0=yq, demo=0)[2]
+                all_xq.append(xq)
+                all_yq.append(xq)
+                #to do: analyze_map (inside_I, outside_I) 
                 #process the work image
+
         else:
-            roi0=roi_stack #single image
-        #in this section, build the 'workimage'
+                # smooth, treshold:
+                roi_tr=guv_tools.smooth_it(roi_stack,labda=4)
+                roi_tr= roi.astype(int)
+                roi_tr= guv_tools.treshold_it(roi)[0]
+                roi_tr=guv_tools.sobel_it(roi) 
+                #track!:
+                xq,yq, map = guv_tools.work_radial_pattern(roi_tr, runmodus=1, demo=0)
+        #in this section, build the 'workimage':
         roi0=roi0-np.min(roi0)
         # smooth, treshold:
         roi0=guv_tools.smooth_it(roi0,labda=4)
@@ -44,7 +64,9 @@ def build_coordinates(im_ori_name,guv_xyr,initval):
         roi0= guv_tools.treshold_it(roi0)[0]
         roi0=guv_tools.sobel_it(roi0) 
         #roi0=guv_tools.donut_mask_it(roi0)
-        fig, axs = guv_tools.work_radial_pattern(roi0)   
+        
+        #demo_save:
+        fig, axs = guv_tools.work_radial_pattern(roi0, runmodus=1, demo=1)   
         #show the result
         titl = str("file_")+ im_ori_name  + str("_roi")+str(roi_i) +  str("c") + str(color_i) + str("frame") + str(0) + str("_sobel_QI_track")
         outfig_name = overviewpath_name  + titl + str(".png")
