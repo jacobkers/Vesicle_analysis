@@ -23,7 +23,6 @@ def build_coordinates(im_ori_name,guv_xyr,initval):
 
     for roi_i, cd in enumerate(guv_xyr):  #work each GUV and its center coordinates:
         color_i=initval.tracking_key
-        
         #load tracking channel:
         roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
         roi_stack=io.imread(roipath / f"{roiname}")
@@ -97,7 +96,7 @@ def build_coordinates(im_ori_name,guv_xyr,initval):
                 axs2[1,0].set_ylabel('intensity, a.u.')
                 axs2[1,1].set_xlabel('frame no.')
                 axs2[1,1].plot(all_outside_I,'ko',linewidth=0.3)
-                axs2[1,1].set_title('edge_I') 
+                axs2[1,1].set_title('outside_I') 
                 axs2[1,1].set_ylabel('intensity, a.u.')
                 axs2[1,1].set_xlabel('frame no.')
                 outfig_name2 = overviewpath_name  + titl + str("frame") + str(0)+ str("_QI_tracked.png")
