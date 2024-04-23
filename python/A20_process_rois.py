@@ -27,6 +27,6 @@ for im_ori_name in initval.movienames:
         thisguv = [int(X0), int(YY0[ii]), int(RR0[ii])]
         guv_xyr.append(thisguv)
     #access ROI-stacks per guv:
-        guv_process_stacks.work_roi_tiffs(im_ori_name,guv_xyr,initval)
-        guv_process_stacks.build_coordinates(im_ori_name,guv_xyr,initval)
+    guv_process_stacks.work_roi_tiffs(im_ori_name,guv_xyr,initval)
+    guv_process_stacks.build_coordinates(im_ori_name,guv_xyr,initval)
 

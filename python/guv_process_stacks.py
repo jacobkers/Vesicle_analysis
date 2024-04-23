@@ -28,52 +28,81 @@ def build_coordinates(im_ori_name,guv_xyr,initval):
         roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
         roi_stack=io.imread(roipath / f"{roiname}")
         roi_shp=np.shape(roi_stack)
-        if len(roi_shp)==3: #work a stack
-            roi0=roi_stack[0,:,:] 
-            all_xq=[]
-            all_yq=[]
-            for roi in roi_stack:
-                # smooth, treshold:
-                roi_tr=roi-np.min(roi)
+        
+        if len(roi_shp)==2:
+            n_frames=1
+        if len(roi_shp)==3: #stack
+            n_frames=roi_shp[0]
+        all_xq=[]
+        all_yq=[]
+        all_inside_I=[]
+        all_edge_I=[]
+        all_outside_I=[]
+        for fri in np.arange(n_frames):
+            if len(roi_shp)==2:
+                roi=roi_stack
+            if len(roi_shp)==3: #stack
+                roi=roi_stack[fri,:,:]
+            if fri==0:
+                roi0=roi
+            #A. build an image that allows robust tracking 
+            # smooth, treshold:    
+            roi_tr=roi-np.min(roi)
+            if np.max(np.array(roi_tr))>0:
                 roi_tr=guv_tools.smooth_it(roi_tr,labda=4)
                 roi_tr= roi.astype(int)
                 roi_tr= guv_tools.treshold_it(roi)[0]
                 roi_tr=guv_tools.sobel_it(roi) 
                 #track!:
-                xq,yq, map = guv_tools.work_radial_pattern(roi_tr, runmodus=1, demo=0)
-                #map on original roi using these coordinates:
-                map = guv_tools.work_radial_pattern(roi_tr, runmodus=0, x0=xq, y0=yq, demo=0)[2]
+                xq,yq = guv_tools.track_radial_pattern(roi_tr, runmodus=1, demo=0)[0:2]
                 all_xq.append(xq)
-                all_yq.append(xq)
-                #to do: analyze_map (inside_I, outside_I) 
+                all_yq.append(yq)
+                #map on original roi using these coordinates:
+                #B. use the track coordinates to force-map the original image 
+                map = guv_tools.track_radial_pattern(roi, runmodus=0, x0=xq,y0=yq,demo=0)[2]
+                #to do: analyze_map (inside_I, outside_I)
+                all_inside_I.append(np.median(map[1]))
+                all_edge_I.append(np.median(np.max(map, axis=0)))
+                all_outside_I.append(np.median(map[-1]))
+                dum=1
+            else:
+                all_xq.append(0)
+                all_yq.append(0)
+                all_inside_I=(0)
+                all_edge_I=(0)
+                all_outside_I=(0)
                 #process the work image
-
-        else:
-                # smooth, treshold:
-                roi_tr=guv_tools.smooth_it(roi_stack,labda=4)
-                roi_tr= roi.astype(int)
-                roi_tr= guv_tools.treshold_it(roi)[0]
-                roi_tr=guv_tools.sobel_it(roi) 
-                #track!:
-                xq,yq, map = guv_tools.work_radial_pattern(roi_tr, runmodus=1, demo=0)
-        #in this section, build the 'workimage':
-        roi0=roi0-np.min(roi0)
-        # smooth, treshold:
-        roi0=guv_tools.smooth_it(roi0,labda=4)
-        roi0= roi0.astype(int)
-        roi0= guv_tools.treshold_it(roi0)[0]
-        roi0=guv_tools.sobel_it(roi0) 
-        #roi0=guv_tools.donut_mask_it(roi0)
-        
-        #demo_save:
-        fig, axs = guv_tools.work_radial_pattern(roi0, runmodus=1, demo=1)   
-        #show the result
-        titl = str("file_")+ im_ori_name  + str("_roi")+str(roi_i) +  str("c") + str(color_i) + str("frame") + str(0) + str("_sobel_QI_track")
-        outfig_name = overviewpath_name  + titl + str(".png")
-        fig.savefig(outfig_name)
-        plt.close()
-
-
+            if fri==0:
+                #demo_save, forced mapping on last 'work' image:
+                fig1, axs1 = guv_tools.track_radial_pattern(roi_tr, runmodus=0, x0=xq,y0=yq,demo=1)  
+                #show track example:
+                titl = str("file_")+ im_ori_name  + str("_roi")+str(roi_i) +  str("c") + str(color_i)
+                outfig_name1 = overviewpath_name  + titl + str("frame") + str(0)+ str("_QI_mapped.png")
+                fig1.savefig(outfig_name1)
+                plt.close()
+            if fri == n_frames-1:
+                #show trace example
+                fig2, axs2=plt.subplots(2,2)
+                axs2[0,0].plot(all_xq,'ro',linewidth=0.3)
+                axs2[0,0].set_title('tracked by QI') 
+                axs2[0,0].plot(all_yq,'bo',linewidth=0.3)
+                axs2[0,0].set_ylabel('position')
+                axs2[0,0].set_xlabel('frame no.')
+                axs2[0,1].plot(all_inside_I,'bo',linewidth=0.3)
+                axs2[0,1].set_title('inside_I') 
+                axs2[0,1].set_ylabel('intensity, a.u.')
+                axs2[0,1].set_xlabel('frame no.')
+                axs2[1,0].plot(all_edge_I,'ko',linewidth=0.3)
+                axs2[1,0].set_title('edge_I') 
+                axs2[1,0].set_ylabel('intensity, a.u.')
+                axs2[1,1].set_xlabel('frame no.')
+                axs2[1,1].plot(all_outside_I,'ko',linewidth=0.3)
+                axs2[1,1].set_title('edge_I') 
+                axs2[1,1].set_ylabel('intensity, a.u.')
+                axs2[1,1].set_xlabel('frame no.')
+                outfig_name2 = overviewpath_name  + titl + str("frame") + str(0)+ str("_QI_tracked.png")
+                fig2.savefig(outfig_name2)
+                plt.close()
 
 
 def work_roi_tiffs(im_ori_name,guv_xyr,initval):

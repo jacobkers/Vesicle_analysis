@@ -72,17 +72,19 @@ def track_radial_pattern(roi, runmodus=1, x0=0, y0=0,demo=1):
         x_in = rr/2
         y_in = rr/2
     xq, yq, allprofiles = QI_Tracker.TrackXY_by_QI(QI,roi_array, preset, x_in, y_in)    
-    fig, axs = plt.subplots(1,2)
-    plotgridy=preset["X0samplinggrid"]+xq
-    plotgridx=preset["Y0samplinggrid"]+yq
-    axs[0].imshow(roi)
-    lx=np.shape(plotgridx)
-    axs[0].plot(plotgridx[::10,::20],plotgridy[::10,::20],'r-',linewidth=0.3)
-    axs[0].set_title('tracked by QI') 
-    axs[1].imshow(allprofiles)
-    axs[1].set_title('polar map') 
-    fig.tight_layout()
+    
     if demo:
+        fig, axs = plt.subplots(1,2)
+        plotgridy=preset["X0samplinggrid"]+xq
+        plotgridx=preset["Y0samplinggrid"]+yq
+        axs[0].imshow(roi)
+        lx=np.shape(plotgridx)
+        axs[0].plot(plotgridx[::10,::20],plotgridy[::10,::20],'r-',linewidth=0.3)
+        axs[0].set_title('tracked by QI') 
+        axs[1].imshow(allprofiles)
+        axs[1].set_title('polar map') 
+        fig.tight_layout()
+        
         return fig,axs
     else:
         return xq, yq, allprofiles
