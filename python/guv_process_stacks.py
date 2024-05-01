@@ -51,12 +51,14 @@ def build_coordinates(im_ori_name,guv_xyr,initval):
                 roi_tr=guv_tools.smooth_it(roi_tr,labda=4)
                 roi_tr= roi.astype(int)
                 roi_tr= guv_tools.treshold_it(roi)[0]
-                roi_tr=guv_tools.sobel_it(roi) 
-                #track!:
+                roi_tr=guv_tools.sobel_it(roi)
+                #transfer to binary operations to gat masks and coordinates
+                xm, ym, BW, BW_edge = guv_tools.work_binaries(roi_tr)
+                # QI-track the work image to get coordinates:
                 xq,yq = guv_tools.track_radial_pattern(roi_tr, runmodus=1, demo=0)[0:2]
                 all_xq.append(xq)
                 all_yq.append(yq)
-                #map on original roi using these coordinates:
+                #Radial-map on original roi using these coordinates:
                 #B. use the track coordinates to force-map the original image 
                 map = guv_tools.track_radial_pattern(roi, runmodus=0, x0=xq,y0=yq,demo=0)[2]
                 #to do: analyze_map (inside_I, outside_I)
@@ -104,7 +106,7 @@ def build_coordinates(im_ori_name,guv_xyr,initval):
                 plt.close()
 
 
-def work_roi_tiffs(im_ori_name,guv_xyr,initval):
+def show_roi_overviews(im_ori_name,guv_xyr,initval):
     """ use pre-set coordinates in imageJ to processed standardized tif roi-stacks from  format
     #Jacob 2024 """
     datapath_out_name = initval.mainpath_out + initval.subdir 
@@ -131,9 +133,6 @@ def work_roi_tiffs(im_ori_name,guv_xyr,initval):
             else:
                 roi0=roi_stack #single image
             roi0=roi0-np.min(roi0)
-            #roi0=guv_tools.donut_mask_it(roi0)
-            #in this section, build the 'workimage'
-            
             #show the color channel
             fig, axs = plt.subplots(1,1)
             axs.imshow(roi0)

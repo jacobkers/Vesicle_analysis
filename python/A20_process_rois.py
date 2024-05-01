@@ -11,10 +11,11 @@ from A00_init import get_exps
 experiment indices (int = laptop, add: 0.1 for office local, 0.2 to run on CD:K:):
 0: .nd testfiles
 1: .lif testfiles
-2: .tif testfiles 
+2: .tif testfiles (also laptop)
+3: .tif test (office)
 
 """
-expi = 2.0  #less_challenging ones
+expi = 2   #3:less_challenging ones
 initval = get_exps(expi)
 
 for im_ori_name in initval.movienames:
@@ -27,6 +28,6 @@ for im_ori_name in initval.movienames:
         thisguv = [int(X0), int(YY0[ii]), int(RR0[ii])]
         guv_xyr.append(thisguv)
     #access ROI-stacks per guv:
-    guv_process_stacks.work_roi_tiffs(im_ori_name,guv_xyr,initval)
+    guv_process_stacks.show_roi_overviews(im_ori_name,guv_xyr,initval)
     guv_process_stacks.build_coordinates(im_ori_name,guv_xyr,initval)
 
