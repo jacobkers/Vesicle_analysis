@@ -179,19 +179,3 @@ def donut_mask_it(roi):
         dum=1
 
     return roi_out
-def  work_binaries(roi_tr):
-
-    if 1: #test
-        fig, axs = plt.subplots(1,2)
-        axs[0].imshow(roi_tr)
-        #axs.plot(donut_mask)
-        fig.tight_layout()
-        fig.show()
-        dum=1
-
-        xm=0
-        ym=0
-        BW=0*roi_tr
-        BW_edge=0*roi_tr
-        
-    return xm, ym, BW, BW_edge

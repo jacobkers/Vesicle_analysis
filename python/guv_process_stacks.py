@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 from skimage import io
 import guv_tools
+import guv_binary_ops
 import cv2
 def build_coordinates(im_ori_name,guv_xyr,initval):
     """ collect relevant coordinates (such as guv center) from tiff stacks and save as csv
@@ -32,8 +33,8 @@ def build_coordinates(im_ori_name,guv_xyr,initval):
             n_frames=1
         if len(roi_shp)==3: #stack
             n_frames=roi_shp[0]
-        all_xq=[]
-        all_yq=[]
+        all_xg=[]
+        all_yg=[]
         all_inside_I=[]
         all_edge_I=[]
         all_outside_I=[]
@@ -52,23 +53,28 @@ def build_coordinates(im_ori_name,guv_xyr,initval):
                 roi_tr= roi.astype(int)
                 roi_tr= guv_tools.treshold_it(roi)[0]
                 roi_tr=guv_tools.sobel_it(roi)
-                #transfer to binary operations to gat masks and coordinates
-                xm, ym, BW, BW_edge = guv_tools.work_binaries(roi_tr)
+                
                 # QI-track the work image to get coordinates:
-                xq,yq = guv_tools.track_radial_pattern(roi_tr, runmodus=1, demo=0)[0:2]
-                all_xq.append(xq)
-                all_yq.append(yq)
+                if 0:
+                    xg,yg = guv_tools.track_radial_pattern(roi_tr, runmodus=1, demo=0)[0:2]
+                    all_xg.append(xg)
+                    all_yg.append(yg)
+                else:
+                    #transfer to binary operations to gat masks and coordinates
+                    msk, BW_edge, xg, yg = guv_binary_ops.work_binaries(roi_tr)
+                    all_xg.append(xg)
+                    all_yg.append(yg)
                 #Radial-map on original roi using these coordinates:
                 #B. use the track coordinates to force-map the original image 
-                map = guv_tools.track_radial_pattern(roi, runmodus=0, x0=xq,y0=yq,demo=0)[2]
+                map = guv_tools.track_radial_pattern(roi*msk, runmodus=0, x0=xg,y0=yg,demo=0)[2]
                 #to do: analyze_map (inside_I, outside_I)
                 all_inside_I.append(np.median(map[1]))
                 all_edge_I.append(np.median(np.max(map, axis=0)))
                 all_outside_I.append(np.median(map[-1]))
                 dum=1
             else:
-                all_xq.append(0)
-                all_yq.append(0)
+                all_xg.append(0)
+                all_yg.append(0)
                 all_inside_I.append(0)
                 all_edge_I.append(0)
                 all_outside_I.append(0)
@@ -84,9 +90,9 @@ def build_coordinates(im_ori_name,guv_xyr,initval):
             if fri == n_frames-1:
                 #show trace example
                 fig2, axs2=plt.subplots(2,2)
-                axs2[0,0].plot(all_xq,'ro',linewidth=0.3)
+                axs2[0,0].plot(all_xg,'ro',linewidth=0.3)
                 axs2[0,0].set_title('tracked by QI') 
-                axs2[0,0].plot(all_yq,'bo',linewidth=0.3)
+                axs2[0,0].plot(all_yg,'bo',linewidth=0.3)
                 axs2[0,0].set_ylabel('position')
                 axs2[0,0].set_xlabel('frame no.')
                 axs2[0,1].plot(all_inside_I,'bo',linewidth=0.3)
