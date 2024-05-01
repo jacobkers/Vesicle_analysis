@@ -79,11 +79,11 @@ def build_coordinates(im_ori_name,guv_xyr,initval):
                 all_edge_I.append(0)
                 all_outside_I.append(0)
                 #process the work image
-            if fri==0:
+            titl = str("file_")+ im_ori_name  + str("_roi")+str(roi_i) +  str("c") + str(color_i)
+            if 0 and fri==0:
                 #demo_save, forced mapping on last 'work' image:
-                fig1, axs1 = guv_tools.track_radial_pattern(roi_tr, runmodus=0, x0=xq,y0=yq,demo=1)  
+                fig1, axs1 = guv_tools.track_radial_pattern(roi_tr, runmodus=0, x0=xg,y0=yg,demo=1)  
                 #show track example:
-                titl = str("file_")+ im_ori_name  + str("_roi")+str(roi_i) +  str("c") + str(color_i)
                 outfig_name1 = overviewpath_name  + titl + str("frame") + str(0)+ str("_QI_mapped.png")
                 fig1.savefig(outfig_name1)
                 plt.close()
@@ -91,7 +91,7 @@ def build_coordinates(im_ori_name,guv_xyr,initval):
                 #show trace example
                 fig2, axs2=plt.subplots(2,2)
                 axs2[0,0].plot(all_xg,'ro',linewidth=0.3)
-                axs2[0,0].set_title('tracked by QI') 
+                axs2[0,0].set_title('tracked') 
                 axs2[0,0].plot(all_yg,'bo',linewidth=0.3)
                 axs2[0,0].set_ylabel('position')
                 axs2[0,0].set_xlabel('frame no.')

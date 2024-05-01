@@ -183,6 +183,7 @@ def generate_spot(
 
 
 def  work_binaries(roi_tr):
+    rr,cc=roi_tr.shape
     BW_edge=0*roi_tr
     msk = binary_actions(roi_tr)
     labels, n_labels = measure.label(msk, return_num = True)
@@ -201,8 +202,8 @@ def  work_binaries(roi_tr):
             dum=1
             plt.close('all')
         else:
-            xc = []
-            yc = []
+            xc = cc/2
+            yc = rr/2
         
     return  msk, BW_edge, xc, yc 
 
