@@ -52,22 +52,22 @@ def binary_actions(im):
     if 0: fgm = im>0.2*(np.max(im) -np.mean(im)) + np.mean(im)
     # triangulation treshold:
     if 1: fgm=sorted_pixels_treshold(im)[1]
+    # filling:
+    if 1: fgm = binary_fill_holes(fgm, square(3))
     # remove tiny regions:
-    if 0: fgm = binary_opening(fgm, disk(3), iterations = 2)
+    if 1: fgm = binary_opening(fgm, disk(3), iterations = 2)
+    # pick largest object:
+    if 1: fgm = mask_central_object(fgm)[0]
     # connect fragmented regions:
-    if 1: fgm = binary_closing(fgm, diamond(5)) 
+    if 0: fgm = binary_closing(fgm, diamond(5)) 
     # remove small regions:
     if 0: fgm = binary_opening(fgm, disk(5))
     # close dark holes:
-    if 1: fgm = binary_closing(fgm, square(3))
-    # more filling:
-    if 1: fgm = binary_fill_holes(fgm, square(3))
-    # pick largest object:
-    if 1: fgm = mask_central_object(fgm)[0]
+    if 0: fgm = binary_closing(fgm, square(3))
     #dilate(1)
     if 0: fgm = binary_dilation(fgm, disk(3), iterations = 4)
     # fill holes in mask (1)
-    if 1: fgm = binary_fill_holes(fgm)
+    if 0: fgm = binary_fill_holes(fgm)
     # smooth boundary(1)
     if 1 and fgm.sum() > 0: 
         fgm = smooth_boundary(fgm)  
@@ -78,6 +78,14 @@ def binary_actions(im):
         except Exception as e:
             print("planar_masking.binary_dilation: 3D Dilating with diamond")
             fgm = binary_dilation(fgm, iterations = 1)
+    if 0:
+        fig, axs=plt.subplots(1,2)
+        axs[0].imshow(im)
+        axs[1].imshow(fgm)
+        fig.show()
+        axs[0].set_title("spot")
+        fig.tight_layout()
+        plt.close("all")
 
     return fgm
 
@@ -190,6 +198,7 @@ def  work_binaries(roi_tr):
     regprops = measure.regionprops(labels)
     if len(regprops)>0:
         xc,yc = regprops[0].centroid
+        rc=regprops[0].axis_minor_length/2
         if 0: #test
             plt.close('all')
             fig, axs = plt.subplots(1,2)
@@ -201,11 +210,11 @@ def  work_binaries(roi_tr):
             fig.show()
             dum=1
             plt.close('all')
-        else:
-            xc = cc/2
-            yc = rr/2
+    else:
+        xc = cc/2
+        yc = rr/2
         
-    return  msk, BW_edge, xc, yc 
+    return  msk, BW_edge, xc, yc, rc 
 
 
 # show:

@@ -50,27 +50,30 @@ def build_coordinates(im_ori_name,guv_xyr,initval):
             roi_tr=roi-np.min(roi)
             if np.max(np.array(roi_tr))>0:
                 roi_tr=guv_tools.smooth_it(roi_tr,labda=4)
-                roi_tr= roi.astype(int)
-                roi_tr= guv_tools.treshold_it(roi)[0]
-                roi_tr=guv_tools.sobel_it(roi)
-                
-                # QI-track the work image to get coordinates:
-                if 0:
-                    xg,yg = guv_tools.track_radial_pattern(roi_tr, runmodus=1, demo=0)[0:2]
-                    all_xg.append(xg)
-                    all_yg.append(yg)
-                else:
-                    #transfer to binary operations to gat masks and coordinates
-                    msk, BW_edge, xg, yg = guv_binary_ops.work_binaries(roi_tr)
-                    all_xg.append(xg)
-                    all_yg.append(yg)
+                roi_tr= roi_tr.astype(int)
+                roi_tr= guv_tools.treshold_it(roi_tr)[0]
+                roi_tr=guv_tools.sobel_it(roi_tr)   
+                roi_tr=guv_tools.smooth_it(roi_tr,labda=4)
+                #transfer to binary operations to gat masks and robust coordinates
+                msk, BW_edge, xm, ym, rm = guv_binary_ops.work_binaries(roi_tr)     
+                # QI-track the work image to get coordinates (from com first guess):
+                xq,yq = guv_tools.track_radial_pattern(roi_tr*msk, runmodus=1, demo=0)[0:2]
                 #Radial-map on original roi using these coordinates:
                 #B. use the track coordinates to force-map the original image 
-                map = guv_tools.track_radial_pattern(roi*msk, runmodus=0, x0=xg,y0=yg,demo=0)[2]
+                map = guv_tools.track_radial_pattern(roi, runmodus=0, x0=xm,y0=ym,demo=0)[2]
+                #crop on twice the object radius: note that radials are in half-pixel units
+                radials =np.shape(map)[0]
+                cropit=int(np.min([2*2*rm, radials]))
+                map=map[0:cropit,:]
+                
+                all_xg.append(xm)
+                all_yg.append(ym)
                 #to do: analyze_map (inside_I, outside_I)
-                all_inside_I.append(np.median(map[1]))
+                inside_radial_limit=int(0.5*2*rm)  #in half-pixel units
+                outside_radial_limit=int(1.1*2*rm)   #in half-pixel units
+                all_inside_I.append(np.mean(map[0:inside_radial_limit]))
                 all_edge_I.append(np.median(np.max(map, axis=0)))
-                all_outside_I.append(np.median(map[-1]))
+                all_outside_I.append(np.mean(map[outside_radial_limit:-1]))
                 dum=1
             else:
                 all_xg.append(0)
@@ -80,15 +83,29 @@ def build_coordinates(im_ori_name,guv_xyr,initval):
                 all_outside_I.append(0)
                 #process the work image
             titl = str("file_")+ im_ori_name  + str("_roi")+str(roi_i) +  str("c") + str(color_i)
-            if 0 and fri==0:
+            if  fri==0:
                 #demo_save, forced mapping on last 'work' image:
-                fig1, axs1 = guv_tools.track_radial_pattern(roi_tr, runmodus=0, x0=xg,y0=yg,demo=1)  
+                map = guv_tools.track_radial_pattern(roi*msk, runmodus=0, x0=xm,y0=ym,demo=0)[2]
+                map=map[0:cropit,:]
                 #show track example:
-                outfig_name1 = overviewpath_name  + titl + str("frame") + str(0)+ str("_QI_mapped.png")
+                fig1, axs1=plt.subplots(2,2)
+                axs1[0,0].imshow(roi)
+                axs1[0,0].set_title('original') 
+                axs1[0,1].imshow(roi_tr)
+                axs1[0,1].set_title('track_image')
+                axs1[0,1].plot(yq,xq,'ro') 
+                axs1[1,0].imshow(msk)
+                axs1[1,0].set_title('mask/Centroid') 
+                axs1[1,0].plot(ym,xm,'ro') 
+                axs1[1,1].imshow(map)
+                axs1[1,1].set_title('mapped') 
+                outfig_name1 = overviewpath_name  + titl + str("frame") + str(fri)+ str("_QI_mapped.png")
+                #fig1.show()
+                print(titl + str("frame") + str(fri))
                 fig1.savefig(outfig_name1)
-                plt.close()
+                #plt.close()
+            #summary figure for movie:
             if fri == n_frames-1:
-                #show trace example
                 fig2, axs2=plt.subplots(2,2)
                 axs2[0,0].plot(all_xg,'ro',linewidth=0.3)
                 axs2[0,0].set_title('tracked') 
