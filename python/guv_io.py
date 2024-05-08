@@ -26,7 +26,7 @@ def get_XY_info(csv_source):
     Y = []
     R = []
     with open(csv_source) as f:
-        reader = csv.DictReader(f, delimiter=",")
+        reader = csv.DictReader(f, delimiter=";")
         for row in reader:
             X.append(float(row["X"]))
             Y.append(float(row["Y"]))
