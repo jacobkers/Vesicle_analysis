@@ -12,7 +12,7 @@ import numpy as np
 from skimage import measure
 from skimage.morphology import ball, disk, square, diamond, ball
 from skimage.draw import polygon2mask
-from scipy.ndimage import binary_opening, binary_closing, binary_fill_holes, binary_dilation
+from scipy.ndimage import binary_opening, binary_closing, binary_fill_holes, binary_dilation, binary_erosion
 from scipy.signal import savgol_filter
 
 def mask_central_object(im_fg):
@@ -42,6 +42,41 @@ def mask_central_object(im_fg):
     im_bg = ~im_fg
     return im_fg, im_bg
 
+def sorted_pixels_treshold(im):
+    rr,cc=im.shape
+    # sort and scale on number of pixels (to equalize axes)
+    impixels=im.flatten()
+    impixels_sorted=np.sort(impixels)
+    Npix=len(impixels)
+    pix_ax=np.arange(0, Npix, 1)
+    Ipix=np.max(impixels)
+    impixels_sorted=impixels_sorted/Ipix*Npix
+
+    #fit on lower half of N:
+    lowerhalf_N=impixels_sorted[0:int(Npix/2)]
+    lowerhalf_pix_ax=pix_ax[0:int(Npix/2)]
+    lowerfit_p=np.polyfit(lowerhalf_pix_ax,lowerhalf_N,1)
+    lowerfit=np.polyval(lowerfit_p, pix_ax)
+
+    #fit on higher half of I:
+    upperhalf_I=impixels_sorted[impixels_sorted>Npix/2]
+    upperhalf_pix_ax=pix_ax[impixels_sorted>Npix/2]
+    upperfit_p=np.polyfit(upperhalf_pix_ax,upperhalf_I,1)
+    upperfit=np.polyval(upperfit_p, pix_ax)
+    #get cross-point
+    xc=(lowerfit_p[1]-upperfit_p[1])/(upperfit_p[0]-lowerfit_p[0])
+    yc=np.polyval(lowerfit_p,xc)
+
+    #get 'knee'
+    #rr=np.hypot((1:length(sim))-xc).'.^2, (sim-yc).^2);
+    rr=np.hypot(pix_ax-xc,impixels_sorted-yc)
+    x_kn=pix_ax[(rr== min(rr))]
+    y_kn=impixels_sorted[(rr== min(rr))]
+    #scale value back
+    treshold=y_kn/Npix*Ipix
+    msk=im>treshold
+    spot_tres=msk*im
+    return spot_tres, msk, treshold 
 
 def binary_actions(im):
     """ examples of binary image operations, re-edited from M.Holub'24 
@@ -56,6 +91,8 @@ def binary_actions(im):
     if 1: fgm = binary_fill_holes(fgm, square(3))
     # remove tiny regions:
     if 1: fgm = binary_opening(fgm, disk(3), iterations = 2)
+    #shrink to split neigbouring objects:
+    if 1: fgm = binary_erosion(fgm, disk(3), iterations = 3)
     # pick largest object:
     if 1: fgm = mask_central_object(fgm)[0]
     # connect fragmented regions:
@@ -65,7 +102,7 @@ def binary_actions(im):
     # close dark holes:
     if 0: fgm = binary_closing(fgm, square(3))
     #dilate(1)
-    if 0: fgm = binary_dilation(fgm, disk(3), iterations = 4)
+    if 1: fgm = binary_dilation(fgm, disk(3), iterations = 3)
     # fill holes in mask (1)
     if 0: fgm = binary_fill_holes(fgm)
     # smooth boundary(1)
@@ -130,41 +167,7 @@ def smooth_boundary(mask):
         mask = polygon2mask(mask.shape, bnd_smooth)
     return mask
 
-def sorted_pixels_treshold(im):
-    rr,cc=im.shape
-    # sort and scale on number of pixels (to equalize axes)
-    impixels=im.flatten()
-    impixels_sorted=np.sort(impixels)
-    Npix=len(impixels)
-    pix_ax=np.arange(0, Npix, 1)
-    Ipix=np.max(impixels)
-    impixels_sorted=impixels_sorted/Ipix*Npix
 
-    #fit on lower half of N:
-    lowerhalf_N=impixels_sorted[0:int(Npix/2)]
-    lowerhalf_pix_ax=pix_ax[0:int(Npix/2)]
-    lowerfit_p=np.polyfit(lowerhalf_pix_ax,lowerhalf_N,1)
-    lowerfit=np.polyval(lowerfit_p, pix_ax)
-
-    #fit on higher half of I:
-    upperhalf_I=impixels_sorted[impixels_sorted>Npix/2]
-    upperhalf_pix_ax=pix_ax[impixels_sorted>Npix/2]
-    upperfit_p=np.polyfit(upperhalf_pix_ax,upperhalf_I,1)
-    upperfit=np.polyval(upperfit_p, pix_ax)
-    #get cross-point
-    xc=(lowerfit_p[1]-upperfit_p[1])/(upperfit_p[0]-lowerfit_p[0])
-    yc=np.polyval(lowerfit_p,xc)
-
-    #get 'knee'
-    #rr=np.hypot((1:length(sim))-xc).'.^2, (sim-yc).^2);
-    rr=np.hypot(pix_ax-xc,impixels_sorted-yc)
-    x_kn=pix_ax[(rr== min(rr))]
-    y_kn=impixels_sorted[(rr== min(rr))]
-    #scale value back
-    treshold=y_kn/Npix*Ipix
-    msk=im>treshold
-    spot_tres=msk*im
-    return spot_tres, msk, treshold 
 
 def generate_spot(
     psf=2,  # point spread
@@ -213,6 +216,7 @@ def  work_binaries(roi_tr):
     else:
         xc = cc/2
         yc = rr/2
+        rc = rr/4
         
     return  msk, BW_edge, xc, yc, rc 
 

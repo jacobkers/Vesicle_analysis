@@ -1,6 +1,6 @@
 """
 21-2-2024
-Work guv imagery
+Work guv imagery, saves to standardized tiffs per guv
 @author: jkerssemakers
 """
 import guv_tools

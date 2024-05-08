@@ -13,6 +13,28 @@ import matplotlib.pyplot as plt
 import guv_tools
 from PIL import Image, ImageSequence
 
+def get_XY_info(csv_source):
+    """ ead roi data as acquired via ImageJ:
+    ImageJ area selection
+    * Open BF or Phase image
+    * Select "round" ROI (keep Shift pressed for a circle)
+    * Find the position and press "T" to load it into the ROI manager (check "show all" box)
+    * Click into the ROI manager window and CTRL+A to select all ROIs
+    * CLick More>list>File>Save As> ".....csv"
+    * for convenience, you might just save the screenshots with overlays """
+    X = []
+    Y = []
+    R = []
+    with open(csv_source) as f:
+        reader = csv.DictReader(f, delimiter=",")
+        for row in reader:
+            X.append(float(row["X"]))
+            Y.append(float(row["Y"]))
+            R.append(float(row["R"]))
+
+
+
+    return X, Y,R
 
 def get_roi_info(csv_source):
     """ ead roi data as acquired via ImageJ:
@@ -239,10 +261,6 @@ def work_roi_tiffs(im_ori_name,guv_xyr,initval):
             roi_shp=np.shape(roi_stack)
             if len(roi_shp)==3: #work stack
                 roi0=roi_stack[0,:,:] 
-                #walk frames [empty]:
-                for roi in roi_stack:
-                    dum=1
-                    #process the work image
             else:
                 roi0=roi_stack #single image
             roi0=roi0-np.min(roi0)
