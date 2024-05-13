@@ -24,17 +24,17 @@ def get_XY_info(csv_source):
     * for convenience, you might just save the screenshots with overlays """
     X = []
     Y = []
-    R = []
+    R_minor = []
+    R_major = []
     with open(csv_source) as f:
         reader = csv.DictReader(f, delimiter=";")
         for row in reader:
             X.append(float(row["X"]))
             Y.append(float(row["Y"]))
-            R.append(float(row["R"]))
+            R_minor.append(float(row["R_minor"]))
+            R_major.append(float(row["R_major"]))
 
-
-
-    return X, Y,R
+    return X, Y,R_minor, R_major
 
 def get_roi_info(csv_source):
     """ ead roi data as acquired via ImageJ:
@@ -187,10 +187,6 @@ def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
     roipath = Path(roipath_name)
     if not roipath.is_dir():
         roipath.mkdir()
-    overviewpath_name = initval.mainpath_out + initval.subdir +str("/A10_overview/")
-    overviewpath = Path(overviewpath_name)
-    if not overviewpath.is_dir():
-        overviewpath.mkdir()
     N_guvs, dum = np.shape(guv_xyr)
     
     #nlif _format reader:
@@ -209,8 +205,8 @@ def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
     }
 
     for roi_i, cd in enumerate(guv_xyr):  #work each GUV and its center coordinates:
-        fig, axs = plt.subplots(1,4)
-        for color_i in np.arange(3):
+        fig, axs = plt.subplots(1,initval.N_colors)
+        for color_i in np.arange(initval.N_colors):
             for fri, frame in enumerate(ImageSequence.Iterator(RGB_tif)):  
                 chan_pil=frame.split()[color_i]
                 chan = np.array(chan_pil)      
@@ -227,17 +223,16 @@ def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
                     ff=int(info_dict["Frames in Image"])
                     roi=np.zeros((ff,rr,cc),dtype=int)
                 roi[fri,:,:]=roi_1frame
+                
+                # save overview plots per GUVp
+                if fri == 0:
+                    axs[color_i].imshow(roi[0,:,:])
+                    axs[color_i].set_title(color_i)
+                    fig.tight_layout()
             #build a savename, save the tiff:
             roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
+            print(str("a10:") + roiname)
             io.imsave(roipath / f"{roiname}", roi, check_contrast=False)
-            # save overview plots per GUVp
-            if fri == 0:
-                axs[color_i].imshow(roi[0,:,:])               
-                axs[color_i].imshow(chan)
-                axs[color_i].set_title(color_i)
-                fig.tight_layout()
-                outfig_name1 = overviewpath_name  + str("file_")+ im_ori_name  + str("frame") + str(fri) + str("_example.png")
-                fig.savefig(outfig_name1)             
 
 def work_roi_tiffs(im_ori_name,guv_xyr,initval):
     """ use pre-set coordinates in imageJ to save standardized tif roi-stacks from .lif  format

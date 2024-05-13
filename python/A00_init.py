@@ -25,6 +25,7 @@ class Guv_experiment:
         self.movienames = []
         self.suffix='.tif'
         self.tracking_key=0  #channel index to use for obtaining geometry
+        self.N_colors=3
 
 # overview of experiments:
 def get_exps(exp_idx):
@@ -70,6 +71,7 @@ def get_exps(exp_idx):
     Exp3.movienames = ["30 uM LUVs_WITHCerC6 real time_Series011_t00_overlay"]  # the ones that have ROIs measured in ImageJ
     Exp3.suffix='.tif'
     Exp3.tracking_key=1
+    Exp3.N_colors=3
 
     all_Experiments = [Exp0, Exp1, Exp2, Exp3]
 

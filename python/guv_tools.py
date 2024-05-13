@@ -53,13 +53,13 @@ def treshold_it(im):
     return im_tres, im_BW
 
 
-def track_radial_pattern(roi, runmodus=1, x0=0, y0=0,demo=1):
+def track_radial_pattern(roi, runmodus=1, x0=0, y0=0, demo=1):
     """ perform QI-based tracking 
     runmodus 0 = just map using x0 and y0
     runmodus 1 = same, export final data
     """
     roi_array = np.array(roi)  #for tracking                
-    # QI_track on one channel
+    # QI_track on one channel, standard radius
     rr=np.shape(roi)[0]
     r0=rr/2
     QI=QI_Tracker(roi_array)

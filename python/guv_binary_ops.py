@@ -81,20 +81,42 @@ def sorted_pixels_treshold(im):
 def binary_actions(im):
     """ examples of binary image operations, re-edited from M.Holub'24 
     MH sequence default ON is labeled with (1)"""
+    showit=0
+    if showit: fig,ax = plt.subplots(3,3)
     #ignore nans:
     if 0: im = np.ma.masked_where(np.isnan(im), im) 
     #simple treshold:
     if 0: fgm = im>0.2*(np.max(im) -np.mean(im)) + np.mean(im)
     # triangulation treshold:
-    if 1: fgm=sorted_pixels_treshold(im)[1]
+    if 1: 
+        fgm=sorted_pixels_treshold(im)[1]           
+        if showit: 
+            ax[0,0].imshow(fgm)
+            ax[0,0].set_title("treshold")
     # filling:
-    if 1: fgm = binary_fill_holes(fgm, square(3))
+    if 1: 
+        fgm = binary_fill_holes(fgm, disk(3))
+        if showit: 
+            ax[0,1].imshow(fgm)
+            ax[0,1].set_title("fill")
     # remove tiny regions:
-    if 1: fgm = binary_opening(fgm, disk(3), iterations = 2)
+    if 1: 
+        fgm = binary_opening(fgm, disk(3), iterations = 3)
+        if showit: 
+            ax[0,2].imshow(fgm)
+            ax[0,2].set_title("despeckle")
     #shrink to split neigbouring objects:
-    if 1: fgm = binary_erosion(fgm, disk(3), iterations = 3)
+    if 1: 
+        fgm = binary_erosion(fgm, disk(3), iterations = 3)
+        if showit: 
+            ax[1,0].imshow(fgm)
+            ax[1,0].set_title("erode")
     # pick largest object:
-    if 1: fgm = mask_central_object(fgm)[0]
+    if 1: 
+        fgm = mask_central_object(fgm)[0]
+        if showit: 
+            ax[1,1].imshow(fgm)
+            ax[1,1].set_title("single")
     # connect fragmented regions:
     if 0: fgm = binary_closing(fgm, diamond(5)) 
     # remove small regions:
@@ -102,12 +124,19 @@ def binary_actions(im):
     # close dark holes:
     if 0: fgm = binary_closing(fgm, square(3))
     #dilate(1)
-    if 1: fgm = binary_dilation(fgm, disk(3), iterations = 3)
+    if 1: 
+        fgm = binary_dilation(fgm, disk(3), iterations = 3)
+        if showit: 
+            ax[1,2].imshow(fgm)
+            ax[1,2].set_title("dilate")
     # fill holes in mask (1)
     if 0: fgm = binary_fill_holes(fgm)
     # smooth boundary(1)
     if 1 and fgm.sum() > 0: 
-        fgm = smooth_boundary(fgm)  
+        fgm = smooth_boundary(fgm) 
+        if showit: 
+            ax[2,0].imshow(fgm)
+            ax[2,0].set_title("smooth")
     #some more dilation (1)
     if 0: 
         try:
@@ -115,13 +144,10 @@ def binary_actions(im):
         except Exception as e:
             print("planar_masking.binary_dilation: 3D Dilating with diamond")
             fgm = binary_dilation(fgm, iterations = 1)
-    if 0:
-        fig, axs=plt.subplots(1,2)
-        axs[0].imshow(im)
-        axs[1].imshow(fgm)
-        fig.show()
-        axs[0].set_title("spot")
+    if showit:
         fig.tight_layout()
+        fig.show()
+        dum=1
         plt.close("all")
 
     return fgm
@@ -201,7 +227,8 @@ def  work_binaries(roi_tr):
     regprops = measure.regionprops(labels)
     if len(regprops)>0:
         xc,yc = regprops[0].centroid
-        rc=regprops[0].axis_minor_length/2
+        rmin=regprops[0].axis_minor_length/2
+        rmaj=regprops[0].axis_major_length/2
         if 0: #test
             plt.close('all')
             fig, axs = plt.subplots(1,2)
@@ -216,9 +243,10 @@ def  work_binaries(roi_tr):
     else:
         xc = cc/2
         yc = rr/2
-        rc = rr/4
+        rmin = rr/4
+        rmaj = rr/4
         
-    return  msk, BW_edge, xc, yc, rc 
+    return  msk, BW_edge, xc, yc, rmin, rmaj
 
 
 # show:

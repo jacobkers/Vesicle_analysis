@@ -13,4 +13,12 @@
 * for convenience, you might just save the screenshots with overlays
 
 ### Python
-* 
+* A00 sets up a new experiment
+* A10 cuts the movie to standardized tiffs per guv
+* A20a gets the geometry numbers
+* A20b works on intensities
+
+
+
+### notes
+to see binaryzation performance when tuning in a new dataset: A20 set frames to 1, binary-ops showit=1, run in debug mode 
