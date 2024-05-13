@@ -192,7 +192,7 @@ def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
     if not overviewpath.is_dir():
         overviewpath.mkdir()
     N_guvs, dum = np.shape(guv_xyr)
-    fig, axs = plt.subplots(N_guvs + 1, 4)
+    
     #nlif _format reader:
     #loop: 'images' contains all colors and all frames
     RGB_tif = Image.open(source)
@@ -209,6 +209,7 @@ def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
     }
 
     for roi_i, cd in enumerate(guv_xyr):  #work each GUV and its center coordinates:
+        fig, axs = plt.subplots(1,4)
         for color_i in np.arange(3):
             for fri, frame in enumerate(ImageSequence.Iterator(RGB_tif)):  
                 chan_pil=frame.split()[color_i]
@@ -226,20 +227,17 @@ def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
                     ff=int(info_dict["Frames in Image"])
                     roi=np.zeros((ff,rr,cc),dtype=int)
                 roi[fri,:,:]=roi_1frame
-            # plotting cosmetics:-------------------------------------------
-            axs[roi_i + 1, color_i].imshow(roi[0,:,:])               
-            axs[0, color_i].imshow(chan)
-            axs[0, color_i].set_title(color_i)
-            #build a savename:
+            #build a savename, save the tiff:
             roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
             io.imsave(roipath / f"{roiname}", roi, check_contrast=False)
-            #saving of overviews:                
-        fig.tight_layout()
-        fig.show()
-        outfig_name1 = overviewpath_name  + str("file_")+ im_ori_name  + str("frame") + str(1) + str(".png")
-        # outfig = f"frame{frame_index}_plotname.png"
-        fig.savefig(outfig_name1)             
-        dum=1
+            # save overview plots per GUVp
+            if fri == 0:
+                axs[color_i].imshow(roi[0,:,:])               
+                axs[color_i].imshow(chan)
+                axs[color_i].set_title(color_i)
+                fig.tight_layout()
+                outfig_name1 = overviewpath_name  + str("file_")+ im_ori_name  + str("frame") + str(fri) + str("_example.png")
+                fig.savefig(outfig_name1)             
 
 def work_roi_tiffs(im_ori_name,guv_xyr,initval):
     """ use pre-set coordinates in imageJ to save standardized tif roi-stacks from .lif  format
