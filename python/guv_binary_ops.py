@@ -107,7 +107,7 @@ def binary_actions(im):
             ax[0,2].set_title("despeckle")
     #shrink to split neigbouring objects:
     if 1: 
-        fgm = binary_erosion(fgm, disk(3), iterations = 3)
+        fgm = binary_erosion(fgm, disk(3), iterations = 4)
         if showit: 
             ax[1,0].imshow(fgm)
             ax[1,0].set_title("erode")
@@ -125,7 +125,7 @@ def binary_actions(im):
     if 0: fgm = binary_closing(fgm, square(3))
     #dilate(1)
     if 1: 
-        fgm = binary_dilation(fgm, disk(3), iterations = 3)
+        fgm = binary_dilation(fgm, disk(3), iterations = 4)
         if showit: 
             ax[1,2].imshow(fgm)
             ax[1,2].set_title("dilate")
@@ -147,7 +147,6 @@ def binary_actions(im):
     if showit:
         fig.tight_layout()
         fig.show()
-        dum=1
         plt.close("all")
 
     return fgm
