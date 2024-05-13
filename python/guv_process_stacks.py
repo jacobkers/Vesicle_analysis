@@ -182,8 +182,8 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                 rm=all_R_major[fri]
                 if np.max(np.array(roi))>0:
                     #B. use the track coordinates to force-map the original image 
-                    map = guv_tools.track_radial_pattern(roi, runmodus=0, x0=xm,y0=ym, demo=0)[2]
-                    if 1: 
+                    map = guv_tools.track_radial_pattern(roi, runmodus=0, x0=xm,y0=ym, mapradius=rm, demo=0)[2]
+                    if 0: 
                         #crop on twice the object radius: note that radials are in half-pixel units
                         radials =np.shape(map)[0]
                         if rm>1: 
