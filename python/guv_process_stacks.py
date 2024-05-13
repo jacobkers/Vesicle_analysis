@@ -18,12 +18,17 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
     #set apaths:
     datapath_out_name = initval.mainpath_out + initval.subdir 
     in_path_name_rois = initval.mainpath_out + initval.subdir +str("/A10_rois")
+    outpath_masks_name = initval.mainpath_out + initval.subdir +str("/A20a_masks")
     out_path_name = initval.mainpath_out + initval.subdir +str("/A20a_tracked/")
     roipath = Path(in_path_name_rois)
+    maskpath=Path(outpath_masks_name)
     overviewpath = Path(out_path_name)
     if not overviewpath.is_dir():
         overviewpath.mkdir()
-   
+    
+    if not maskpath.is_dir():
+        maskpath.mkdir()
+    
     fig, axs = plt.subplots(1, 3)
 
     for roi_i, cd in enumerate(guv_xyr):  #work each GUV and its center coordinates:
@@ -41,6 +46,7 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
         all_R_minor=[]
         all_rmaj=[]
         #n_frames=1
+        mask_stack=0*roi_stack
         for fri in np.arange(n_frames):
             if len(roi_shp)==2:
                 roi=roi_stack
@@ -62,12 +68,15 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
                 all_xg.append(xm)
                 all_yg.append(ym)
                 all_R_minor.append(rmin) 
-                all_rmaj.append(rmaj)         
+                all_rmaj.append(rmaj) 
+                mask_stack[fri,:,:]=msk
             else:
                 all_xg.append(0)
                 all_yg.append(0)
                 all_R_minor.append(0)
                 all_rmaj.append(0) 
+
+
 
             #build and save summary figure:    
             titl = str("file_")+ im_ori_name  + str("_roi")+str(roi_i) +  str("c") + str(color_i)
@@ -95,6 +104,11 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
         outfig_name = out_path_name  + titl + str("frame") + str(fri)+ str("_track_example.png")
         fig1.savefig(outfig_name)
         plt.close()
+
+        #save_mask:    
+        maskname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str("_BW.tif")
+        io.imsave(maskpath / f"{maskname}", mask_stack, check_contrast=False)
+
         #set up csv for tracking data:
         csv_target=out_path_name  +str("file_")+ im_ori_name  + str("_roi")+str(roi_i) + "_xy_tracked.csv"
         with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing

@@ -181,12 +181,14 @@ def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
     datapath_out_name = initval.mainpath_out + initval.subdir 
     roipath_name = initval.mainpath_out + initval.subdir +str("/A10_rois")
     
+    
     outpath = Path(datapath_out_name)
     if not outpath.is_dir():
         outpath.mkdir()
     roipath = Path(roipath_name)
     if not roipath.is_dir():
         roipath.mkdir()
+    
     N_guvs, dum = np.shape(guv_xyr)
     
     #nlif _format reader:
@@ -233,6 +235,7 @@ def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
             roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
             print(str("a10:") + roiname)
             io.imsave(roipath / f"{roiname}", roi, check_contrast=False)
+            dum=1
 
 def work_roi_tiffs(im_ori_name,guv_xyr,initval):
     """ use pre-set coordinates in imageJ to save standardized tif roi-stacks from .lif  format
