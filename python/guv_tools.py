@@ -71,7 +71,7 @@ def track_radial_pattern(roi, runmodus=1, x0=0, y0=0, mapradius=0, demo=1):
     if runmodus == 0:
         #single run, forced mapping:
         preset['maxradius']=mapradius
-        preset['iterations']=1
+        preset['iterations']=0
         x_in = x0
         y_in = y0
     if runmodus == 1:
@@ -94,7 +94,8 @@ def track_radial_pattern(roi, runmodus=1, x0=0, y0=0, mapradius=0, demo=1):
         
         return fig,axs
     else:
-        return xq, yq, allprofiles
+        if runmodus ==1: return xq, yq, allprofiles
+        if runmodus ==0: return x_in, y_in, allprofiles
 
 def get_roi(image,x0,y0,r0):
     """

@@ -11,6 +11,8 @@ import guv_binary_ops
 import guv_io
 import cv2
 import csv
+from scipy.ndimage import binary_opening, binary_closing, binary_fill_holes, binary_dilation, binary_erosion
+from skimage.morphology import ball, disk, square, diamond, ball
 
 def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
     """ collect relevant coordinates (such as guv center) from tiff stacks and save as csv
@@ -181,26 +183,43 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                     roi=roi_stack
                 if len(roi_shp)==3: #stack
                     roi=roi_stack[fri,:,:]
-                    mask=mask_stack[fri,:,:]
+                    all_mask=mask_stack[fri,:,:]
+                    inner_mask = binary_erosion(all_mask, disk(3), iterations = 2)
+                    edge_mask=all_mask-inner_mask
+                    outer_mask = 1-binary_dilation(all_mask, disk(3), iterations = 2)
                 xm=all_xg[fri]
                 ym=all_yg[fri]
                 rm=all_R_major[fri]
+
+
+
                 if np.max(np.array(roi))>0:
-                    #B. use the track coordinates to force-map the original image 
-                    map = guv_tools.track_radial_pattern(roi*(~mask), runmodus=0, x0=xm,y0=ym, mapradius=rm, demo=0)[2]
+                    #B. use the track coordinates to force-edge_map the original image 
+                    edge_map = guv_tools.track_radial_pattern(edge_mask*roi, runmodus=0, x0=xm,y0=ym, mapradius=2*rm, demo=0)[2]
+                    inner_map = guv_tools.track_radial_pattern(inner_mask*roi, runmodus=0, x0=xm,y0=ym, mapradius=2*rm, demo=0)[2]
+                    outer_map = guv_tools.track_radial_pattern(outer_mask*roi, runmodus=0, x0=xm,y0=ym, mapradius=2*rm, demo=0)[2]
+                    if 1: #test
+                        fig, axs = plt.subplots(2,2)
+                        axs[0,0].imshow(roi)
+                        axs[0,1].imshow(inner_map)
+                        axs[1,0].imshow(edge_map)
+                        axs[1,1].imshow(outer_map)
+                        fig.tight_layout()
+                        fig.show()
+                        dum=1
                     if 0: 
                         #crop on twice the object radius: note that radials are in half-pixel units
-                        radials =np.shape(map)[0]
+                        radials =np.shape(edge_map)[0]
                         if rm>1: 
-                            cropit=int(np.min([2*2*rm, radials]))
-                            map=map[0:cropit,:]
+                            cropit=int(np.min([3*rm, radials]))
+                            edge_map=edge_map[0:cropit,:]
                    
                     #to do: analyze_map (inside_I, outside_I)
                     inside_radial_limit=int(0.5*2*rm)  #in half-pixel units
                     outside_radial_limit=int(1.1*2*rm)   #in half-pixel units
-                    all_inside_I.append(np.mean(map[0:inside_radial_limit]))
-                    all_edge_I.append(np.median(np.max(map, axis=0)))
-                    all_outside_I.append(np.mean(map[outside_radial_limit:-1]))
+                    all_inside_I.append(np.mean(edge_map[0:inside_radial_limit]))
+                    all_edge_I.append(np.median(np.max(edge_map, axis=0)))
+                    all_outside_I.append(np.mean(edge_map[outside_radial_limit:-1]))
                     dum=1
                 else:
                     all_inside_I.append(0)
@@ -210,7 +229,7 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                 titl = str("file_")+ im_ori_name  + str("_roi")+str(roi_i) +  str("c") + str(color_i)
                 if  fri==0:
                     #show track example: 
-                    axs1[0,color_i].imshow(map)
+                    axs1[0,color_i].imshow(edge_map)
                     axs1[0,color_i].set_title(str("color") + str(color_i)) 
                     print("a20b:" + titl + str("frame") + str(fri))
             #end result:
