@@ -162,13 +162,14 @@ class QI_Tracker():
     
      
     # This function corresponds to the main function TrackXY_by_QI in the mathlab file    
-    def TrackXY_by_QI(self,im, QI, xm, ym):            
-            QI['radialoversampling']=2 #These settings are also defined above, but for certainty there are also defined in thsi definition
-            QI['angularoversampling']=0.7
-            QI['minradius']=0
-            QI['maxradius']=50/3
-            QI['iterations']=10
-            QI=self.TrackXY_by_QI_Init(im)
+    def TrackXY_by_QI(self,im, QI, xm, ym):    
+            if 0:       
+                QI['radialoversampling']=2 #These settings are also defined above, but for certainty there are also defined in thsi definition
+                QI['angularoversampling']=0.7
+                QI['minradius']=0
+                QI['maxradius']=50/3
+                QI['iterations']=10
+                QI=self.TrackXY_by_QI_Init(im)
             
             xnw=xm
             ynw=ym
