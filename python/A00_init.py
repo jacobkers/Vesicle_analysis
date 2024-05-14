@@ -63,6 +63,7 @@ def get_exps(exp_idx):
     Exp2.subdir = str("40 uM LUVsWITHCerC6/")
     Exp2.movienames = ["40 uM LUVsWITHCerC6_RealTime_Series002_t000_crp"]  # the ones that have ROIs measured in ImageJ
     Exp2.suffix='.tif'
+    Exp2.N_colors=2
 
     Exp3 = Guv_experiment()
     Exp3.mainpath_in=in_root+ str("Test_subdir_tif/")

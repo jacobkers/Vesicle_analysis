@@ -163,8 +163,8 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                             all_R_major))
         header_out=[str("X"), str("Y"),  str("R_minor"), str("R_major")]
 
-        fig1, axs1=plt.subplots(2,3)
-        for color_i in np.arange(3):     
+        fig1, axs1=plt.subplots(3,initval.N_colors)
+        for color_i in np.arange(initval.N_colors):     
             #load tracking channel:
             roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
             maskname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(initval.tracking_key) + str("_BW.tif")
@@ -185,8 +185,10 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                     roi=roi_stack[fri,:,:]
                     all_mask=mask_stack[fri,:,:]
                     inner_mask = binary_erosion(all_mask, disk(3), iterations = 2)
+                    blankcenter_mask= binary_erosion(all_mask, disk(3), iterations = 8)
                     edge_mask=all_mask-inner_mask
                     outer_mask = 1-binary_dilation(all_mask, disk(3), iterations = 2)
+                    inner_donut_mask=inner_mask & ~blankcenter_mask
                 xm=all_xg[fri]
                 ym=all_yg[fri]
                 rm=all_R_major[fri]
@@ -198,25 +200,26 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                     edge_map = guv_tools.track_radial_pattern(edge_mask*roi, runmodus=0, x0=xm,y0=ym, mapradius=2*rm, demo=0)[2]
                     inner_map = guv_tools.track_radial_pattern(inner_mask*roi, runmodus=0, x0=xm,y0=ym, mapradius=2*rm, demo=0)[2]
                     outer_map = guv_tools.track_radial_pattern(outer_mask*roi, runmodus=0, x0=xm,y0=ym, mapradius=2*rm, demo=0)[2]
-                    if 1: #test
+                    if 0: #fri==0: #test
                         fig, axs = plt.subplots(2,2)
                         axs[0,0].imshow(roi)
-                        axs[0,0].set_title("roi")
+                        axs[0,0].set_title("roi_color:"+ str(color_i))
                         axs[0,1].imshow(inner_map)
                         axs[0,1].set_title("inner map")
                         axs[0,1].set_xlabel("angular pos., a.u")
                         axs[0,1].set_ylabel("radial pos., a.u")
                         axs[1,0].imshow(edge_map)
-                        axs[1,0].set_title("inner map")
+                        axs[1,0].set_title("edge map")
                         axs[1,0].set_xlabel("angular pos., a.u")
                         axs[1,0].set_ylabel("radial pos., a.u")
                         axs[1,1].imshow(outer_map)
-                        axs[1,1].set_title("inner map")
+                        axs[1,1].set_title("outer map")
                         axs[1,1].set_xlabel("angular pos., a.u")
                         axs[1,1].set_ylabel("radial pos., a.u")
                         fig.tight_layout()
                         fig.show()
                         dum=1
+                        plt.close("all")
                     if 0: 
                         #crop on twice the object radius: note that radials are in half-pixel units
                         radials =np.shape(edge_map)[0]
@@ -225,11 +228,18 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                             edge_map=edge_map[0:cropit,:]
                    
                     #to do: analyze_map (inside_I, outside_I)
-                    inside_radial_limit=int(0.5*2*rm)  #in half-pixel units
-                    outside_radial_limit=int(1.1*2*rm)   #in half-pixel units
-                    all_inside_I.append(np.mean(edge_map[0:inside_radial_limit]))
-                    all_edge_I.append(np.median(np.max(edge_map, axis=0)))
-                    all_outside_I.append(np.mean(edge_map[outside_radial_limit:-1]))
+                    insides=(np.array(inner_map[np.nonzero(inner_map>0)]))
+                    outsides=(np.array(outer_map[np.nonzero(outer_map>0)]))
+                    if len(insides)>0: 
+                        all_inside_I.append(np.mean(insides))
+                    else:
+                        all_inside_I.append(0)
+                    if len(outsides)>0: 
+                        all_outside_I.append(np.mean(outsides))
+                    else:
+                        all_outside_I.append(0)
+                    #note we treat the edge differently:
+                    all_edge_I.append(np.mean(np.max(edge_map, axis=0)))
                     dum=1
                 else:
                     all_inside_I.append(0)
@@ -243,10 +253,14 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                     axs1[0,color_i].set_title(str("color") + str(color_i)) 
                     print("a20b:" + titl + str("frame") + str(fri))
             #end result:
-            axs1[1,color_i].plot(all_inside_I,'ro', markersize=2)
+            
             axs1[1,color_i].plot(all_edge_I,'bo',markersize=2)
-            axs1[1,color_i].plot(all_outside_I,'ko',markersize=2)
-            axs1[1,color_i].legend(['inside', 'edge', 'outside'],loc='best', fontsize='xx-small')
+            axs1[1,color_i].set_ylabel("I, a.u.")
+            axs1[2,color_i].legend(['edge'],loc='best', fontsize='xx-small')
+            axs1[2,color_i].plot(all_inside_I,'ro', markersize=2)
+            axs1[2,color_i].plot(all_outside_I,'ko',markersize=2)
+            axs1[2,color_i].legend(['inside', 'outside'],loc='best', fontsize='xx-small')
+            axs1[2,color_i].set_xlabel("frames")
             color_data=np.vstack((all_inside_I, 
                                   all_edge_I, 
                                   all_outside_I))
