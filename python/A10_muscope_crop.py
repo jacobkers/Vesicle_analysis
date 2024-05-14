@@ -12,7 +12,7 @@ experiment indices (add 0.1 to run on K:):
 0: .nd testfiles
 1: .lif testfiles 
 """
-expi = 3.2
+expi = 4.2
 initval = get_exps(expi)
 
 for im_ori_name in initval.movienames:
@@ -29,6 +29,8 @@ for im_ori_name in initval.movienames:
         guv_io.cut_nd2_to_roi_tiffs(im_ori_name,guv_xyr,initval)
     if initval.suffix =='.lif': 
         guv_io.cut_lif_to_roi_tiffs(im_ori_name,guv_xyr,initval)
-    if initval.suffix =='.tif':
+    if initval.suffix =='.tif' and initval.sequence=='time_trace':
         guv_io.cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval)
+    if initval.suffix =='.tif' and initval.sequence=='single_frame':
+        guv_io.cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval)  # change this to a single frame operator
 

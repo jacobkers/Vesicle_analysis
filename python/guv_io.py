@@ -173,7 +173,7 @@ def cut_lif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
 
 
 def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
-    """ use pre-set coordinates in imageJ to save standardized tif roi-stacks from .lif  format
+    """ use pre-set coordinates in imageJ to save standardized tif roi-stacks from .tif  format
     #Jacob 2024 """
     source = initval.mainpath_in + initval.subdir + im_ori_name + str(initval.suffix)
     datapath_out_name = initval.mainpath_out + initval.subdir 
@@ -186,7 +186,6 @@ def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
         roipath.mkdir()   
     N_guvs, dum = np.shape(guv_xyr)
     
-    #nlif _format reader:
     #loop: 'images' contains all colors and all frames
     RGB_tif = Image.open(source)
     # extract other basic metadata

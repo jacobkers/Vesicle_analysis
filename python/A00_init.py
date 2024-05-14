@@ -26,6 +26,7 @@ class Guv_experiment:
         self.suffix='.tif'
         self.tracking_key=0  #channel index to use for obtaining geometry
         self.N_colors=3
+        self.sequence='time_trace'
 
 # overview of experiments:
 def get_exps(exp_idx):
@@ -74,7 +75,17 @@ def get_exps(exp_idx):
     Exp3.tracking_key=1
     Exp3.N_colors=3
 
-    all_Experiments = [Exp0, Exp1, Exp2, Exp3]
+    Exp4 = Guv_experiment()
+    Exp4.mainpath_in=str("M:/tnw/bn/cd/Shared/Rafael Lira/Nikon confocal microscope/Ewa/231128_Permeability experiments/DOPC.DOPS/")
+    Exp4.mainpath_out=out_root+ str("Test_subdir_tif/")
+    Exp4.subdir = str("40 uM_Over 1h incubation/")
+    Exp4.movienames = ["6_tiff"]  # the ones that have ROIs measured in ImageJ
+    Exp4.suffix='.tif'
+    Exp4.tracking_key=0
+    Exp4.N_colors=4
+    Exp4.sequence='single_frame'
+
+    all_Experiments = [Exp0, Exp1, Exp2, Exp3, Exp4]
 
     Experiment = all_Experiments[exp_idx_base]
 
