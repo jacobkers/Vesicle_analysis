@@ -106,7 +106,7 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
         plt.close()
 
         #save_mask:    
-        maskname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str("_BW.tif")
+        maskname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(initval.tracking_key) + str("_BW.tif")
         io.imsave(maskpath / f"{maskname}", mask_stack, check_contrast=False)
 
         #set up csv for tracking data:
@@ -142,9 +142,11 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
 #Jacob 2024 """
     datapath_out_name = initval.mainpath_out + initval.subdir 
     in_path_name_rois = initval.mainpath_out + initval.subdir +str("/A10_rois")
+    in_path_name_masks = initval.mainpath_out + initval.subdir +str("/A20a_masks")
     in_path_name_tracked = initval.mainpath_out + initval.subdir +str("/A20a_tracked/")
     out_path_name = initval.mainpath_out + initval.subdir +str("/A20b_processed/")
     roipath = Path(in_path_name_rois)
+    maskpath= Path(in_path_name_masks)
     out_path = Path(out_path_name)
     if not out_path.is_dir(): out_path.mkdir()
     for roi_i, cd in enumerate(guv_xyr):  #work each GUV and its center coordinates:
@@ -163,7 +165,9 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
         for color_i in np.arange(3):     
             #load tracking channel:
             roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
+            maskname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(initval.tracking_key) + str("_BW.tif")
             roi_stack=io.imread(roipath / f"{roiname}")
+            mask_stack=io.imread(maskpath / f"{maskname}")
             roi_shp=np.shape(roi_stack)
             if len(roi_shp)==2:
                 n_frames=1
@@ -177,12 +181,13 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                     roi=roi_stack
                 if len(roi_shp)==3: #stack
                     roi=roi_stack[fri,:,:]
+                    mask=mask_stack[fri,:,:]
                 xm=all_xg[fri]
                 ym=all_yg[fri]
                 rm=all_R_major[fri]
                 if np.max(np.array(roi))>0:
                     #B. use the track coordinates to force-map the original image 
-                    map = guv_tools.track_radial_pattern(roi, runmodus=0, x0=xm,y0=ym, mapradius=rm, demo=0)[2]
+                    map = guv_tools.track_radial_pattern(roi*(~mask), runmodus=0, x0=xm,y0=ym, mapradius=rm, demo=0)[2]
                     if 0: 
                         #crop on twice the object radius: note that radials are in half-pixel units
                         radials =np.shape(map)[0]

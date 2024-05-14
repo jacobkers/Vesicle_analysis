@@ -136,10 +136,8 @@ def cut_lif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
     fig, axs = plt.subplots(N_guvs + 1, 4)
     #nlif _format reader:
     #loop: 'images' contains all colors and all frames
-
     get_lifs= LifFile(source)
     lif_list = [i for i in get_lifs.get_iter_image()]
-
     for roi_i, cd in enumerate(guv_xyr):  #work each GUV and its center coordinates:
     #walk the frames:
         for lif_objects in lif_list:
@@ -179,16 +177,13 @@ def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
     #Jacob 2024 """
     source = initval.mainpath_in + initval.subdir + im_ori_name + str(initval.suffix)
     datapath_out_name = initval.mainpath_out + initval.subdir 
-    roipath_name = initval.mainpath_out + initval.subdir +str("/A10_rois")
-    
-    
+    roipath_name = initval.mainpath_out + initval.subdir +str("/A10_rois")   
     outpath = Path(datapath_out_name)
     if not outpath.is_dir():
         outpath.mkdir()
     roipath = Path(roipath_name)
     if not roipath.is_dir():
-        roipath.mkdir()
-    
+        roipath.mkdir()   
     N_guvs, dum = np.shape(guv_xyr)
     
     #nlif _format reader:
@@ -205,7 +200,6 @@ def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
         "Image is Animated": getattr(RGB_tif, "is_animated", False),
         "Frames in Image": getattr(RGB_tif, "n_frames", 1),
     }
-
     for roi_i, cd in enumerate(guv_xyr):  #work each GUV and its center coordinates:
         fig, axs = plt.subplots(1,initval.N_colors)
         for color_i in np.arange(initval.N_colors):
@@ -248,7 +242,6 @@ def work_roi_tiffs(im_ori_name,guv_xyr,initval):
     if not overviewpath.is_dir():
         overviewpath.mkdir()
     fig, axs = plt.subplots(1, 3)
-
     for roi_i, cd in enumerate(guv_xyr):  #work each GUV and its center coordinates:
         for color_i in np.arange(3):
             #load:
@@ -273,37 +266,4 @@ def work_roi_tiffs(im_ori_name,guv_xyr,initval):
         fig.tight_layout()
         fig.show()
         plt.close("all")
-
-        dum=1
           
-""" 
-               
-                
-                #get image or stack:              
-                roi = guv_tools.get_roi(chan, x0, y0, r0)                         
-                #build work image via the various channels-------------------------------------------   
-                if color_i==0: #setup a work image for edge detection etc
-                    #work_image=guv_tools.sobel_it(roi)
-                    work_image=roi
-                #else:
-                    #work_image=work_image+guv_tools.sobel_it(roi)                                
-                # plotting cosmetics:-------------------------------------------
-                axs[roi_i + 1, color_i].imshow(roi)               
-                axs[0, color_i].imshow(chan)
-                axs[0, color_i].set_title(images.channels[color_i])
-                #build a savename:
-                roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
-                io.imsave(roipath / f"{roiname}", roi, check_contrast=False)
-        #saving of overviews:                
-        fig.tight_layout()
-        fig.show()
-        outfig_name1 = overviewpath_name  + str("file_")+ im_ori_name  + str("frame") + str(1) + str(".png")
-        # outfig = f"frame{frame_index}_plotname.png"
-        fig.savefig(outfig_name1)             
-        #process the work image
-        fig2, ax2 = guv_tools.work_radial_pattern(work_image, x0,y0,r0)
-        fig2.show() 
-        outfig_name2 = overviewpath_name  + str("file_")+ im_ori_name  + str("frame") + str(1) + str("_QI_track.png")
-        # outfig = f"frame{frame_index}_plotname.png"
-        fig2.savefig(outfig_name2)
-        plt.close("all") """

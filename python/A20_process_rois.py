@@ -15,7 +15,7 @@ experiment indices (int = laptop, add: 0.1 for office local, 0.2 to run on CD:K:
 3: .tif test (office-PC) less_challenging ones
 
 """
-expi = 2.2   #3:less_challenging ones
+expi = 2.2   #2: flexibles; 3:less_challenging ones
 initval = get_exps(expi)
 
 for im_ori_name in initval.movienames:
