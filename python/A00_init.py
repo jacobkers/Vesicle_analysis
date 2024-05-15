@@ -79,7 +79,7 @@ def get_exps(exp_idx):
     Exp4.mainpath_in=str("M:/tnw/bn/cd/Shared/Rafael Lira/Nikon confocal microscope/Ewa/231128_Permeability experiments/DOPC.DOPS/")
     Exp4.mainpath_out=out_root+ str("Test_subdir_tif/")
     Exp4.subdir = str("40 uM_Over 1h incubation/")
-    Exp4.movienames = ["6_tiff"]  # the ones that have ROIs measured in ImageJ
+    Exp4.movienames = ["1_tiff","2_tiff","3_tiff","4_tiff","5_tiff","6_tiff","7_tiff","8_tiff","9_tiff","10_tiff", "11_tiff","12_tiff","13_tiff","14_tiff","15_tiff"]  # the ones that have ROIs measured in ImageJ
     Exp4.suffix='.tif'
     Exp4.tracking_key=0
     Exp4.N_colors=4

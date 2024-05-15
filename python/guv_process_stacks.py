@@ -38,22 +38,18 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
         #load tracking channel:
         roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
         roi_stack=io.imread(roipath / f"{roiname}")
+        if roi_stack.ndim == 2: roi_stack = roi_stack[np.newaxis,:] # expand to third dimension
         roi_shp=np.shape(roi_stack)
-        if len(roi_shp)==2:
-            n_frames=1
-        if len(roi_shp)==3: #stack
-            n_frames=roi_shp[0]
+        n_frames=roi_shp[0]
         all_xg=[]
         all_yg=[]
         all_R_minor=[]
         all_rmaj=[]
         #n_frames=1
+        
         mask_stack=0*roi_stack
         for fri in np.arange(n_frames):
-            if len(roi_shp)==2:
-                roi=roi_stack
-            if len(roi_shp)==3: #stack
-                roi=roi_stack[fri,:,:]
+            roi=roi_stack[fri,:,:]
             if fri==0:
                 roi0=roi
             #A. build an image that allows robust tracking 
@@ -77,8 +73,6 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
                 all_yg.append(0)
                 all_R_minor.append(0)
                 all_rmaj.append(0) 
-
-
 
             #build and save summary figure:    
             titl = str("file_")+ im_ori_name  + str("_roi")+str(roi_i) +  str("c") + str(color_i)
@@ -169,8 +163,10 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
             roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
             maskname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(initval.tracking_key) + str("_BW.tif")
             roi_stack=io.imread(roipath / f"{roiname}")
+            if roi_stack.ndim == 2: roi_stack = roi_stack[np.newaxis,:] # expand to third dimension
             mask_stack=io.imread(maskpath / f"{maskname}")
             roi_shp=np.shape(roi_stack)
+
             if len(roi_shp)==2:
                 n_frames=1
             if len(roi_shp)==3: #stack
@@ -184,10 +180,10 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                 if len(roi_shp)==3: #stack
                     roi=roi_stack[fri,:,:]
                     all_mask=mask_stack[fri,:,:]
-                    inner_mask = binary_erosion(all_mask, disk(3), iterations = 2)
+                    inner_mask = binary_erosion(all_mask, disk(3), iterations = 3)
                     blankcenter_mask= binary_erosion(all_mask, disk(3), iterations = 8)
                     edge_mask=all_mask-inner_mask
-                    outer_mask = 1-binary_dilation(all_mask, disk(3), iterations = 2)
+                    outer_mask = 1-binary_dilation(all_mask, disk(3), iterations = 3)
                     inner_donut_mask=inner_mask & ~blankcenter_mask
                 xm=all_xg[fri]
                 ym=all_yg[fri]
