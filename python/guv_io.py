@@ -230,6 +230,54 @@ def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
             io.imsave(roipath / f"{roiname}", roi, check_contrast=False)
             dum=1
 
+def cut_singletime_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
+    """ use pre-set coordinates in imageJ to save standardized tif roi-stacks from .tif  format
+    #Jacob 2024 """
+    source = initval.mainpath_in + initval.subdir + im_ori_name + str(initval.suffix)
+    datapath_out_name = initval.mainpath_out + initval.subdir 
+    roipath_name = initval.mainpath_out + initval.subdir +str("/A10_rois")   
+    outpath = Path(datapath_out_name)
+    if not outpath.is_dir():
+        outpath.mkdir()
+    roipath = Path(roipath_name)
+    if not roipath.is_dir():
+        roipath.mkdir()   
+    N_guvs, dum = np.shape(guv_xyr)
+    
+    #loop: 'images' contains all colors and all frames
+    #RGB_tif = Image.open(source)
+    RGB_tif = io.imread(source)
+    # extract other basic metadata
+    rr,cc,ff,=np.shape(RGB_tif)
+    for roi_i, cd in enumerate(guv_xyr):  #work each GUV and its center coordinates:
+        fig, axs = plt.subplots(1,initval.N_colors)
+        #for single-time tiffs, the sequence just lists the for colors
+        #thus, the nth frame should be chosen for this color.
+        
+        for color_i in np.arange(ff):  
+            frame= RGB_tif[:,:,color_i]    
+            #cut (we assume roi just fits the vesicle)
+            extra_space=2
+            x0 = cd[0]
+            y0 = cd[1]
+            r0 = cd[2]*extra_space
+            #get image or stack:  
+            #chan = np.array(frame)            
+            roi_1frame = guv_tools.get_roi(frame, x0, y0, r0)
+            rr,cc=np.shape(roi_1frame)
+            if color_i==0:  
+                roi_all_colors=np.zeros((ff,rr,cc),dtype=int)
+            # overview plots per GUVp:
+            axs[color_i].imshow(roi_all_colors[color_i,:,:])
+            axs[color_i].set_title(color_i)
+            fig.tight_layout()
+            roi_all_colors[color_i,:,:]=roi_1frame
+        #build a savename, save the tiff:
+        roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("all_colors") + str(".tif")
+        print(str("a10:") + roiname)
+        io.imsave(roipath / f"{roiname}", roi_all_colors, check_contrast=False)
+        dum=1
+
 def work_roi_tiffs(im_ori_name,guv_xyr,initval):
     """ use pre-set coordinates in imageJ to save standardized tif roi-stacks from .lif  format
     #Jacob 2024 """

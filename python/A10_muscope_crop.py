@@ -32,5 +32,5 @@ for im_ori_name in initval.movienames:
     if initval.suffix =='.tif' and initval.sequence=='time_trace':
         guv_io.cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval)
     if initval.suffix =='.tif' and initval.sequence=='single_frame':
-        guv_io.cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval)  # change this to a single frame operator
+        guv_io.cut_singletime_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval)  # change this to a single frame operator
 
