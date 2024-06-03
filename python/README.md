@@ -1,4 +1,4 @@
-# GUV analysis with Rafael De Lira 
+# GUV analysis with Rafael de Lira 
 2023 onwards
 
 ## Step by step:

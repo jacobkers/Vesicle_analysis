@@ -70,10 +70,11 @@ def get_exps(exp_idx):
     Exp3.mainpath_in=in_root+ str("Test_subdir_tif/")
     Exp3.mainpath_out=out_root+ str("Test_subdir_tif/")
     Exp3.subdir = str("Less challenging GUV/")
-    Exp3.movienames = ["30 uM LUVs_WITHCerC6 real time_Series011_t00_overlay"]  # the ones that have ROIs measured in ImageJ
+    Exp3.movienames = ["30 uM LUVs_WITHCerC6 real time_Series011_t00_overlay" , "30 uM LUVs_WITHCerC6 real time_Series011 - Copy"]  # the ones that have ROIs measured in ImageJ
     Exp3.suffix='.tif'
     Exp3.tracking_key=1
     Exp3.N_colors=3
+    Exp3.sequence='time_trace'
 
     Exp4 = Guv_experiment()
     Exp4.mainpath_in=str("M:/tnw/bn/cd/Shared/Rafael Lira/Nikon confocal microscope/Ewa/231128_Permeability experiments/DOPC.DOPS/")
