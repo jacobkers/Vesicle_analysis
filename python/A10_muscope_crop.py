@@ -21,6 +21,11 @@ for im_ori_name in initval.movienames:
     #build list of GUVs:
     guv_xyr = []
     XX0, YY0, RR0 = guv_io.get_roi_info(csv_source)
+
+    if initval.apply_drift_correction:
+        csv_drift = initval.mainpath_in + initval.subdir + str("Drift_per5 of ") + im_ori_name + str(".csv")
+        initval.driftX, initval.driftY= guv_io.get_drift_info(csv_drift)
+
     for ii, X0 in enumerate(XX0):
         thisguv = [int(X0), int(YY0[ii]), int(RR0[ii])]
         guv_xyr.append(thisguv)

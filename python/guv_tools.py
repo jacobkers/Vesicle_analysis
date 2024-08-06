@@ -103,7 +103,7 @@ def get_roi(image,x0,y0,r0):
     'image' can also be a stack
     @author: jkerssemakers, 2024
     """
-    #cuts square area with inscribed radius r0. If outside-roi, roi is shifted
+    #cuts square area with inscribed radius r0. If outside-FOV, roi is shifted
     dims =np.shape(image)
     
     lox=int(max([0, x0 - r0]))

@@ -59,8 +59,52 @@ def get_roi_info(csv_source):
     YY0 = np.array(Yc) + np.array(width) / 2
     RR0 = np.array(width) / 2
 
+    return XX0,YY0,RR0
 
-    return XX0, YY0, RR0
+def get_drift_info(csv_source):
+    """ 
+    prepare an extimate of the drift usijg pre-clicked coordinates 
+    """
+    interval=5  #clicked every ...frames, starting from first
+    Td = []
+    Xd = []
+    Yd = []
+    t=-interval
+    width = []
+    with open(csv_source) as f:
+        reader = csv.DictReader(f, delimiter=",")
+        for row in reader:
+            t=t+interval
+            Td.append(t)
+            Xd.append(float(row["X"]))
+            Yd.append(float(row["Y"]))
+    #make sure drift vector is long enough:
+   
+    last_driftX=Xd[-1]-Xd[-2]
+    last_driftY=Xd[-1]-Xd[-2]
+    for ii in np.arange(interval):
+        t=t+interval
+        Td.append(t)
+        Xd.append(Xd[-1]+last_driftX)
+        Yd.append(Yd[-1]+last_driftY)
+    Xd=np.array(Xd)-Xd[0]
+    Yd=np.array(Yd)-Yd[0]
+    Td=np.array(Td)
+    fig, axs = plt.subplots(1,1)
+
+    Ti = np.arange(np.max(Td))
+    Xi = np.interp(Ti, Td, Xd)
+    Yi = np.interp(Ti, Td, Yd)
+ 
+    if 0:
+        axs.plot(Td,Xd, 'ro')
+        axs.plot(Td,Yd, 'bo')
+        axs.plot(Ti,Xi, 'r-')
+        axs.plot(Ti,Yi, 'b-')
+        fig.show()
+        dum=1
+
+    return Xi,Yi
 
 
 def cut_nd2_to_roi_tiffs(im_ori_name,guv_xyr,initval):
@@ -202,9 +246,12 @@ def cut_tif_to_roi_tiffs_hardwired(im_ori_name,guv_xyr,initval):
         for color_i, color_i_trace in enumerate(st):
             for fri, chan in enumerate(color_i_trace):                  
                 #cut (we assume roi just fits the vesicle)
-                extra_space=2
+                extra_space=2       
                 x0 = cd[0]
                 y0 = cd[1]
+                if initval.apply_drift_correction:
+                    x0=int(x0+initval.driftX[fri])
+                    y0=int(y0+initval.driftY[fri])
                 r0 = cd[2]*extra_space
                 #get image or stack:             
                 roi_1frame = guv_tools.get_roi(chan, x0, y0, r0)
