@@ -28,6 +28,7 @@ class Guv_experiment:
         self.N_colors=3
         self.sequence='time_trace'
         self.apply_drift_correction=False
+        self.pix2mu=0.4141253
 
 # overview of experiments:
 def get_exps(exp_idx):
@@ -95,6 +96,7 @@ def get_exps(exp_idx):
     Exp5.suffix='.tif'
     Exp5.sequence='time_trace'
     Exp5.N_colors=2
+    Exp5.tracking_key=1
     Exp5.apply_drift_correction=True
 
     all_Experiments = [Exp0, Exp1, Exp2, Exp3, Exp4, Exp5]

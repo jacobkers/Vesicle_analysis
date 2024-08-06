@@ -61,7 +61,7 @@ def get_roi_info(csv_source):
 
     return XX0,YY0,RR0
 
-def get_drift_info(csv_source):
+def get_drift_info(csv_source,initval):
     """ 
     prepare an extimate of the drift usijg pre-clicked coordinates 
     """
@@ -87,16 +87,16 @@ def get_drift_info(csv_source):
         Td.append(t)
         Xd.append(Xd[-1]+last_driftX)
         Yd.append(Yd[-1]+last_driftY)
-    Xd=np.array(Xd)-Xd[0]
-    Yd=np.array(Yd)-Yd[0]
+    Xd=(np.array(Xd)-Xd[0])/initval.pix2mu
+    Yd=(np.array(Yd)-Yd[0])/initval.pix2mu
     Td=np.array(Td)
-    fig, axs = plt.subplots(1,1)
-
+    
     Ti = np.arange(np.max(Td))
     Xi = np.interp(Ti, Td, Xd)
     Yi = np.interp(Ti, Td, Yd)
  
     if 0:
+        fig, axs = plt.subplots(1,1)
         axs.plot(Td,Xd, 'ro')
         axs.plot(Td,Yd, 'bo')
         axs.plot(Ti,Xi, 'r-')

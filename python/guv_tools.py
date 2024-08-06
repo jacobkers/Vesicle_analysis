@@ -97,23 +97,34 @@ def track_radial_pattern(roi, runmodus=1, x0=0, y0=0, mapradius=0, demo=1):
         if runmodus ==1: return xq, yq, allprofiles
         if runmodus ==0: return x_in, y_in, allprofiles
 
+def check_limits(x0,y0, dims):
+    in_range=True
+    if (x0<0) or (x0 >= dims[0]) or (y0<0) or (y0 >= dims[1]):
+        in_range=False
+    return in_range
+
 def get_roi(image,x0,y0,r0):
     """
     basic collection of points
     'image' can also be a stack
     @author: jkerssemakers, 2024
     """
-    #cuts square area with inscribed radius r0. If outside-FOV, roi is shifted
+    #cuts square area with inscribed radius r0. 
+    # If outside-FOV, roi is shifted
     dims =np.shape(image)
-    
-    lox=int(max([0, x0 - r0]))
-    hix=int(min([dims[0], x0+r0]))
-    loy=int(max([0, y0 - r0]))
-    hiy=int(min([dims[1], y0+r0]))
-    if len(dims)==2:
-        roi = image[loy:hiy, lox:hix]
-    if len(dims)==3:
-        roi = image[loy:hiy, lox:hix,:]
+    #force roi size:
+
+    roi = np.zeros((2*r0,2*r0))
+    if check_limits(x0,y0, dims):
+        lox=int(max([0, x0 - r0]))
+        hix=int(min([dims[0], x0+r0]))
+        loy=int(max([0, y0 - r0]))
+        hiy=int(min([dims[1], y0+r0]))
+
+        if len(dims)==2:
+            roi[0:hiy-loy, 0:hix-lox] = image[loy:hiy, lox:hix]
+        if len(dims)==3:
+            roi[0:hiy-loy, 0:hix-lox] = image[loy:hiy, lox:hix,:]
 
     return roi
 
