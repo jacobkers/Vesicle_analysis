@@ -198,3 +198,32 @@ def donut_mask_it(roi):
         dum=1
 
     return roi_out
+
+def make_montage(tiff_in, format_out='tiff'):
+    """ from a single t (or z) stack, build a montage for evaluation purposes """
+    fovs,rr,cc =np.shape(tiff_in)
+    sz_h= int(np.ceil(fovs**0.5))
+    if ((sz_h-1)*sz_h)>=fovs:
+        sz_v=sz_h-1
+    else:
+        sz_v=sz_h
+    first_fov=np.log((0*tiff_in[0]+1))
+    mxval=np.max(first_fov)
+    montage_tiff=np.tile((0*first_fov+mxval),(sz_v,sz_h))
+    for ix, fov in enumerate(tiff_in):
+       
+        col_i=int(np.mod(ix,sz_h))
+        rw_i=int(np.floor(ix/sz_h))
+        lox=col_i*cc
+        hix=lox+cc
+        loy=rw_i*rr
+        hiy=loy+rr
+        montage_tiff[loy:hiy,lox:hix]=np.log(fov+1)
+        t=np.log(fov+1)
+        if 0:
+            fig, ax = plt.subplots(1, 2)
+            ax[0].imshow(montage_tiff)
+            fig.show()
+            dum=1
+    if format_out == 'tiff':
+        return montage_tiff
