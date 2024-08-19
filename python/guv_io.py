@@ -75,11 +75,12 @@ def get_drift_info(csv_source,initval):
         reader = csv.DictReader(f, delimiter=",")
         for row in reader:
             t=t+interval
-            Td.append(t)
+            Td.append(float(row["Frame"])-1)
             Xd.append(float(row["X"]))
             Yd.append(float(row["Y"]))
-    #make sure drift vector is long enough:
-   
+    
+    
+    #make sure drift vector is long enough: add some extra frame steps 
     last_driftX=Xd[-1]-Xd[-2]
     last_driftY=Xd[-1]-Xd[-2]
     for ii in np.arange(interval):

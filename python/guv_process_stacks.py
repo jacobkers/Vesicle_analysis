@@ -34,10 +34,15 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
     fig, axs = plt.subplots(1, 3)
 
     for roi_i, cd in enumerate(guv_xyr):  #work each GUV and its center coordinates:
-        color_i=initval.tracking_key
-        #load tracking channel:
-        roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
-        roi_stack=io.imread(roipath / f"{roiname}")
+
+        for ci, color_i in enumerate(initval.tracking_key):
+            #load tracking channel:
+            roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
+            if ci==0:
+                roi_stack=io.imread(roipath / f"{roiname}")
+            else:
+                roi_stack=roi_stack + io.imread(roipath / f"{roiname}")
+        
         if roi_stack.ndim == 2: roi_stack = roi_stack[np.newaxis,:] # expand to third dimension
         roi_shp=np.shape(roi_stack)
         n_frames=roi_shp[0]
@@ -102,15 +107,15 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
         plt.close()
 
         #save_mask:    
-        maskname=out_path_name  + ("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(initval.tracking_key) + str("_BW.tif")
+        maskname= ("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(initval.tracking_key) + str("_BW.tif")
         io.imsave(maskpath / f"{maskname}", mask_stack, check_contrast=False)
 
         #save montage:
         fig, axs = plt.subplots(1, 1)
         mtg=guv_tools.make_montage(mask_stack, format_out='tiff')
         axs.imshow(mtg, cmap="gray", interpolation="nearest")
-        mtg_plotname=out_path_name  + titl + str("frame") + str(fri)+ str("_mask_example.png")
-        fig.savefig(maskpath / f"{(mtg_plotname)}", dpi=500)
+        mtg_plotname= titl + str("frame") + str(fri)+ str("_mask_example.png")
+        fig.savefig(overviewpath / f"{(mtg_plotname)}", dpi=500)
         
         #set up csv for tracking data:
         csv_target=out_path_name  +str("file_")+ im_ori_name  + str("_roi")+str(roi_i) + "_xy_tracked.csv"

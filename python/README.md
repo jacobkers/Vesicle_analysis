@@ -1,7 +1,17 @@
 # GUV analysis with Rafael de Lira 
 2023 onwards
 
+
+
 ## Step by step:
+### ImageJ Drift vector
+* Open imageJ
+* Set measurement: include 'position in stack' (X, Y, Frame)
+* Open BF or Phase
+* Select "square" ROI and select a representative GUV
+* Follow it at regular intervals with CTRL-M
+* with FOV jumps, make sure you measure before-and after jump
+
 
 ### ImageJ area selection
 * Open imageJ

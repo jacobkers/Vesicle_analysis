@@ -92,11 +92,11 @@ def get_exps(exp_idx):
     Exp5.mainpath_in=in_root+ str("Test_subdir_tif/")
     Exp5.mainpath_out=out_root+ str("Test_subdir_tif/")
     Exp5.subdir = str("Real time fusion and morphology/")
-    Exp5.movienames = ["nd462_tiff"]
+    Exp5.movienames = ["nd462"]
     Exp5.suffix='.tif'
     Exp5.sequence='time_trace'
     Exp5.N_colors=2
-    Exp5.tracking_key=1
+    Exp5.tracking_key=[0, 1]  #which channels to add
     Exp5.apply_drift_correction=True
 
     all_Experiments = [Exp0, Exp1, Exp2, Exp3, Exp4, Exp5]
