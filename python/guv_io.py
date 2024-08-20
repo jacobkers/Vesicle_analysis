@@ -65,16 +65,13 @@ def get_drift_info(csv_source,initval):
     """ 
     prepare an extimate of the drift usijg pre-clicked coordinates 
     """
-    interval=5  #clicked every ...frames, starting from first
     Td = []
     Xd = []
     Yd = []
-    t=-interval
     width = []
     with open(csv_source) as f:
         reader = csv.DictReader(f, delimiter=",")
         for row in reader:
-            t=t+interval
             Td.append(float(row["Frame"])-1)
             Xd.append(float(row["X"]))
             Yd.append(float(row["Y"]))
@@ -83,9 +80,10 @@ def get_drift_info(csv_source,initval):
     #make sure drift vector is long enough: add some extra frame steps 
     last_driftX=Xd[-1]-Xd[-2]
     last_driftY=Xd[-1]-Xd[-2]
-    for ii in np.arange(interval):
-        t=t+interval
-        Td.append(t)
+    last_T=Td[-1]
+    extra_t=float(0)
+    for extra_t in np.arange(5.0):
+        Td.append(extra_t + last_T)
         Xd.append(Xd[-1]+last_driftX)
         Yd.append(Yd[-1]+last_driftY)
     Xd=(np.array(Xd)-Xd[0])/initval.pix2mu

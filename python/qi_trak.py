@@ -19,7 +19,7 @@ from scipy.interpolate import interp2d                # for creating an interpol
 from warnings import warn                             # for creating warnings if needed
 from os.path import splitext, basename, isfile        # for analysing name and extension of a chosen file
 import time                                           # for keeping track of time
-
+import warnings
 
 ##############################################################################################################################
 ### Quadrant Interpolation (QI) Tracking
@@ -247,6 +247,9 @@ class QI_Tracker():
         hi = np.hstack([x+hf,ld]).min()#This line takes the minimum
         ys=d[lo:hi]
         xs=xs[lo:hi]
-        prms=np.polyfit(xs,ys,2)#Here the location is polyfitted
-        x=-prms[1]/(2*prms[0])
+        if np.max(ys)>np.min(ys):
+            prms=np.polyfit(xs,ys,2)#Here the location is polyfitted
+            x=-prms[1]/(2*prms[0])
+        else:
+            x=np.nan
         return x

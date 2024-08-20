@@ -205,9 +205,17 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
 
                 if np.max(np.array(roi))>0:
                     #B. use the track coordinates to force-edge_map the original image 
-                    edge_map = guv_tools.track_radial_pattern(edge_mask*roi, runmodus=0, x0=xm,y0=ym, mapradius=2*rm, demo=0)[2]
-                    inner_map = guv_tools.track_radial_pattern(inner_mask*roi, runmodus=0, x0=xm,y0=ym, mapradius=2*rm, demo=0)[2]
-                    outer_map = guv_tools.track_radial_pattern(outer_mask*roi, runmodus=0, x0=xm,y0=ym, mapradius=2*rm, demo=0)[2]
+                    presets={#
+                    'oversampling' : 2,#The radiaoversampling is set to two
+                    'angularoversampling' : 0.7,#The angular oversampling is set to 0.7
+                    'radialoversampling' : 2,
+                    'minradius' : 0,#the minimal radius is 0
+                    'maxradius' : 2*rm
+                    }
+                    edge_map=guv_tools.QI_map(edge_mask*roi, presets, xm, ym)
+                    inner_map=guv_tools.QI_map(inner_mask*roi, presets, xm, ym)
+                    outer_map=guv_tools.QI_map(outer_mask*roi, presets, xm, ym)
+
                     if 0: #fri==0: #test
                         fig, axs = plt.subplots(2,2)
                         axs[0,0].imshow(roi)
@@ -235,7 +243,8 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                             cropit=int(np.min([3*rm, radials]))
                             edge_map=edge_map[0:cropit,:]
                    
-                    #to do: analyze_map (inside_I, outside_I)
+                    #analyze_map 
+                    # 1) inside intensity, outside intensity
                     insides=(np.array(inner_map[np.nonzero(inner_map>0)]))
                     outsides=(np.array(outer_map[np.nonzero(outer_map>0)]))
                     if len(insides)>0: 
@@ -246,9 +255,10 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                         all_outside_I.append(np.mean(outsides))
                     else:
                         all_outside_I.append(0)
-                    #note we treat the edge differently:
+                    # 2) edge intensity (note we treat the edge differently:
                     all_edge_I.append(np.mean(np.max(edge_map, axis=0)))
-                    dum=1
+                    # 3) edge length
+                    LC, LR, RC=guv_tools.measure_edge_length(edge_map, presets)
                 else:
                     all_inside_I.append(0)
                     all_edge_I.append(0)
