@@ -86,17 +86,21 @@ def measure_edge_length(edge_map, presets):
     true_x=np.array(true_x)
     true_y=np.array(true_y)
     #smooth with com:
-    print(true_radius)
-    true_x,true_y, alpha=smooth_lines(true_x, true_y, labda, demo=0)
-    
-    if 0:
-        fig, axs = plt.subplots(1,1)
-        axs.plot(true_x,true_y,'ro-')
-        fig.show()
-        dum=1
-    LC=np.sum((np.diff(true_x)**2+(np.diff(true_y)**2)**0.5))
-    RC=np.nanmean(true_radius)
-    LR=2*mt.pi*RC
+    if (len(np.argwhere(np.isnan(true_radius))))==0:
+        true_x,true_y, alpha=smooth_lines(true_x, true_y, labda, demo=0)
+        
+        if 0:
+            fig, axs = plt.subplots(1,1)
+            axs.plot(true_x,true_y,'ro-')
+            fig.show()
+            dum=1
+        LC=np.sum((np.diff(true_x)**2+(np.diff(true_y)**2)**0.5))
+        RC=np.nanmean(true_radius)
+        LR=2*mt.pi*RC
+    else:
+        LC=np.nan
+        LR=np.nan
+        RC=np.nan
     return LC, LR, RC
 
 def track_radial_pattern(roi, runmodus=1, x0=0, y0=0, mapradius=0, demo=1):

@@ -116,7 +116,8 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
         axs.imshow(mtg, cmap="gray", interpolation="nearest")
         mtg_plotname= titl + str("frame") + str(fri)+ str("_mask_example.png")
         fig.savefig(overviewpath / f"{(mtg_plotname)}", dpi=500)
-        
+        plt.close('all')
+
         #set up csv for tracking data:
         csv_target=out_path_name  +str("file_")+ im_ori_name  + str("_roi")+str(roi_i) + "_xy_tracked.csv"
         with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
@@ -132,9 +133,9 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
                 )
         #save tracking results per GUV as csv
         for fr_i, x in enumerate(all_xg):
-            with open(csv_target, "a",newline='') as csv_f:  
+            with open(csv_target, "a",newline='') as csv_g:  
                 # create the csv writer
-                writer = csv.writer(csv_f, delimiter=";")    
+                writer = csv.writer(csv_g, delimiter=";")    
                 writer.writerow(
                     [
                         all_xg[fr_i],
@@ -186,6 +187,8 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
             all_inside_I=[]
             all_edge_I=[]
             all_outside_I=[]
+            all_LC=[]
+            all_LC_excess=[]
             for fri in np.arange(n_frames):
                 if len(roi_shp)==2:
                     roi=roi_stack
@@ -200,8 +203,6 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                 xm=all_xg[fri]
                 ym=all_yg[fri]
                 rm=all_R_major[fri]
-
-
 
                 if np.max(np.array(roi))>0:
                     #B. use the track coordinates to force-edge_map the original image 
@@ -259,10 +260,14 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                     all_edge_I.append(np.mean(np.max(edge_map, axis=0)))
                     # 3) edge length
                     LC, LR, RC=guv_tools.measure_edge_length(edge_map, presets)
+                    all_LC.append(LC)
+                    all_LC_excess.append(LC/LR)
                 else:
                     all_inside_I.append(0)
                     all_edge_I.append(0)
                     all_outside_I.append(0)
+                    all_LC.append(0)
+                    all_LC_excess.append(0)
                     #process the work image
                 titl = str("file_")+ im_ori_name  + str("_roi")+str(roi_i) +  str("c") + str(color_i)
                 if  fri==0:
@@ -275,16 +280,18 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
             axs1[1,color_i].plot(all_edge_I,'bo',markersize=2)
             axs1[1,color_i].set_ylabel("I, a.u.")
             axs1[2,color_i].legend(['edge'],loc='best', fontsize='xx-small')
-            axs1[2,color_i].plot(all_inside_I,'ro', markersize=2)
-            axs1[2,color_i].plot(all_outside_I,'ko',markersize=2)
-            axs1[2,color_i].legend(['inside', 'outside'],loc='best', fontsize='xx-small')
+            axs1[2,color_i].plot(all_LC_excess,'ro', markersize=2)
             axs1[2,color_i].set_xlabel("frames")
             color_data=np.vstack((all_inside_I, 
                                   all_edge_I, 
-                                  all_outside_I))
+                                  all_outside_I,
+                                  all_LC,
+                                  all_LC_excess))
             color_header=[str("color") + str(color_i)+str("_inside"), 
                           str("c") + str(color_i)+str("_edge"),
                           str("c") + str(color_i)+str("_outside"),
+                          str("c") + str(color_i)+str("_contour_L"),
+                          str("c") + str(color_i)+str("_contour_ratio"),
                         ]
             data_out=np.vstack((data_out,color_data))
             header_out=np.hstack((header_out, color_header))
@@ -293,20 +300,21 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
         outfig_name = out_path_name  + titl + str("frame") + str(fri)+ str("_intensities.png")
         fig1.savefig(outfig_name)
         plt.close()
-
-        #scv:
-        csv_target=out_path_name  +str("file_")+ im_ori_name  + str("_roi")+str(roi_i) + "_all_data.csv"
-        with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
-            # create the csv writer
-            writer = csv.writer(csv_f, delimiter=";")
-            writer.writerow(header_out)
-        #save results per GUV as csv
-        for row in np.transpose(data_out):
-            with open(csv_target, "a",newline='') as csv_f:  
+        
+        if 1:
+            #scv:
+            csv_target=out_path_name  +str("file_")+ im_ori_name  + str("_roi")+str(roi_i) + "_all_data.csv"
+            with open(csv_target, "w",newline='') as csv_h:  # will overwrite existing
                 # create the csv writer
-                writer = csv.writer(csv_f, delimiter=";")    
-                writer.writerow(row)
-        dum=1
+                writer = csv.writer(csv_h, delimiter=";")
+                writer.writerow(header_out)
+            #save results per GUV as csv
+            for row in np.transpose(data_out):
+                with open(csv_target, "a",newline='') as csv_h:  
+                    # create the csv writer
+                    writer = csv.writer(csv_h, delimiter=";")    
+                    writer.writerow(row)
+            dum=1
 
 
 def show_roi_overviews(im_ori_name,guv_xyr,initval):
