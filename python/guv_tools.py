@@ -55,7 +55,8 @@ def treshold_it(im):
 
     return im_tres, im_BW
 
-def measure_edge_length(edge_map, presets):
+def get_xy_contour(edge_map, presets):
+    g# et a smooth xy contour from polar coordinates
     # assume an egde running through a polar map. 
     labda=3    
     edge_map=smooth_it(edge_map,labda)
@@ -72,6 +73,10 @@ def measure_edge_length(edge_map, presets):
         else:
             max_I_idx.append(np.nan)
 
+    # to do: get a smoothend dependence or a fit
+    #HERE 
+
+
     #translate back to xy:
     true_radius=(mnr+np.array(max_I_idx))/cr
     true_angle=np.linspace(0,2*mt.pi, len(true_radius))
@@ -85,16 +90,22 @@ def measure_edge_length(edge_map, presets):
     true_y.append(true_y[0])    
     true_x=np.array(true_x)
     true_y=np.array(true_y)
-    #smooth with com:
+    #smooth with com, if there are no gaps:
     if (len(np.argwhere(np.isnan(true_radius))))==0:
-        true_x,true_y, alpha=smooth_lines(true_x, true_y, labda, demo=0)
-        
+        true_x,true_y, alpha=smooth_lines(true_x, true_y, labda, demo=0)      
         if 0:
             fig, axs = plt.subplots(1,1)
             axs.plot(true_x,true_y,'ro-')
             fig.show()
-            dum=1
+    return true_x, true_y
+
+def measure_perimeter(true_x, true_y):
+    #measure perimater and average radius of smooth contour
+    if (len(np.argwhere(np.isnan(true_x))))==0:
         LC=np.sum((np.diff(true_x)**2+(np.diff(true_y)**2)**0.5))
+        mnx=np.nanmean(true_x)
+        mny=np.nanmean(true_y)
+        true_radius=((true_x-mnx)**2+(true_y-mny)**2)**0.5
         RC=np.nanmean(true_radius)
         LR=2*mt.pi*RC
     else:
@@ -201,6 +212,35 @@ def get_roi(image,x0,y0,r0):
             roi[0:hiy-loy, 0:hix-lox] = image[loy:hiy, lox:hix,:]
 
     return roi
+
+def highlight_roi(image,x0,y0,r0):
+    """
+    @author: jkerssemakers, 2024
+    """
+    #showss square area with inscribed radius r0. 
+    # If outside-FOV, roi is shifted
+    dims =np.shape(image)
+    #force roi size:
+    image_roi=1*image
+    
+    roi = np.zeros((2*r0,2*r0))
+    if check_limits(x0,y0, dims):
+        lox=int(max([0, x0 - r0]))
+        hix=int(min([dims[0], x0+r0]))
+        loy=int(max([0, y0 - r0]))
+        hiy=int(min([dims[1], y0+r0]))
+
+        if len(dims)==2:
+            roi[0:hiy-loy, 0:hix-lox] = image[loy:hiy, lox:hix]
+        if len(dims)==3:
+            roi[0:hiy-loy, 0:hix-lox] = image[loy:hiy, lox:hix,:]
+    mxr=np.max(roi)
+    image_roi[loy:hiy, lox]=0.5*mxr
+    image_roi[loy:hiy, hix-1]=0.5*mxr
+    image_roi[loy, lox:hix]=0.5*mxr
+    image_roi[hiy-1, lox:hix]=0.5*mxr
+
+    return image_roi
 
 def smooth_it(roi,labda=3):
     #gaussian smooth

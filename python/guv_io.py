@@ -10,6 +10,7 @@ from pathlib import Path
 import csv
 from skimage import io
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 import guv_tools
 from PIL import Image, ImageSequence
 
@@ -240,8 +241,8 @@ def cut_tif_to_roi_tiffs_hardwired(im_ori_name,guv_xyr,initval):
     st=np.moveaxis(st,1,0)  #CTXY for easy color split
 
     #work each GUV and its center coordinates:
-    for roi_i, cd in enumerate(guv_xyr):  
-        fig, axs = plt.subplots(1,initval.N_colors)
+    fig, axs = plt.subplots(1,initval.N_colors)
+    for roi_i, cd in enumerate(guv_xyr):      
         for color_i, color_i_trace in enumerate(st):
             for fri, chan in enumerate(color_i_trace):                  
                 #cut (we assume roi just fits the vesicle)
@@ -260,15 +261,32 @@ def cut_tif_to_roi_tiffs_hardwired(im_ori_name,guv_xyr,initval):
                 roi[fri,:,:]=roi_1frame
                 
                 # save overview plots per GUVp
+                if roi_i==0 and fri==0:
+                    ovv_im=chan
                 if fri == 0:
-                    axs[color_i].imshow(roi[0,:,:])
+                    ovv_im=guv_tools.highlight_roi(ovv_im, x0, y0, r0)
+                    axs[color_i].imshow(ovv_im)
                     axs[color_i].set_title(color_i)
-                    fig.tight_layout()
+                    fontprops = fm.FontProperties(size = 12, family = 'serif')
+                    kwargs_ = {
+                            'fontproperties': fontprops,
+                            'color': 'white',
+                            }
+                    kwargs_.update(kwargs_)
+                    axs[color_i].annotate(str(roi_i), xy = (x0, y0), xycoords = 'data',  **kwargs_)
+                    fig.tight_layout()             
+
             #build a savename, save the tiff:
             roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
             print(str("a10:") + roiname)
             io.imsave(roipath / f"{roiname}", roi, check_contrast=False)
-            dum=1
+            
+               
+    fig.show()
+    overviewname=str("from_")+ im_ori_name + str("_roi_overview.png")
+    fig.savefig(roipath / f"{overviewname}")
+    dum=1
+
 
 
     dum=1

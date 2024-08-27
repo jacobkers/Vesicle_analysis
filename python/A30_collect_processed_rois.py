@@ -105,4 +105,3 @@ if initval.suffix =='.tif'and initval.sequence=='time_trace':
         axs[2].plot(c1_edge)
     fig.show()
     dum=1
-    dum=1

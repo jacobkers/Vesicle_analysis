@@ -110,11 +110,19 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
         maskname= ("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(initval.tracking_key) + str("_BW.tif")
         io.imsave(maskpath / f"{maskname}", mask_stack, check_contrast=False)
 
-        #save montage:
+        #save montage 1:
         fig, axs = plt.subplots(1, 1)
         mtg=guv_tools.make_montage(mask_stack, format_out='tiff')
         axs.imshow(mtg, cmap="gray", interpolation="nearest")
         mtg_plotname= titl + str("frame") + str(fri)+ str("_mask_example.png")
+        fig.savefig(overviewpath / f"{(mtg_plotname)}", dpi=500)
+        plt.close('all')
+
+        #save montage 2:
+        fig, axs = plt.subplots(1, 1)
+        mtg=guv_tools.make_montage(roi_stack*mask_stack, format_out='tiff')
+        axs.imshow(mtg, cmap="gray", interpolation="nearest")
+        mtg_plotname= titl + str("frame") + str(fri)+ str("_work_im_example.png")
         fig.savefig(overviewpath / f"{(mtg_plotname)}", dpi=500)
         plt.close('all')
 
@@ -131,6 +139,7 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
                         str("R_major"),  
                     ]
                 )
+        csv_f.close()
         #save tracking results per GUV as csv
         for fr_i, x in enumerate(all_xg):
             with open(csv_target, "a",newline='') as csv_g:  
@@ -144,6 +153,7 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
                         all_rmaj[fr_i],
                     ]
                 )
+        csv_g.close()
         
 
 def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
@@ -258,8 +268,9 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                         all_outside_I.append(0)
                     # 2) edge intensity (note we treat the edge differently:
                     all_edge_I.append(np.mean(np.max(edge_map, axis=0)))
-                    # 3) edge length
-                    LC, LR, RC=guv_tools.measure_edge_length(edge_map, presets)
+                    # 3) edge length from smoothened contour:
+                    true_x, true_y = guv_tools.get_xy_contour(edge_map, presets)
+                    LC, LR, RC=guv_tools.measure_perimeter(true_x, true_y)
                     all_LC.append(LC)
                     all_LC_excess.append(LC/LR)
                 else:
@@ -314,7 +325,7 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                     # create the csv writer
                     writer = csv.writer(csv_h, delimiter=";")    
                     writer.writerow(row)
-            dum=1
+            csv_h.close()
 
 
 def show_roi_overviews(im_ori_name,guv_xyr,initval):
