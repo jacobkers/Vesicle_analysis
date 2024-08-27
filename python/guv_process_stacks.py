@@ -49,8 +49,10 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
         all_xg=[]
         all_yg=[]
         all_R_minor=[]
-        all_rmaj=[]
-        #n_frames=1
+        all_R_major=[]
+        all_areas=[]
+        all_perimeters=[]
+        all_roundness=[]
         
         mask_stack=0*roi_stack
         for fri in np.arange(n_frames):
@@ -67,41 +69,78 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
                 #roi_tr=guv_tools.sobel_it(roi_tr)   
                 #roi_tr=guv_tools.smooth_it(roi_tr,labda=1)
                 #transfer to binary operations to gat masks and robust coordinates
-                msk, BW_edge, xm, ym, rmin, rmaj = guv_binary_ops.work_binaries(roi_tr)                    
+                msk, BW_edge, xm, ym, rmin, rmaj, area, perimeter, roundness = guv_binary_ops.work_binaries(roi_tr)                    
                 all_xg.append(xm)
                 all_yg.append(ym)
                 all_R_minor.append(rmin) 
-                all_rmaj.append(rmaj) 
+                all_R_major.append(rmaj) 
+                all_areas.append(area)
+                all_perimeters.append(perimeter)
+                all_roundness.append(roundness)
                 mask_stack[fri,:,:]=msk
             else:
                 all_xg.append(0)
                 all_yg.append(0)
                 all_R_minor.append(0)
-                all_rmaj.append(0) 
-
+                all_R_major.append(0) 
+                all_areas.append(0)
+                all_perimeters.append(0)
+                all_roundness.append(0)
             #build and save summary figure:    
             titl = str("file_")+ im_ori_name  + str("_roi")+str(roi_i) +  str("c") + str(color_i)
             if  fri==0:
                 #show track example:
+                #image
                 fig1, axs1=plt.subplots(2,2)
                 axs1[0,0].imshow(roi)
-                axs1[0,0].set_title('original') 
-                axs1[0,1].imshow(roi_tr)
-                axs1[0,1].set_title('work_image')
-                axs1[0,1].plot(ym,xm,'ro')
-                axs1[1,0].imshow(msk)
-                axs1[1,0].set_title('binary & COM') 
-                axs1[1,0].plot(ym,xm,'ro')  
+                axs1[0,0].set_title('original')
+                axs1[0,0].plot(ym,xm,'ro')
+                
                 print("a20a:" + titl + str("frame") + str(fri))
-        #end result I: plots
-        axs1[1,1].plot(all_xg,'ro',markersize=2)
-        axs1[1,1].set_title('XY-tracked') 
-        axs1[1,1].plot(all_yg,'bo',markersize=2)
-        axs1[1,1].plot(all_R_minor,'ko',markersize=2)
-        axs1[1,1].plot(all_rmaj,'mo',markersize=2)
-        axs1[1,1].set_ylabel('position')
+        
+    
+        #end result
+        #set up csv for tracking data:
+        csv_target=out_path_name  +str("file_")+ im_ori_name  + str("_roi")+str(roi_i) + "_xy_tracked.csv"
+        with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
+            # create the csv writer
+            writer = csv.writer(csv_f, delimiter=";")
+            writer.writerow(
+                    [
+                        str("X"),
+                        str("Y"),
+                        str("R_minor"), 
+                        str("R_major"),
+                        str("area"),
+                        str("perimeter"),
+                        str("roundness"),  
+                    ]
+                )
+        csv_f.close()
+
+
+
+        frax=np.arange(len(all_roundness))
+        roundness_plot=np.array(all_roundness)
+        R_minor_plot=np.array(all_R_minor)
+        R_major_plot=np.array(all_R_major)
+        areas_plot=np.array(all_areas)
+
+        valid_idx=np.nonzero(np.array(all_roundness)>0)
+        #main axes
+        axs1[0,1].plot(frax[valid_idx], R_minor_plot[valid_idx],'ko-')
+        axs1[0,1].plot(frax[valid_idx], R_major_plot[valid_idx],'ro-')
+        axs1[0,1].set_ylabel('ax length')
+        axs1[0,1].set_xlabel('frame no.')
+        axs1[0,1].legend(['R_minor', 'R_major'],loc='best', fontsize='xx-small')
+        
+        axs1[1,0].plot(frax[valid_idx], areas_plot[valid_idx],'bo-')
+        axs1[1,0].set_ylabel('area')
+        axs1[1,0].set_xlabel('frame no.')
+ 
+        axs1[1,1].plot(frax[valid_idx], roundness_plot[valid_idx],'ko-')
+        axs1[1,1].set_ylabel('roundness')
         axs1[1,1].set_xlabel('frame no.')
-        axs1[1,1].legend(['X', 'Y', 'R_minor', 'R_major'],loc='best', fontsize='xx-small')
         outfig_name = out_path_name  + titl + str("frame") + str(fri)+ str("_track_example.png")
         fig1.savefig(outfig_name)
         plt.close()
@@ -126,20 +165,7 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
         fig.savefig(overviewpath / f"{(mtg_plotname)}", dpi=500)
         plt.close('all')
 
-        #set up csv for tracking data:
-        csv_target=out_path_name  +str("file_")+ im_ori_name  + str("_roi")+str(roi_i) + "_xy_tracked.csv"
-        with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
-            # create the csv writer
-            writer = csv.writer(csv_f, delimiter=";")
-            writer.writerow(
-                    [
-                        str("X"),
-                        str("Y"),
-                        str("R_minor"), 
-                        str("R_major"),  
-                    ]
-                )
-        csv_f.close()
+        
         #save tracking results per GUV as csv
         for fr_i, x in enumerate(all_xg):
             with open(csv_target, "a",newline='') as csv_g:  
@@ -150,7 +176,10 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
                         all_xg[fr_i],
                         all_yg[fr_i],
                         all_R_minor[fr_i], 
-                        all_rmaj[fr_i],
+                        all_R_major[fr_i],
+                        all_areas[fr_i],
+                        all_perimeters[fr_i],
+                        all_roundness[fr_i],
                     ]
                 )
         csv_g.close()
@@ -173,15 +202,26 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
         ##load csv::
         csv_source=in_path_name_tracked  +str("file_")+ im_ori_name  + str("_roi")+str(roi_i) + "_xy_tracked.csv"
 
-        all_xg,all_yg,all_R_minor, all_R_major = guv_io.get_XY_info(csv_source)
+        all_xg,all_yg,all_R_minor, all_R_major, all_areas,all_perimeters, all_roundness = guv_io.get_XY_info(csv_source)
         data_out=np.vstack((all_xg, 
                             all_yg, 
                             all_R_minor,
-                            all_R_major))
-        header_out=[str("X"), str("Y"),  str("R_minor"), str("R_major")]
+                            all_R_major,
+                            all_areas,
+                            all_areas,
+                            all_perimeters, 
+                            all_roundness))
+        header_out=[str("X"), str("Y"),  str("R_minor"), str("R_major"), str("all_areas"),str("area"), str("perimeter"), str("roundness")]
 
         fig1, axs1=plt.subplots(3,initval.N_colors)
-        for color_i in np.arange(initval.N_colors):     
+        for color_i in np.arange(initval.N_colors): 
+            csv_target=out_path_name  +str("file_")+ im_ori_name  + str("_roi")+str(roi_i) + "_all_data.csv"
+            with open(csv_target, "w",newline='') as csv_h:  # will overwrite existing
+                # create the csv writer
+                writer = csv.writer(csv_h, delimiter=";")
+                writer.writerow(header_out)
+                csv_h.close()
+
             #load tracking channel:
             roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
             maskname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(initval.tracking_key) + str("_BW.tif")
@@ -267,12 +307,17 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                     else:
                         all_outside_I.append(0)
                     # 2) edge intensity (note we treat the edge differently:
-                    all_edge_I.append(np.mean(np.max(edge_map, axis=0)))
-                    # 3) edge length from smoothened contour:
-                    true_x, true_y = guv_tools.get_xy_contour(edge_map, presets)
-                    LC, LR, RC=guv_tools.measure_perimeter(true_x, true_y)
-                    all_LC.append(LC)
-                    all_LC_excess.append(LC/LR)
+                    if np.sum((np.shape(edge_map)))>0:
+                        all_edge_I.append(np.nanmean(np.nanmax(edge_map, axis=0)))
+                        # 3) edge length from smoothened contour:
+                        true_x, true_y = guv_tools.get_xy_contour(edge_map, presets)
+                        LC, LR, RC=guv_tools.measure_perimeter(true_x, true_y)
+                        all_LC.append(LC)
+                        all_LC_excess.append(LC/LR)
+                    else:
+                        all_edge_I.append(0)
+                        all_LC.append(0)
+                        all_LC_excess.append(0)
                 else:
                     all_inside_I.append(0)
                     all_edge_I.append(0)
@@ -312,20 +357,15 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
         fig1.savefig(outfig_name)
         plt.close()
         
-        if 1:
-            #scv:
-            csv_target=out_path_name  +str("file_")+ im_ori_name  + str("_roi")+str(roi_i) + "_all_data.csv"
-            with open(csv_target, "w",newline='') as csv_h:  # will overwrite existing
+        #csv:
+        
+        #save results per GUV as csv
+        for row in np.transpose(data_out):
+            with open(csv_target, "a",newline='') as csv_hi:  
                 # create the csv writer
-                writer = csv.writer(csv_h, delimiter=";")
-                writer.writerow(header_out)
-            #save results per GUV as csv
-            for row in np.transpose(data_out):
-                with open(csv_target, "a",newline='') as csv_h:  
-                    # create the csv writer
-                    writer = csv.writer(csv_h, delimiter=";")    
-                    writer.writerow(row)
-            csv_h.close()
+                writer = csv.writer(csv_hi, delimiter=";")    
+                writer.writerow(row)
+            csv_hi.close()
 
 
 def show_roi_overviews(im_ori_name,guv_xyr,initval):

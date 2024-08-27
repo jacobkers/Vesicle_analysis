@@ -92,8 +92,8 @@ def get_exps(exp_idx):
     Exp5.mainpath_in=in_root+ str("Test_subdir_tif/")
     Exp5.mainpath_out=out_root+ str("Test_subdir_tif/")
     Exp5.subdir = str("Real time fusion and morphology/")
-    Exp5.movienames = ["nd462", "nd463"]
-    #Exp5.movienames = ["nd463"]
+    Exp5.movienames = ["nd462", "nd463" ,"nd465"]
+    Exp5.movienames = ["nd465"]
     Exp5.suffix='.tif'
     Exp5.sequence='time_trace'
     Exp5.N_colors=2

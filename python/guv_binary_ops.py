@@ -6,7 +6,7 @@ other info:
 # https://www.geeksforgeeks.org/image-segmentation-using-morphological-operation/
 # https://docs.opencv.org/3.3.1/d3/db4/tutorial_py_watershed.html
 """
-
+import math as mt
 import matplotlib.pyplot as plt
 import numpy as np
 from skimage import measure
@@ -228,6 +228,9 @@ def  work_binaries(roi_tr):
         xc,yc = regprops[0].centroid
         rmin=regprops[0].axis_minor_length/2
         rmaj=regprops[0].axis_major_length/2
+        area=regprops[0].area
+        perimeter= regprops[0].perimeter
+        roundness = 4*mt.pi*(area)/(perimeter**2)
         if 0: #test
             plt.close('all')
             fig, axs = plt.subplots(1,2)
@@ -240,12 +243,15 @@ def  work_binaries(roi_tr):
             dum=1
             plt.close('all')
     else:
-        xc = cc/2
-        yc = rr/2
-        rmin = rr/4
-        rmaj = rr/4
-        
-    return  msk, BW_edge, xc, yc, rmin, rmaj
+        xc = 0
+        yc = 0
+        rmin = 0
+        rmaj = 0
+        rmaj = 0
+        area= 0
+        perimeter= 0
+        roundness= 0
+    return  msk, BW_edge, xc, yc, rmin, rmaj, area, perimeter, roundness
 
 
 # show:

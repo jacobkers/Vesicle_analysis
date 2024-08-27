@@ -56,7 +56,7 @@ def treshold_it(im):
     return im_tres, im_BW
 
 def get_xy_contour(edge_map, presets):
-    g# et a smooth xy contour from polar coordinates
+    # get a smooth xy contour from polar coordinates
     # assume an egde running through a polar map. 
     labda=3    
     edge_map=smooth_it(edge_map,labda)
@@ -234,11 +234,11 @@ def highlight_roi(image,x0,y0,r0):
             roi[0:hiy-loy, 0:hix-lox] = image[loy:hiy, lox:hix]
         if len(dims)==3:
             roi[0:hiy-loy, 0:hix-lox] = image[loy:hiy, lox:hix,:]
-    mxr=np.max(roi)
-    image_roi[loy:hiy, lox]=0.5*mxr
-    image_roi[loy:hiy, hix-1]=0.5*mxr
-    image_roi[loy, lox:hix]=0.5*mxr
-    image_roi[hiy-1, lox:hix]=0.5*mxr
+        mxr=np.max(roi)
+        image_roi[loy:hiy, lox]=0.9*mxr
+        image_roi[loy:hiy, hix-1]=0.9*mxr
+        image_roi[loy, lox:hix]=0.9*mxr
+        image_roi[hiy-1, lox:hix]=0.9*mxr
 
     return image_roi
 

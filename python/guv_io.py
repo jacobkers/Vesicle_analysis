@@ -27,6 +27,9 @@ def get_XY_info(csv_source):
     Y = []
     R_minor = []
     R_major = []
+    areas=[]
+    perimeters=[]
+    roundness=[]
     with open(csv_source) as f:
         reader = csv.DictReader(f, delimiter=";")
         for row in reader:
@@ -34,8 +37,10 @@ def get_XY_info(csv_source):
             Y.append(float(row["Y"]))
             R_minor.append(float(row["R_minor"]))
             R_major.append(float(row["R_major"]))
-
-    return X, Y,R_minor, R_major
+            areas.append(float(row["area"]))
+            perimeters.append(float(row["perimeter"])) 
+            roundness.append(float(row["roundness"]))
+    return X, Y,R_minor, R_major, areas, perimeters, roundness
 
 def get_roi_info(csv_source):
     """ ead roi data as acquired via ImageJ:
@@ -228,20 +233,28 @@ def cut_tif_to_roi_tiffs_hardwired(im_ori_name,guv_xyr,initval):
     #standard setting up:
     source = initval.mainpath_in + initval.subdir + im_ori_name + str(initval.suffix)
     datapath_out_name = initval.mainpath_out + initval.subdir 
-    roipath_name = initval.mainpath_out + initval.subdir +str("/A10_rois")   
+    roipath_name = initval.mainpath_out + initval.subdir +str("/A10_rois")
+    overviewpath_name = initval.mainpath_out + initval.subdir +str("/A100_overviews")
+    
     outpath = Path(datapath_out_name)
+    overviewpath= Path(overviewpath_name)
     if not outpath.is_dir():
         outpath.mkdir()
+       
     roipath = Path(roipath_name)
     if not roipath.is_dir():
-        roipath.mkdir()   
+        roipath.mkdir() 
+        overviewpath.mkdir()  
     #simple load:
     st = io.imread(source)
-    ff,nc,dx,dy=np.shape(st)
-    st=np.moveaxis(st,1,0)  #CTXY for easy color split
+    idx=np.argmin(np.shape(st))
+    st=np.moveaxis(st,idx,0)  #CTXY for easy color split
+    nc,ff,dx,dy=np.shape(st)
+
+    
 
     #work each GUV and its center coordinates:
-    fig, axs = plt.subplots(1,initval.N_colors)
+    fig, axs = plt.subplots(1,1)
     for roi_i, cd in enumerate(guv_xyr):      
         for color_i, color_i_trace in enumerate(st):
             for fri, chan in enumerate(color_i_trace):                  
@@ -260,20 +273,20 @@ def cut_tif_to_roi_tiffs_hardwired(im_ori_name,guv_xyr,initval):
                     roi=np.zeros((ff,rr,cc),dtype=int)
                 roi[fri,:,:]=roi_1frame
                 
-                # save overview plots per GUVp
+                # save overview plots per GUVp, last channel
                 if roi_i==0 and fri==0:
-                    ovv_im=chan
+                    ovv_im=np.log(chan)
                 if fri == 0:
                     ovv_im=guv_tools.highlight_roi(ovv_im, x0, y0, r0)
-                    axs[color_i].imshow(ovv_im)
-                    axs[color_i].set_title(color_i)
-                    fontprops = fm.FontProperties(size = 12, family = 'serif')
+                    axs.imshow(ovv_im)
+                    axs.set_title(im_ori_name)
+                    fontprops = fm.FontProperties(size = 8, family = 'serif')
                     kwargs_ = {
                             'fontproperties': fontprops,
                             'color': 'white',
                             }
                     kwargs_.update(kwargs_)
-                    axs[color_i].annotate(str(roi_i), xy = (x0, y0), xycoords = 'data',  **kwargs_)
+                    axs.annotate(str(roi_i), xy = (x0-6, y0+6), xycoords = 'data',  **kwargs_)
                     fig.tight_layout()             
 
             #build a savename, save the tiff:
@@ -284,7 +297,7 @@ def cut_tif_to_roi_tiffs_hardwired(im_ori_name,guv_xyr,initval):
                
     fig.show()
     overviewname=str("from_")+ im_ori_name + str("_roi_overview.png")
-    fig.savefig(roipath / f"{overviewname}")
+    fig.savefig(overviewpath / f"{overviewname}")
     dum=1
 
 
