@@ -2,6 +2,7 @@
 Jacob Kers 2024
 
  """
+import time as tm
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
@@ -215,12 +216,7 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
 
         fig1, axs1=plt.subplots(3,initval.N_colors)
         for color_i in np.arange(initval.N_colors): 
-            csv_target=out_path_name  +str("file_")+ im_ori_name  + str("_roi")+str(roi_i) + "_all_data.csv"
-            with open(csv_target, "w",newline='') as csv_h:  # will overwrite existing
-                # create the csv writer
-                writer = csv.writer(csv_h, delimiter=";")
-                writer.writerow(header_out)
-                csv_h.close()
+            
 
             #load tracking channel:
             roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
@@ -235,7 +231,9 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
             if len(roi_shp)==3: #stack
                 n_frames=roi_shp[0]
             all_inside_I=[]
-            all_edge_I=[]
+            all_edge_I_mx=[]
+            all_edge_I_sum=[]
+            all_edge_I_sum_std=[]
             all_outside_I=[]
             all_LC=[]
             all_LC_excess=[]
@@ -308,19 +306,25 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                         all_outside_I.append(0)
                     # 2) edge intensity (note we treat the edge differently:
                     if np.sum((np.shape(edge_map)))>0:
-                        all_edge_I.append(np.nanmean(np.nanmax(edge_map, axis=0)))
+                        all_edge_I_mx.append(np.nanmean(np.nanmax(edge_map, axis=0)))
+                        all_edge_I_sum.append(np.nansum(np.nansum(edge_map, axis=0))) 
+                        all_edge_I_sum_std.append(np.nanstd(np.nansum(edge_map, axis=0)))
                         # 3) edge length from smoothened contour:
                         true_x, true_y = guv_tools.get_xy_contour(edge_map, presets)
                         LC, LR, RC=guv_tools.measure_perimeter(true_x, true_y)
                         all_LC.append(LC)
                         all_LC_excess.append(LC/LR)
                     else:
-                        all_edge_I.append(0)
+                        all_edge_I_mx.append(0)
+                        all_edge_I_sum.append(0)
+                        all_edge_I_sum_std.append(0)
                         all_LC.append(0)
                         all_LC_excess.append(0)
                 else:
                     all_inside_I.append(0)
-                    all_edge_I.append(0)
+                    all_edge_I_mx.append(0)
+                    all_edge_I_sum.append(0)
+                    all_edge_I_sum_std.append(0)
                     all_outside_I.append(0)
                     all_LC.append(0)
                     all_LC_excess.append(0)
@@ -331,24 +335,32 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                     axs1[0,color_i].imshow(edge_map)
                     axs1[0,color_i].set_title(str("color") + str(color_i)) 
                     print("a20b:" + titl + str("frame") + str(fri))
-            #end result:
+            #end results:
             
-            axs1[1,color_i].plot(all_edge_I,'bo',markersize=2)
+
+
+            axs1[1,color_i].plot(all_edge_I_mx,'bo',markersize=2)
             axs1[1,color_i].set_ylabel("I, a.u.")
             axs1[2,color_i].legend(['edge'],loc='best', fontsize='xx-small')
             axs1[2,color_i].plot(all_LC_excess,'ro', markersize=2)
             axs1[2,color_i].set_xlabel("frames")
             color_data=np.vstack((all_inside_I, 
-                                  all_edge_I, 
+                                  all_edge_I_mx,
+                                  all_edge_I_sum,
+                                  all_edge_I_sum_std, 
                                   all_outside_I,
                                   all_LC,
                                   all_LC_excess))
             color_header=[str("color") + str(color_i)+str("_inside"), 
-                          str("c") + str(color_i)+str("_edge"),
+                          str("c") + str(color_i)+str("_edge_mx"),
+                          str("c") + str(color_i)+str("_edge_sum"),
+                          str("c") + str(color_i)+str("_edge_sum_std"),
                           str("c") + str(color_i)+str("_outside"),
                           str("c") + str(color_i)+str("_contour_L"),
                           str("c") + str(color_i)+str("_contour_ratio"),
                         ]
+            
+
             data_out=np.vstack((data_out,color_data))
             header_out=np.hstack((header_out, color_header))
         dum=1
@@ -358,14 +370,20 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
         plt.close()
         
         #csv:
-        
+        csv_target=out_path_name  +str("file_")+ im_ori_name  + str("_roi")+str(roi_i) + "_all_data.csv"
+        with open(csv_target, "w",newline='') as csv_h:  # will overwrite existing
+            # create the csv writer
+            writer = csv.writer(csv_h, delimiter=";")
+            writer.writerow(header_out)
+        csv_h.close()
+        tm.sleep(2) 
         #save results per GUV as csv
         for row in np.transpose(data_out):
             with open(csv_target, "a",newline='') as csv_hi:  
                 # create the csv writer
                 writer = csv.writer(csv_hi, delimiter=";")    
                 writer.writerow(row)
-            csv_hi.close()
+        csv_hi.close()
 
 
 def show_roi_overviews(im_ori_name,guv_xyr,initval):
