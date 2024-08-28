@@ -107,8 +107,10 @@ if initval.suffix =='.tif'and initval.sequence=='time_trace':
     csv_path_in_A20a = Path(load_dirname_A20a)
     csv_path_in_A20b = Path(load_dirname_A20b)
     guv_labels=[]
+    #select movie and guvs:
     for this_guv in Guv_list:
-        if this_guv.use_it ==1 and this_guv.movie_id==462:
+        #if this_guv.movie_id==462 and this_guv.use_it ==1:
+        if this_guv.use_it ==1:
             guv_labels.append(this_guv.label)
             data=[]
             csv_source=Path(load_dirname_A20b + this_guv.label +"_all_data.csv")
@@ -144,44 +146,45 @@ if initval.suffix =='.tif'and initval.sequence=='time_trace':
             #valid_idx=np.nonzero(np.array(c0_edge_mx)>0)[0]
             #frax= [frax[i] for i in valid_idx]
             #area= [area[i] for i in valid_idx]
+            sz=4
 
-            axs[0,0].plot(frax, area,'o', markersize=2)
+            axs[0,0].plot(frax, area,'o', markersize=sz)
             axs[0,0].set_ylabel("area")
             axs[0,0].set_xlabel("frames")
             axs[0,0].set_title("area")  
 
-            axs[0,1].plot(frax,roundness, 'o', markersize=2)
+            axs[0,1].plot(frax,roundness, 'o', markersize=sz)
             axs[0,1].set_xlabel("frames")
             axs[0,1].set_ylabel("roundness")
             axs[0,1].set_title("roundness")  
 
-            axs[0,2].plot(frax,c0_edge_mx, 'o', markersize=2)
+            axs[0,2].plot(frax,c0_edge_mx, 'o', markersize=sz)
             axs[0,2].set_xlabel("frames")
             axs[0,2].set_ylabel("edge max")
             axs[0,2].set_title("edge max CH0") 
 
-            axs[0,3].plot(frax,c1_edge_mx, 'o', markersize=2)
+            axs[0,3].plot(frax,c1_edge_mx, 'o', markersize=sz)
             axs[0,3].set_xlabel("frames")
             axs[0,3].set_ylabel("edge max")
             axs[0,3].set_title("edge max CH1") 
 
-            axs[1,2].plot(frax,c0_edge_sm, 'o', markersize=2)
+            axs[1,2].plot(frax,c0_edge_sm, 'o', markersize=sz)
             axs[1,2].set_xlabel("frames")
             axs[1,2].set_ylabel("sum")
             axs[1,2].set_title("edge sum CH0")
 
-            axs[1,1].plot(frax,c1_edge_sm_std, 'o', markersize=2)
+            axs[1,1].plot(frax,c1_edge_sm_std, 'o', markersize=sz)
             axs[1,1].set_xlabel("frames")
             axs[1,1].set_ylabel("sum_std")
             axs[1,1].set_title("edge sum_std CH1")
             axs[1,1].legend(guv_labels,loc='best', fontsize='xx-small') 
 
-            axs[1,3].plot(frax,c1_edge_sm, 'o', markersize=2)
+            axs[1,3].plot(frax,c1_edge_sm, 'o', markersize=sz)
             axs[1,3].set_xlabel("frames")
             axs[1,3].set_ylabel("sum")
             axs[1,3].set_title("edge sum CH1")
 
-            axs[1,0].plot(frax, ratio1, 'o', markersize=2)
+            axs[1,0].plot(frax, ratio1, 'o', markersize=sz)
             axs[1,0].set_xlabel("frames")
             axs[1,0].set_ylabel("ratio, a.u.")
             axs[1,0].set_title("edgeIsm/area")
