@@ -35,27 +35,21 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
     fig, axs = plt.subplots(1, 3)
 
     for roi_i, cd in enumerate(guv_xyr):  #work each GUV and its center coordinates:
-
+    #1) load tracking channels and add them up in one stack-to-track:
         for ci, color_i in enumerate(initval.tracking_key):
-            #load tracking channel:
             roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
             if ci==0:
                 roi_stack=io.imread(roipath / f"{roiname}")
             else:
                 roi_stack=roi_stack + io.imread(roipath / f"{roiname}")
-        
+    #2) obtain basic area properties from this tracking image:
         if roi_stack.ndim == 2: roi_stack = roi_stack[np.newaxis,:] # expand to third dimension
+        #set up:
+        all_xg=[];     all_yg=[];          all_R_minor=[];  all_R_major=[]
+        all_areas=[];  all_perimeters=[];  all_roundness=[]
+        mask_stack=0*roi_stack
         roi_shp=np.shape(roi_stack)
         n_frames=roi_shp[0]
-        all_xg=[]
-        all_yg=[]
-        all_R_minor=[]
-        all_R_major=[]
-        all_areas=[]
-        all_perimeters=[]
-        all_roundness=[]
-        
-        mask_stack=0*roi_stack
         for fri in np.arange(n_frames):
             roi=roi_stack[fri,:,:]
             if fri==0:
@@ -64,6 +58,7 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
             # smooth, treshold:    
             roi_tr=roi-np.min(roi)
             if np.max(np.array(roi_tr))>0:
+                roi_tr=guv_tools.soft_mask_it(roi_tr)
                 roi_tr=guv_tools.smooth_it(roi_tr,labda=2)
                 roi_tr= roi_tr.astype(int)
                 #roi_tr= guv_tools.treshold_it(roi_tr)[0]

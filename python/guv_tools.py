@@ -313,6 +313,39 @@ def donut_mask_it(roi):
 
     return roi_out
 
+def soft_mask_it(roi):
+    """
+    make donut-shaped mask to improve QI tracking of versicle edge.
+    Note: we assume a roi is taken as 2 times the approximate vesicle diameter 
+    @author: jkerssemakers, 2024
+    """
+    rr,cc =np.shape(roi)
+    approx_rim=rr/4  
+    rim_lo=0.1*approx_rim
+    rim_hi=1.7*approx_rim
+    rim_sharpness=rr/40
+    x, y = np.linspace(-cc / 2, cc / 2, cc), np.linspace(-rr / 2, rr / 2, rr)
+    X, Y = np.meshgrid(x, y)
+    radii = np.hypot(X, Y)
+    donut_mask=0*radii+1
+    #smooth band:
+    if 1:
+        #donut_mask[radii<rim_lo]=0
+        donut_mask[radii>rim_hi]=0
+        rimsmooth_lo=1-np.exp(-(radii-rim_lo)/rim_sharpness)
+        rimsmooth_hi=1-np.exp(-(rim_hi-radii)/rim_sharpness)
+        donut_mask=donut_mask*rimsmooth_hi
+        roi_out=roi*donut_mask
+    if 0: #test
+        fig, axs = plt.subplots(1,1)
+        axs.imshow(donut_mask)
+        #axs.plot(donut_mask)
+        fig.tight_layout()
+        fig.show()
+        dum=1
+
+    return roi_out
+
 def make_montage(tiff_in, format_out='tiff'):
     """ from a single t (or z) stack, build a montage for evaluation purposes """
     fovs,rr,cc =np.shape(tiff_in)
