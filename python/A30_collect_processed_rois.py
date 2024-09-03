@@ -132,19 +132,20 @@ if initval.suffix =='.tif'and initval.sequence=='time_trace':
             ratio1=[]
             for fri, row in enumerate(data):
                 c1_mean_peaks=(float(row['c1_edge_mx']))
+                c1_sum=float(row['c1_edge_sum'])
                 okay_point=float(row['roundness'])>0 and float(row['R_minor'])>0 and c1_mean_peaks>400
                 if okay_point:
                     #fetch work parameters:
                     axis_major=float(row['R_major'])
                     axis_minor=float(row['R_minor'])
-                    c1_sum=float(row['c1_edge_sum'])
+                    
                     c1_std_sum=float(row['c1_edge_sum_std'])
                     #c1_mean_peaks=(float(row['c1_edge_mx']))
                     c0_mean_peaks=(float(row['c0_edge_mx']))
                     #build plots:
                     #plot_ax.append(fri)
                     axlabel="frames"
-                    plot_ax.append(c1_mean_peaks)
+                    plot_ax.append(c1_sum)
                     axlabel="edge_I"
                     area.append(float(row['area']))
                     roundness.append(float(row['roundness']))
