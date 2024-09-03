@@ -109,8 +109,8 @@ if initval.suffix =='.tif'and initval.sequence=='time_trace':
     guv_labels=[]
     #select movie and guvs:
     for this_guv in Guv_list:
-        #if this_guv.movie_id==462 and this_guv.use_it ==1:
-        if this_guv.use_it ==1:
+        if this_guv.movie_id==462 and this_guv.use_it ==1:
+        #if this_guv.use_it ==1:
             guv_labels.append(this_guv.label)
             data=[]
             csv_source=Path(load_dirname_A20b + this_guv.label +"_all_data.csv")
@@ -120,74 +120,86 @@ if initval.suffix =='.tif'and initval.sequence=='time_trace':
                     data.append(row)
             #collect and plot
   
-            frax=[]
+            plot_ax=[]
             area=[]
             roundness=[]
+            major_minor=[]
             c0_edge_mx=[]
             c1_edge_mx=[]
             c0_edge_sm=[]
             c1_edge_sm=[]
-            c0_edge_sm_std=[]
-            c1_edge_sm_std=[]
+            c1_std_sum_rel=[]
             ratio1=[]
             for fri, row in enumerate(data):
-                okay_point=float(row['roundness'])>0
+                c1_mean_peaks=(float(row['c1_edge_mx']))
+                okay_point=float(row['roundness'])>0 and float(row['R_minor'])>0 and c1_mean_peaks>400
                 if okay_point:
-                    frax.append(fri)
+                    #fetch work parameters:
+                    axis_major=float(row['R_major'])
+                    axis_minor=float(row['R_minor'])
+                    c1_sum=float(row['c1_edge_sum'])
+                    c1_std_sum=float(row['c1_edge_sum_std'])
+                    #c1_mean_peaks=(float(row['c1_edge_mx']))
+                    c0_mean_peaks=(float(row['c0_edge_mx']))
+                    #build plots:
+                    #plot_ax.append(fri)
+                    axlabel="frames"
+                    plot_ax.append(c1_mean_peaks)
+                    axlabel="edge_I"
                     area.append(float(row['area']))
                     roundness.append(float(row['roundness']))
-                    c0_edge_mx.append(float(row['c0_edge_mx']))
-                    c1_edge_mx.append(float(row['c1_edge_mx']))
+                    major_minor.append(axis_major/axis_minor)
+                    c0_edge_mx.append(c0_mean_peaks)
+                    c1_edge_mx.append(c1_mean_peaks)
                     c0_edge_sm.append(float(row['c0_edge_sum']))
-                    c1_edge_sm.append(float(row['c1_edge_sum']))
-                    c0_edge_sm_std.append(float(row['c0_edge_sum_std']))
-                    c1_edge_sm_std.append(float(row['c1_edge_sum_std']))
+                    c1_edge_sm.append(c1_sum)
                     ratio1.append(float(row['c1_edge_sum'])/float(row['area']))
+                    c1_std_sum_rel.append(c1_std_sum/c1_sum)
             #valid_idx=np.nonzero(np.array(c0_edge_mx)>0)[0]
-            #frax= [frax[i] for i in valid_idx]
+            #plot_ax= [plot_ax[i] for i in valid_idx]
             #area= [area[i] for i in valid_idx]
             sz=4
-
-            axs[0,0].plot(frax, area,'o', markersize=sz)
+            axs[0,0].plot(plot_ax, area,'o-', markersize=sz)
             axs[0,0].set_ylabel("area")
-            axs[0,0].set_xlabel("frames")
+            axs[0,0].set_xlabel(axlabel)
             axs[0,0].set_title("area")  
 
-            axs[0,1].plot(frax,roundness, 'o', markersize=sz)
-            axs[0,1].set_xlabel("frames")
+            axs[0,1].plot(plot_ax,roundness, 'o-', markersize=sz)
+            axs[0,1].set_xlabel(axlabel)
             axs[0,1].set_ylabel("roundness")
             axs[0,1].set_title("roundness")  
 
-            axs[0,2].plot(frax,c0_edge_mx, 'o', markersize=sz)
-            axs[0,2].set_xlabel("frames")
+            axs[0,2].plot(plot_ax,c0_edge_mx, 'o-', markersize=sz)
+            axs[0,2].set_xlabel(axlabel)
             axs[0,2].set_ylabel("edge max")
             axs[0,2].set_title("edge max CH0") 
 
-            axs[0,3].plot(frax,c1_edge_mx, 'o', markersize=sz)
-            axs[0,3].set_xlabel("frames")
+            axs[0,3].plot(plot_ax,c1_edge_mx, 'o-', markersize=sz)
+            axs[0,3].set_xlabel(axlabel)
             axs[0,3].set_ylabel("edge max")
             axs[0,3].set_title("edge max CH1") 
+            axs[0,3].legend(guv_labels,loc='best', fontsize='xx-small') 
 
-            axs[1,2].plot(frax,c0_edge_sm, 'o', markersize=sz)
-            axs[1,2].set_xlabel("frames")
+            axs[1,2].plot(plot_ax,c0_edge_sm, 'o-', markersize=sz)
+            axs[1,2].set_xlabel(axlabel)
             axs[1,2].set_ylabel("sum")
             axs[1,2].set_title("edge sum CH0")
 
-            axs[1,1].plot(frax,c1_edge_sm_std, 'o', markersize=sz)
-            axs[1,1].set_xlabel("frames")
-            axs[1,1].set_ylabel("sum_std")
-            axs[1,1].set_title("edge sum_std CH1")
-            axs[1,1].legend(guv_labels,loc='best', fontsize='xx-small') 
+            axs[1,1].plot(plot_ax,c1_std_sum_rel, 'o-', markersize=sz)
+            axs[1,1].set_xlabel(axlabel)
+            axs[1,1].set_ylabel("sum_std/sum")
+            axs[1,1].set_title("relative edge-I variation")
+            
 
-            axs[1,3].plot(frax,c1_edge_sm, 'o', markersize=sz)
-            axs[1,3].set_xlabel("frames")
+            axs[1,3].plot(plot_ax,c1_edge_sm, 'o-', markersize=sz)
+            axs[1,3].set_xlabel(axlabel)
             axs[1,3].set_ylabel("sum")
-            axs[1,3].set_title("edge sum CH1")
+            axs[1,3].set_title("sum signal")
 
-            axs[1,0].plot(frax, ratio1, 'o', markersize=sz)
-            axs[1,0].set_xlabel("frames")
+            axs[1,0].plot(plot_ax, major_minor, 'o-', markersize=sz)
+            axs[1,0].set_xlabel(axlabel)
             axs[1,0].set_ylabel("ratio, a.u.")
-            axs[1,0].set_title("edgeIsm/area")
+            axs[1,0].set_title("major/minor")
             
     fig.show()
     dum=1

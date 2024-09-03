@@ -181,6 +181,31 @@ def QI_map(im, QI, x0, y0):
     
     return allprofiles
 
+def QI_map_analyze(map, presets):
+    #condensed QI mapping: get  parameters from the polar map
+    #(since this map is non-cartesian, parameters as sum intnesity need to be adjusted)
+    #output values are as if the pattern had regular pixel sampling
+    rr, cc=np.shape(map)
+    rads_per_segment=2*mt.pi/cc
+    sum_profile=[]
+    for ci,X_section in enumerate(np.transpose(map)):
+        area_sm=[]
+        areaI_sm=[]
+        for ri, sample_val in enumerate(X_section):
+            area_i=rads_per_segment*ri/(presets['radialoversampling']**2)
+            area_sm.append(area_i)
+            areaI_sm.append(area_i*sample_val)
+        segment_area=np.sum( area_sm)
+        segment_areaI=np.sum(areaI_sm)
+        sum_profile.append(segment_areaI/segment_area)
+    if 0:
+        fig, axs = plt.subplots(1,1)
+        axs.plot(sum_profile)
+        fig.show()
+        plt.close('all')
+
+    return sum_profile
+
 def check_limits(x0,y0, dims):
     in_range=True
     if (x0<0) or (x0 >= dims[0]) or (y0<0) or (y0 >= dims[1]):
@@ -345,6 +370,8 @@ def soft_mask_it(roi):
         dum=1
 
     return roi_out
+
+
 
 def make_montage(tiff_in, format_out='tiff'):
     """ from a single t (or z) stack, build a montage for evaluation purposes """
