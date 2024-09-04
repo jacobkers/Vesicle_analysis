@@ -227,7 +227,8 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                 n_frames=roi_shp[0]
             all_inside_I=[]
             all_edge_I_mx=[]
-            all_edge_I_sum=[]
+            all_edge_I_sum_msk=[]
+            all_edge_I_sum_pol=[]
             all_edge_I_sum_std=[]
             all_outside_I=[]
             all_LC=[]
@@ -301,10 +302,15 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                         all_outside_I.append(0)
                     # 2) edge intensity (note we treat the edge differently:
                     if np.sum((np.shape(edge_map)))>0:
-                        sum_profile=guv_tools.QI_map_analyze(edge_map, presets)
+                        #a) maximum of peak
                         all_edge_I_mx.append(np.nanmean(np.nanmax(edge_map, axis=0)))
-                        all_edge_I_sum.append(np.nansum(sum_profile))
-                        all_edge_I_sum_std.append(np.nansum(sum_profile))
+                        #b1) sum of edge mask:
+                        edge_mask_sum=np.sum(edge_mask*roi)
+                        #b2) sampling-corrected sum of polar map
+                        sum_profile=guv_tools.QI_map_analyze(edge_map, presets)
+                        all_edge_I_sum_msk.append(edge_mask_sum)                     
+                        all_edge_I_sum_pol.append(np.nansum(sum_profile))
+                        all_edge_I_sum_std.append(np.nanstd(sum_profile))
                         # 3) edge length from smoothened contour:
                         true_x, true_y = guv_tools.get_xy_contour(edge_map, presets)
                         LC, LR, RC=guv_tools.measure_perimeter(true_x, true_y)
@@ -312,14 +318,16 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                         all_LC_excess.append(LC/LR)
                     else:
                         all_edge_I_mx.append(0)
-                        all_edge_I_sum.append(0)
+                        all_edge_I_sum_msk.append(0)
+                        all_edge_I_sum_pol.append(0)
                         all_edge_I_sum_std.append(0)
                         all_LC.append(0)
                         all_LC_excess.append(0)
                 else:
                     all_inside_I.append(0)
                     all_edge_I_mx.append(0)
-                    all_edge_I_sum.append(0)
+                    all_edge_I_sum_msk.append(0)
+                    all_edge_I_sum_pol.append(0)
                     all_edge_I_sum_std.append(0)
                     all_outside_I.append(0)
                     all_LC.append(0)
@@ -333,17 +341,17 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                     print("a20b:" + titl + str("frame") + str(fri))
             #end results:
             
-
-
-            axs1[1,color_i].plot(all_edge_I_sum,'bo',markersize=2)
+            axs1[1,color_i].plot(all_edge_I_sum_pol,'bo',markersize=2)
+            axs1[1,color_i].plot(all_edge_I_sum_msk,'bo',markersize=2)
             axs1[1,color_i].set_ylabel("I_sum, a.u.")
+            axs1[1,color_i].legend(['pol', 'msk'],loc='best', fontsize='xx-small')
             axs1[2,color_i].legend(['edge'],loc='best', fontsize='xx-small')
             axs1[2,color_i].plot(all_edge_I_mx,'ro', markersize=2)
             axs1[1,color_i].set_ylabel("I_max, a.u.")
             axs1[2,color_i].set_xlabel("frames")
             color_data=np.vstack((all_inside_I, 
                                   all_edge_I_mx,
-                                  all_edge_I_sum,
+                                  all_edge_I_sum_pol,
                                   all_edge_I_sum_std, 
                                   all_outside_I,
                                   all_LC,
