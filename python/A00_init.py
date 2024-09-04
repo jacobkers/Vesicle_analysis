@@ -99,7 +99,9 @@ def get_exps(exp_idx):
     Exp5.sequence='time_trace'
     Exp5.N_colors=2
     Exp5.tracking_key=[0, 1]  #which channels to add
-    Exp5.apply_drift_correction=True
+    Exp5.apply_drift_correction=1
+    #1: use hand-set drift
+    #2: use x, y from prior run A20
 
     all_Experiments = [Exp0, Exp1, Exp2, Exp3, Exp4, Exp5]
 

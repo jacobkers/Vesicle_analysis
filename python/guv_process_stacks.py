@@ -308,9 +308,11 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                         edge_mask_sum=np.sum(edge_mask*roi)
                         #b2) sampling-corrected sum of polar map
                         sum_profile=guv_tools.QI_map_analyze(edge_map, presets)
-                        all_edge_I_sum_msk.append(edge_mask_sum)                     
-                        all_edge_I_sum_pol.append(np.nansum(sum_profile))
-                        all_edge_I_sum_std.append(np.nanstd(sum_profile))
+                        all_edge_I_sum_msk.append(edge_mask_sum) 
+                        edge_pol_sum=np.nansum(sum_profile)
+                        edge_pol_std=np.nanstd(sum_profile)                   
+                        all_edge_I_sum_pol.append(edge_pol_sum)
+                        all_edge_I_sum_std.append(edge_pol_std)
                         # 3) edge length from smoothened contour:
                         true_x, true_y = guv_tools.get_xy_contour(edge_map, presets)
                         LC, LR, RC=guv_tools.measure_perimeter(true_x, true_y)
@@ -341,8 +343,8 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                     print("a20b:" + titl + str("frame") + str(fri))
             #end results:
             
-            axs1[1,color_i].plot(all_edge_I_sum_pol,'bo',markersize=2)
-            axs1[1,color_i].plot(all_edge_I_sum_msk,'bo',markersize=2)
+            axs1[1,color_i].plot(all_edge_I_sum_pol,'o',markersize=2)
+            axs1[1,color_i].plot(all_edge_I_sum_msk,'o',markersize=2)
             axs1[1,color_i].set_ylabel("I_sum, a.u.")
             axs1[1,color_i].legend(['pol', 'msk'],loc='best', fontsize='xx-small')
             axs1[2,color_i].legend(['edge'],loc='best', fontsize='xx-small')

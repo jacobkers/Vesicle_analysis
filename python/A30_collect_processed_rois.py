@@ -143,10 +143,15 @@ if initval.suffix =='.tif'and initval.sequence=='time_trace':
                     #c1_mean_peaks=(float(row['c1_edge_mx']))
                     c0_mean_peaks=(float(row['c0_edge_mx']))
                     #build plots:
-                    #plot_ax.append(fri)
-                    axlabel="frames"
-                    plot_ax.append(c1_sum)
-                    axlabel="edge_I"
+                    if 0:
+                        plot_ax.append(fri)
+                        axlabel="frames"
+                    if 0:
+                        plot_ax.append(c1_sum)
+                        axlabel="edge_sumI"
+                    if 1:
+                        plot_ax.append(c1_mean_peaks)
+                        axlabel="edge_mx_I"    
                     area.append(float(row['area']))
                     roundness.append(float(row['roundness']))
                     major_minor.append(axis_major/axis_minor)

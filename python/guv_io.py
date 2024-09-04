@@ -67,6 +67,28 @@ def get_roi_info(csv_source):
 
     return XX0,YY0,RR0
 
+def get_drift_info_tracked(roi_id,initval):
+    csv_path= initval.mainpath_out + initval.subdir +str("/A20a_tracked/")
+    csv_name=str("file_")+ roi_id + str("_xy_tracked.csv")
+    csv_source= csv_path + csv_name
+    Xt = []
+    Yt = []
+    width = []
+    with open(csv_source) as f:
+        reader = csv.DictReader(f, delimiter=";")
+        for row in reader:
+            Xt.append(float(row["X"]))
+            Yt.append(float(row["Y"]))
+    #zero on first point, zero-tracks unchanged
+    X0=Xt[0]
+    Y0=Yt[0]
+    for ii,X in enumerate(Xt):
+        if X>0:
+            Xt[ii]=Xt[ii]-X0
+            Yt[ii]=Yt[ii]-Y0
+
+    return Xt,Yt
+
 def get_drift_info(csv_source,initval):
     """ 
     prepare an extimate of the drift usijg pre-clicked coordinates 
@@ -255,17 +277,23 @@ def cut_tif_to_roi_tiffs_hardwired(im_ori_name,guv_xyr,initval):
 
     #work each GUV and its center coordinates:
     fig, axs = plt.subplots(1,1)
-    for roi_i, cd in enumerate(guv_xyr):      
+    for roi_i, cd in enumerate(guv_xyr):  
+        roi_id=im_ori_name + str("_roi")+str(roi_i) 
+        if initval.apply_drift_correction==2:
+                    X_tr,Y_tr=get_drift_info_tracked(roi_id, initval)                   
         for color_i, color_i_trace in enumerate(st):
             for fri, chan in enumerate(color_i_trace):                  
                 #cut (we assume roi just fits the vesicle)
                 extra_space=2       
                 x0 = cd[0]
                 y0 = cd[1]
-                if initval.apply_drift_correction:
+                if initval.apply_drift_correction==1:
                     x0=int(x0+initval.driftX[fri])
                     y0=int(y0+initval.driftY[fri])
-                r0 = cd[2]*extra_space
+                if initval.apply_drift_correction==2:
+                    x0=int(x0+X_tr[fri])
+                    y0=int(y0+Y_tr[fri])
+                r0 = int(cd[2]*extra_space)
                 #get image or stack:             
                 roi_1frame = guv_tools.get_roi(chan, x0, y0, r0)
                 if fri==0:

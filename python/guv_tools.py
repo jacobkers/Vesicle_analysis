@@ -177,7 +177,8 @@ def QI_map(im, QI, x0, y0):
     Xsamplinggrid=QI['X0samplinggrid']+x0 #The grid is made with the Samplinggrid made in the function above
     Ysamplinggrid=QI['Y0samplinggrid']+y0
 
-    allprofiles = map_coordinates(im, [Xsamplinggrid.ravel(), Ysamplinggrid.ravel()], order=3, mode='nearest').reshape(Xsamplinggrid.shape) #This function does the same as interp2, it interpolates the 2D gridded data in meshgrid format
+    allprofiles = map_coordinates(im, [Xsamplinggrid.ravel(), Ysamplinggrid.ravel()], order=3, mode='nearest').reshape(Xsamplinggrid.shape) 
+    #This function does the same as interp2, it interpolates the 2D gridded data in meshgrid format
     
     return allprofiles
 
