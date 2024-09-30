@@ -29,6 +29,7 @@ class Guv_experiment:
         self.sequence='time_trace'
         self.apply_drift_correction=False
         self.pix2mu=0.4141253
+        self.counts2perc=1/4000 #app., see callibration_curve_EP.xlsx
 
 # overview of experiments:
 def get_exps(exp_idx):

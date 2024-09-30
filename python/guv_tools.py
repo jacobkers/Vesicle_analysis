@@ -163,6 +163,8 @@ def QI_map(im, QI, x0, y0):
     #condensed QI mapping
     #With this function a radial sampling grid, based on the size of the image, is built.
     spokesnoperquad=np.ceil(2*np.pi*QI['maxradius']*QI['angularoversampling']/4) #The reverse of np.floor. np.ceil rounds the coordinates to the nearest integer higher or equal to that element, for example 2.4 becomes 3 and -3.4 becomes -3.0
+    #spokesnoperquad=90
+   
     radbinsno=(QI['maxradius']-QI['minradius'])*QI['radialoversampling']
     angles= np.linspace(-(1/4)*np.pi,(7/4)*np.pi, int(4*spokesnoperquad +1)) #The angles are set in a linspace ranging from -π/4 to 7/4*π, with steps a number of spokesnoperquad*4+1 steps
     angularstep=np.pi/2/spokesnoperquad #This is the step size of the angles

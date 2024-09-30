@@ -68,7 +68,6 @@ movie_simbol_list=[str('r'), str('k'), str('m'),str('b')]
 
 initval = get_exps(expi)
 
-
 if initval.suffix =='.tif'and initval.sequence=='single_frame':
     #collect single-frame data points and re-save all in one file
     load_dirname=initval.mainpath_out + initval.subdir +str("/A20b_processed/")
@@ -105,7 +104,7 @@ if initval.suffix =='.tif'and initval.sequence=='single_frame':
     
 
 if initval.suffix =='.tif'and initval.sequence=='time_trace':
-    fig, axs=plt.subplots(2,4)
+    fig, axs=plt.subplots(2,2)
      #collect files per trace:
     Guv_list=get_data_selections(round(expi))
     
@@ -139,42 +138,34 @@ if initval.suffix =='.tif'and initval.sequence=='time_trace':
             c1_std_sum_rel=[]
             ratio1=[]
             for fri, row in enumerate(data):
-                c1_mean_peaks=(float(row['c1_edge_mx']))
-                c1_sum=float(row['c1_edge_sum'])
-                okay_point=float(row['roundness'])>0 and float(row['R_minor'])>0 and c1_mean_peaks>400 and fri< this_guv.crop_it
+                c1_signal_check=(float(row['c1_edge_mx']))
+                okay_point=float(row['roundness'])>0 and float(row['R_minor'])>0 and c1_signal_check>400 and fri< this_guv.crop_it
                 if okay_point:
                     #fetch work parameters:
                     axis_major=float(row['R_major'])
                     axis_minor=float(row['R_minor'])
-                    c1_std_sum=float(row['c1_edge_sum_std'])
-                    #c1_mean_peaks=(float(row['c1_edge_mx']))
-                    c0_mean_peaks=(float(row['c0_edge_mx']))
-                    #build plots:
+                    c1_mean_peaks=(float(row['c1_edge_mx']))
+                    #c0_mean_peaks=(float(row['c0_edge_mx']))
+                    #build plots in calibrated units
+                    #choose axis and build:
                     if 1:
                         plot_ax.append(this_guv.dt*fri)
                         axlabel="time (s)"
                     if 0:
-                        plot_ax.append(c1_sum)
-                        axlabel="edge_sumI"
-                    if 0:
-                        plot_ax.append(c1_mean_peaks)
-                        axlabel="edge_mx_I"    
-                    area.append(float(row['area']))
+                        plot_ax.append(initval.counts2perc*c1_mean_peaks)
+                        axlabel="content (%)"
+                    #build parameters
+                    area.append((initval.pix2mu)**2*float(row['area']))
                     roundness.append(float(row['roundness']))
                     major_minor.append(axis_major/axis_minor)
-                    c0_edge_mx.append(c0_mean_peaks)
-                    c1_edge_mx.append(c1_mean_peaks)
-                    c0_edge_sm.append(float(row['c0_edge_sum']))
-                    c1_edge_sm.append(c1_sum)
-                    ratio1.append(float(row['c1_edge_sum'])/float(row['area']))
-                    c1_std_sum_rel.append(c1_std_sum/c1_sum)
-            
+                    c1_edge_mx.append(initval.counts2perc*c1_mean_peaks)
+         
             simbol_color=movie_simbol_list[movie_use_index]
             sz=2
 
 
             axs[0,0].plot(plot_ax, area,'o-', markersize=sz, color=simbol_color)
-            axs[0,0].set_ylabel("area")
+            axs[0,0].set_ylabel("area, mu^2")
             axs[0,0].set_xlabel(axlabel)
             axs[0,0].set_title("area")  
 
@@ -183,39 +174,17 @@ if initval.suffix =='.tif'and initval.sequence=='time_trace':
             axs[0,1].set_ylabel("roundness")
             axs[0,1].set_title("roundness")  
 
-            axs[0,2].plot(plot_ax,c0_edge_mx, 'o-', markersize=sz, color=simbol_color)
-            axs[0,2].set_xlabel(axlabel)
-            axs[0,2].set_ylabel("edge max")
-            axs[0,2].set_title("edge max CH0") 
-
-            axs[0,3].plot(plot_ax,c1_edge_mx, 'o-', markersize=sz, color=simbol_color)
-            axs[0,3].set_xlabel(axlabel)
-            axs[0,3].set_ylabel("edge max")
-            axs[0,3].set_title("edge max CH1") 
-            axs[0,3].legend(guv_labels,loc='best', fontsize='xx-small') 
-
-            axs[1,0].plot(plot_ax, major_minor, 'o-', markersize=sz, color=simbol_color)
+            axs[1,0].plot(plot_ax,c1_edge_mx, 'o-', markersize=sz, color=simbol_color)
             axs[1,0].set_xlabel(axlabel)
-            axs[1,0].set_ylabel("ratio, a.u.")
-            axs[1,0].set_title("major/minor")
+            axs[1,0].set_ylabel("content (%)")
+            axs[1,0].set_title("edge content") 
+            axs[1,0].legend(guv_labels,loc='best', fontsize='xx-small') 
 
-            axs[1,1].plot(plot_ax,c1_std_sum_rel, 'o-', markersize=sz, color=simbol_color)
+            axs[1,1].plot(plot_ax, major_minor, 'o-', markersize=sz, color=simbol_color)
             axs[1,1].set_xlabel(axlabel)
-            axs[1,1].set_ylabel("sum_std/sum")
-            axs[1,1].set_title("relative edge-I variation")
-            
-            axs[1,2].plot(plot_ax,c0_edge_sm, 'o-', markersize=sz, color=simbol_color)
-            axs[1,2].set_xlabel(axlabel)
-            axs[1,2].set_ylabel("sum")
-            axs[1,2].set_title("edge sum CH0")
-
-            axs[1,3].plot(plot_ax,c1_edge_sm, 'o-', markersize=sz, color=simbol_color)
-            axs[1,3].set_xlabel(axlabel)
-            axs[1,3].set_ylabel("sum")
-            axs[1,3].set_title("edge sum CH1")
-
-            
-            
+            axs[1,1].set_ylabel("ratio, a.u.")
+            axs[1,1].set_title("major/minor")
+         
     fig.show()
     dum=1
 

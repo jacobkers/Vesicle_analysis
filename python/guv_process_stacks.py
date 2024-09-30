@@ -179,7 +179,26 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
                     ]
                 )
         csv_g.close()
-        
+
+def analyze_edge_profile(profile, initval,fri):
+    edge_value=np.nanmean(profile)
+    #from imageJ inspection:
+    # - angular sampling starts at the bottom (both in ImageJ and the python export pics)
+    # - proceeds in CCW fashion
+    # - the highest intensity (due to polarization effects) is visible on the horizontal, i.e. at Q1 ('right) and Q3('left')
+    # - thus, we start at the lower end of a sine function that we want the amplitude from
+
+    # - for a clean fit, we should remove the mean and remove the outliers ('buds')
+
+
+    if fri==25: #fri==0: #test
+        fig, axs = plt.subplots(2,1)
+        axs[0].plot(profile)
+        fig.tight_layout()
+        fig.show()
+        dum=1
+        plt.close("all")
+    return edge_value        
 
 def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
     """ collect values from various color channels
@@ -250,9 +269,11 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
 
                 if np.max(np.array(roi))>0:
                     #B. use the track coordinates to force-edge_map the original image 
+                    maxrad=2*rm
+                    #perimeter_pixels_quart=np.ceil(2*np.pi*maxrad)/4
+                    #angular_sampling_value=90/perimeter_pixels_quart
                     presets={#
-                    'oversampling' : 2,#The radiaoversampling is set to two
-                    'angularoversampling' : 0.7,#The angular oversampling is set to 0.7
+                    'angularoversampling' : 0.7, 
                     'radialoversampling' : 2,
                     'minradius' : 0,#the minimal radius is 0
                     'maxradius' : 2*rm
@@ -303,7 +324,10 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                     # 2) edge intensity (note we treat the edge differently:
                     if np.sum((np.shape(edge_map)))>0:
                         #a) maximum of peak
-                        all_edge_I_mx.append(np.nanmean(np.nanmax(edge_map, axis=0)))
+                        profile=np.nanmax(edge_map, axis=0)
+                        edge_val=analyze_edge_profile(profile, initval,fri)
+                        all_edge_I_mx.append(edge_val)
+                        
                         #b1) sum of edge mask:
                         edge_mask_sum=np.sum(edge_mask*roi)
                         #b2) sampling-corrected sum of polar map
