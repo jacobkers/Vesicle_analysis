@@ -20,6 +20,8 @@ experiment indices (int = laptop, add: 0.1 for office local, 0.2 to run on CD:K:
 
 """
 
+
+
 class GUV:
     """
     properties of a single guv movie
@@ -31,8 +33,7 @@ class GUV:
             self.comment=[]
             self.use_it=[]
             self.crop_it=[]
-         
-
+            self.dt=1       
 
 def get_data_selections(run_id):
     #use a local copy:
@@ -55,12 +56,16 @@ def get_data_selections(run_id):
         Guv.label=(row_cells[Header["guv_label"]].value) 
         Guv.use_it=(row_cells[Header["use"]].value) 
         Guv.crop_it=(row_cells[Header["crop"]].value)
+        Guv.dt=(row_cells[Header["dt(s)"]].value)
         if Guv.exp_id == run_id:
             Guv_list.append(Guv)
     return Guv_list
  
 
 expi = 5.2   #2: flexibles; 3:less_challenging ones 4: single-image tiffs
+movie_to_use_list=[462, 463,465,466]
+movie_simbol_list=[str('r'), str('k'), str('m'),str('b')]
+
 initval = get_exps(expi)
 
 
@@ -111,8 +116,9 @@ if initval.suffix =='.tif'and initval.sequence=='time_trace':
     guv_labels=[]
     #select movie and guvs:
     for this_guv in Guv_list:
-        if this_guv.movie_id==462 and this_guv.use_it ==1:
-        #if this_guv.use_it ==1:
+        if this_guv.use_it ==1 and this_guv.movie_id in movie_to_use_list:
+            movie_use_index = movie_to_use_list.index(this_guv.movie_id)
+            
             guv_labels.append(this_guv.label)
             data=[]
             csv_source=Path(load_dirname_A20b + this_guv.label +"_all_data.csv")
@@ -145,8 +151,8 @@ if initval.suffix =='.tif'and initval.sequence=='time_trace':
                     c0_mean_peaks=(float(row['c0_edge_mx']))
                     #build plots:
                     if 1:
-                        plot_ax.append(fri)
-                        axlabel="frames"
+                        plot_ax.append(this_guv.dt*fri)
+                        axlabel="time (s)"
                     if 0:
                         plot_ax.append(c1_sum)
                         axlabel="edge_sumI"
@@ -162,49 +168,48 @@ if initval.suffix =='.tif'and initval.sequence=='time_trace':
                     c1_edge_sm.append(c1_sum)
                     ratio1.append(float(row['c1_edge_sum'])/float(row['area']))
                     c1_std_sum_rel.append(c1_std_sum/c1_sum)
-            #valid_idx=np.nonzero(np.array(c0_edge_mx)>0)[0]
-            #plot_ax= [plot_ax[i] for i in valid_idx]
-            #area= [area[i] for i in valid_idx]
-            sz=4
-            axs[0,0].plot(plot_ax, area,'o-', markersize=sz)
+            
+            simbol_color=movie_simbol_list[movie_use_index]
+            sz=2
+
+
+            axs[0,0].plot(plot_ax, area,'o-', markersize=sz, color=simbol_color)
             axs[0,0].set_ylabel("area")
             axs[0,0].set_xlabel(axlabel)
             axs[0,0].set_title("area")  
 
-            axs[0,1].plot(plot_ax,roundness, 'o-', markersize=sz)
+            axs[0,1].plot(plot_ax,roundness, 'o-', markersize=sz, color=simbol_color)
             axs[0,1].set_xlabel(axlabel)
             axs[0,1].set_ylabel("roundness")
             axs[0,1].set_title("roundness")  
 
-            axs[0,2].plot(plot_ax,c0_edge_mx, 'o-', markersize=sz)
+            axs[0,2].plot(plot_ax,c0_edge_mx, 'o-', markersize=sz, color=simbol_color)
             axs[0,2].set_xlabel(axlabel)
             axs[0,2].set_ylabel("edge max")
             axs[0,2].set_title("edge max CH0") 
 
-            axs[0,3].plot(plot_ax,c1_edge_mx, 'o-', markersize=sz)
+            axs[0,3].plot(plot_ax,c1_edge_mx, 'o-', markersize=sz, color=simbol_color)
             axs[0,3].set_xlabel(axlabel)
             axs[0,3].set_ylabel("edge max")
             axs[0,3].set_title("edge max CH1") 
             axs[0,3].legend(guv_labels,loc='best', fontsize='xx-small') 
 
-            
-  
-            axs[1,0].plot(plot_ax, major_minor, 'o-', markersize=sz)
+            axs[1,0].plot(plot_ax, major_minor, 'o-', markersize=sz, color=simbol_color)
             axs[1,0].set_xlabel(axlabel)
             axs[1,0].set_ylabel("ratio, a.u.")
             axs[1,0].set_title("major/minor")
 
-            axs[1,1].plot(plot_ax,c1_std_sum_rel, 'o-', markersize=sz)
+            axs[1,1].plot(plot_ax,c1_std_sum_rel, 'o-', markersize=sz, color=simbol_color)
             axs[1,1].set_xlabel(axlabel)
             axs[1,1].set_ylabel("sum_std/sum")
             axs[1,1].set_title("relative edge-I variation")
             
-            axs[1,2].plot(plot_ax,c0_edge_sm, 'o-', markersize=sz)
+            axs[1,2].plot(plot_ax,c0_edge_sm, 'o-', markersize=sz, color=simbol_color)
             axs[1,2].set_xlabel(axlabel)
             axs[1,2].set_ylabel("sum")
             axs[1,2].set_title("edge sum CH0")
 
-            axs[1,3].plot(plot_ax,c1_edge_sm, 'o-', markersize=sz)
+            axs[1,3].plot(plot_ax,c1_edge_sm, 'o-', markersize=sz, color=simbol_color)
             axs[1,3].set_xlabel(axlabel)
             axs[1,3].set_ylabel("sum")
             axs[1,3].set_title("edge sum CH1")
