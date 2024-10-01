@@ -9,11 +9,118 @@ from pathlib import Path
 import cv2
 import csv
 from skimage import io
+from scipy.optimize import curve_fit
 from scipy.ndimage import sobel
-from scipy.ndimage import map_coordinates             # for converting cartesian to circular coördinates in QI
+from scipy.ndimage import map_coordinates   # for converting cartesian to circular coördinates in QI
 from qi_trak import QI_Tracker
 import matplotlib.pyplot as plt
 
+def outlier_flag(data=0, tolerance=2.5, sig_change=0.7, how=1, sho=1, demo=0):
+    """
+    An iterative tool to separate a distribution from its outliers.
+    An initial estimate of average 'mu' and standard deviation 'sigma' is used to identify outliers.
+    These are removed and [mu,sigma] is re-determnined] after wchich the sequence is repeated
+    until sigma does not change much anymore
+    Input:
+        data: single array of values
+        tolerance: outliers are points more than [tolerance] standard deviations away from the average.
+        sigchange: iteration stops if sigma is changed less than a fraction  'sigchange'.
+        how
+    sho
+    demo
+    Output:
+        1) array of outliers
+        2) array of inliers
+        3) flags: binary trace indicating which points where outliers in the original data.
+    Jacob Kers '2022
+    """
+    # demo section start ------------------------
+    if demo:
+        # build trace with 2 distributions
+        N_pts = 2000
+        s1 = 10
+        u1 = 0
+        N_otl = 200
+        s2 = 10
+        u2 = 100
+        temp_ax = np.arange(0, N_pts, 1)
+        data = s1 * np.random.randn(N_pts, 1) + u1
+        for ii in range(N_otl):
+            randii = int((N_pts - 1) * np.random.rand(1, 1))
+            data[randii] = s2 * np.random.randn(1, 1) + u2
+    # demo section stop  ------------------------
+
+    sig_ratio = 0
+    sigma_nw = 1e20
+    flags = 0 * data + 1
+    while sig_ratio < sig_change:
+        sigma_old = sigma_nw
+        ix_in = np.ndarray.nonzero(flags == 1)
+        ix_out = np.ndarray.nonzero(flags == 0)
+        inliers = data[ix_in]
+        outliers = data[ix_out]
+        av = np.median(inliers)
+        sigma_nw = np.std(inliers)
+        sig_ratio = sigma_nw / sigma_old
+        if how == 1:
+            flags = (data - av) < tolerance * sigma_nw
+        elif how == 0:
+            flags = abs(data - av) < tolerance * sigma_nw
+        elif how == -1:
+            flags = (data - av) > -tolerance * sigma_nw
+        if sho:
+            lo = np.min(inliers)
+            hi = np.max(inliers)
+            bins = np.linspace(lo, hi, 40)
+            fig2, ax2 = plt.subplots(1, 1)
+            plt.hist(inliers, bins, histtype="bar")
+            plt.show()
+            dum = 1
+
+    return inliers, outliers, flags
+
+def sine_function(x, A, C):
+    """
+    Sine function with fixed period (equal to half the trace length) and phase 0.
+    
+    Parameters:
+    x : array-like
+        The x values
+    A : float
+        Amplitude of the sine wave
+    C : float
+        Vertical offset
+    
+    Returns:
+    y : array-like
+        The y values of the sine wave
+    """
+    return A * np.sin(2 * np.pi * x / (0.5*len(x))) + C
+
+def fit_sine_to_trace(x_data,y_data):
+    """
+    Fit a sine wave to the given data trace.
+    
+    Parameters:
+    y_data : array-like
+        The y values of the data trace
+    
+    Returns:
+    popt : array
+        Optimal values for the parameters (A, C)
+    pcov : 2D array
+        The estimated covariance of popt
+    """
+    
+    # Initial guess for the parameters
+    A_guess = (np.max(y_data) - np.min(y_data)) / 2
+    C_guess = np.mean(y_data)
+    p0 = [A_guess, C_guess]
+    
+    # Fit the function
+    popt, pcov = curve_fit(sine_function, x_data, y_data, p0=p0)
+    
+    return popt, pcov
 
 def treshold_it(im):
     """ treshold by triangulation, following Margreet Docter 
@@ -487,7 +594,10 @@ def get_com_extra(xx, yy, zz, use_weights, demo=0):
         - 0.5 * (4 * mu_prime11**2 + (mu_prime20 - mu_prime02) ** 2) ** 0.5
     )
     # eccentricity
-    ecc = (1 - labda2 / labda1) ** 0.5
+    if labda1>0:
+        ecc = (1 - labda2 / labda1) ** 0.5
+    else: 
+        ecc =np.nan
     # demo section start ------------------------
     if demo:
         plt.plot(xx, yy, "ro")

@@ -113,9 +113,6 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
                     ]
                 )
         csv_f.close()
-
-
-
         frax=np.arange(len(all_roundness))
         roundness_plot=np.array(all_roundness)
         R_minor_plot=np.array(all_R_minor)
@@ -180,6 +177,10 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
                 )
         csv_g.close()
 
+
+
+
+
 def analyze_edge_profile(profile, initval,fri):
     edge_value=np.nanmean(profile)
     #from imageJ inspection:
@@ -189,15 +190,27 @@ def analyze_edge_profile(profile, initval,fri):
     # - thus, we start at the lower end of a sine function that we want the amplitude from
 
     # - for a clean fit, we should remove the mean and remove the outliers ('buds')
+    # Fit the sine wave
+    x=np.arange(len(profile))
+    inliers, outliers, flags = guv_tools.outlier_flag(profile, tolerance=2.5, sig_change=0.7, how=1, sho=0, demo=0)
+    cln_x=x[np.nonzero(flags)]
+    cln_profile=profile[np.nonzero(flags)]
+    if len(cln_profile)>0:
+        popt, pcov = guv_tools.fit_sine_to_trace(cln_x, cln_profile)   
+        # Generate the fitted curve (on original x)
+        y_fit = guv_tools.sine_function(np.arange(len(x)), *popt)
+        edge_value=np.max(y_fit)
 
-
-    if fri==25: #fri==0: #test
-        fig, axs = plt.subplots(2,1)
-        axs[0].plot(profile)
-        fig.tight_layout()
-        fig.show()
-        dum=1
-        plt.close("all")
+        if 0: # fri==25: #fri==0: #test
+            fig, axs = plt.subplots(1,1)
+            axs.plot(cln_x, cln_profile)
+            axs.plot(y_fit)
+            fig.tight_layout()
+            fig.show()
+            dum=1
+            plt.close("all")
+    else:
+        edge_value=np.nan
     return edge_value        
 
 def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
@@ -228,7 +241,7 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                             all_roundness))
         header_out=[str("X"), str("Y"),  str("R_minor"), str("R_major"), str("all_areas"),str("area"), str("perimeter"), str("roundness")]
 
-        fig1, axs1=plt.subplots(3,initval.N_colors)
+        fig1, axs1=plt.subplots(2,initval.N_colors)
         for color_i in np.arange(initval.N_colors): 
             
 
@@ -322,6 +335,7 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                     else:
                         all_outside_I.append(0)
                     # 2) edge intensity (note we treat the edge differently:
+ 
                     if np.sum((np.shape(edge_map)))>0:
                         #a) maximum of peak
                         profile=np.nanmax(edge_map, axis=0)
@@ -367,14 +381,9 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                     print("a20b:" + titl + str("frame") + str(fri))
             #end results:
             
-            axs1[1,color_i].plot(all_edge_I_sum_pol,'o',markersize=2)
-            axs1[1,color_i].plot(all_edge_I_sum_msk,'o',markersize=2)
-            axs1[1,color_i].set_ylabel("I_sum, a.u.")
-            axs1[1,color_i].legend(['pol', 'msk'],loc='best', fontsize='xx-small')
-            axs1[2,color_i].legend(['edge'],loc='best', fontsize='xx-small')
-            axs1[2,color_i].plot(all_edge_I_mx,'ro', markersize=2)
-            axs1[1,color_i].set_ylabel("I_max, a.u.")
-            axs1[2,color_i].set_xlabel("frames")
+            axs1[1,color_i].legend(['edge'],loc='best', fontsize='xx-small')
+            axs1[1,color_i].plot(all_edge_I_mx,'ro', markersize=2)
+            axs1[1,color_i].set_xlabel("frames")
             color_data=np.vstack((all_inside_I, 
                                   all_edge_I_mx,
                                   all_edge_I_sum_pol,
