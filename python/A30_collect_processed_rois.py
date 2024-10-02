@@ -148,10 +148,10 @@ if initval.suffix =='.tif'and initval.sequence=='time_trace':
                     #c0_mean_peaks=(float(row['c0_edge_mx']))
                     #build plots in calibrated units
                     #choose axis and build:
-                    if 1:
+                    if 0:
                         plot_ax.append(this_guv.dt*fri)
                         axlabel="time (s)"
-                    if 0:
+                    if 1:
                         plot_ax.append(initval.counts2perc*c1_mean_peaks)
                         axlabel="content (%)"
                     #build parameters
@@ -178,12 +178,13 @@ if initval.suffix =='.tif'and initval.sequence=='time_trace':
             axs[1,0].set_xlabel(axlabel)
             axs[1,0].set_ylabel("content (%)")
             axs[1,0].set_title("edge content") 
-            axs[1,0].legend(guv_labels,loc='best', fontsize='xx-small') 
+            
 
             axs[1,1].plot(plot_ax, major_minor, 'o-', markersize=sz, color=simbol_color)
             axs[1,1].set_xlabel(axlabel)
             axs[1,1].set_ylabel("ratio, a.u.")
             axs[1,1].set_title("major/minor")
+            axs[1,1].legend(guv_labels,loc='best', fontsize='xx-small') 
          
     fig.show()
     dum=1
