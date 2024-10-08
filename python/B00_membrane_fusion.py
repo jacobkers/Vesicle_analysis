@@ -57,7 +57,7 @@ def treshold_it(im):
     return treshold, im_tres, im_BW
 
 def find_white_speck_centers(img_array, threshold=1, min_size=2):
-    """Find the centers of white specks in the image."""
+    """Find the centers of white specks in an image image."""
     binary = img_array > threshold
     labeled, num_features = ndimage.label(binary)
     centers = ndimage.center_of_mass(binary, labeled, range(1, num_features + 1))
@@ -94,7 +94,7 @@ if 1:
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
     #moviepath=Path('D:/jkerssemakers/CD_Data_in/2023_Rafa/2024_10_02 membrane fusion')
     movie_filename = '2_TIRF_488_001_PCPG_Chol-1_small_short.tif'
-    filename ='MAX_2_TIRF_488_001_PCPG_Chol-1_small_short.tif'
+    filename ='STD_2_TIRF_488_001_PCPG_Chol-1_small_short.tif'
 if 0:
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
     #moviepath=Path('D:/jkerssemakers/CD_Data_in/2023_Rafa/2024_10_02 membrane fusion')
@@ -128,7 +128,7 @@ x1=1
 y1=0
 
 for center in speck_centers:
-    coords = circular_area_around(center[0], center[1], radius=4)
+    coords = circular_area_around(center[0], center[1], radius=9)
     vals = []
     for coord in coords:
         if 0 <= coord[x1] < img_array.shape[y1] and 0 <= coord[y1] < img_array.shape[x1]:
@@ -163,7 +163,7 @@ for fri, frame in enumerate(frames):
                 img_array[coord[x1], coord[y1]] += 0.1*maxim  # Increment pixel value
         trace_data[fri,si]=np.sum(vals)
     # Display the frame using matplotlib
-ax[1].plot(trace_data)
+ax[1].plot(np.diff(np.transpose(trace_data)), 'o-', markersize=2)
 ax[1].set_title('traces')
 fig.show()
 dum=-1
