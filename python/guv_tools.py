@@ -266,7 +266,7 @@ def track_radial_pattern(roi, runmodus=1, x0=0, y0=0, mapradius=0, demo=1):
         if runmodus ==0: return x_in, y_in, allprofiles, preset
 
 
-def QI_map(im, QI, x0, y0):
+def QI_map(im, QI, x0, y0, demo=0):
     #condensed QI mapping
     #With this function a radial sampling grid, based on the size of the image, is built.
     spokesnoperquad=np.ceil(2*np.pi*QI['maxradius']*QI['angularoversampling']/4) #The reverse of np.floor. np.ceil rounds the coordinates to the nearest integer higher or equal to that element, for example 2.4 becomes 3 and -3.4 becomes -3.0
@@ -288,8 +288,10 @@ def QI_map(im, QI, x0, y0):
 
     allprofiles = map_coordinates(im, [Xsamplinggrid.ravel(), Ysamplinggrid.ravel()], order=3, mode='nearest').reshape(Xsamplinggrid.shape) 
     #This function does the same as interp2, it interpolates the 2D gridded data in meshgrid format
-    
-    return allprofiles
+    if demo == 0:
+        return allprofiles
+    else:
+        return allprofiles, QI, Xsamplinggrid, Ysamplinggrid
 
 def QI_map_analyze(map, presets):
     #condensed QI mapping: get  parameters from the polar map
