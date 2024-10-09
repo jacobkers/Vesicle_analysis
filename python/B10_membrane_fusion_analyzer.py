@@ -111,83 +111,47 @@ if 0:
 image_path =  moviepath/ filename
 movie_path =  moviepath/ movie_filename
 
-with Image.open(image_path) as img:
-    #gray_img = img.convert('L')
-    img_array = np.array(img)
-
-img_array=img_array-np.min(img_array)
-maxim=np.max(img_array)
-
-threshold=treshold_it(img_array)[0]
-
-speck_centers = find_white_speck_centers(img_array,threshold=threshold)
-
-print(f"Found {len(speck_centers)} white specks.")
 
 
-fig, ax = plt.subplots()
-#this is for consistent handling of axes:
-x1=1
-y1=0
-
-for center in speck_centers:
-    coords = circular_area_around(center[0], center[1], radius=9)
-    vals = []
-    for coord in coords:
-        if 0 <= coord[x1] < img_array.shape[y1] and 0 <= coord[y1] < img_array.shape[x1]:
-            vals.append(img_array[coord[x1], coord[y1]])  # Collect value
-            img_array[coord[x1], coord[y1]] += 0.1*maxim  # Increment pixel value
-fig, ax=plt.subplots(1,2)
-ax[0].imshow(img_array, cmap='gray')
-ax[0].set_title('Image with Circular Areas Around Specks')
-
-for center in speck_centers:
-    ax[0].plot(center[x1], center[y1], 'o', color='r')
-
-#plt.show()
-
-# Load TIFF movie
-frame_number = 10  # Load the 11th frame (frame 10 is the 11th in zero-indexing)
-
-# Load the frame
-#frame = load_tiff_frame(movie_path, frame_number)
-frames=load_tiff_movie(movie_path)
-
-ff=len(frames)
-N_events=len(speck_centers)
-
-trace_data=np.zeros((ff,N_events),dtype='float')
-for fri, frame in enumerate(frames):
-    print(fri)
-    img_array = np.array(frame)
-    for si,center in enumerate(speck_centers):
-        coords = circular_area_around(center[0], center[1], radius=7)
-        vals = []
-        for coord in coords:
-            if 0 <= coord[x1] < img_array.shape[y1] and 0 <= coord[y1] < img_array.shape[x1]:
-                vals.append(img_array[coord[x1], coord[y1]])  # Collect value
-                img_array[coord[x1], coord[y1]] += 0.1*maxim  # Increment pixel value
-        trace_data[fri,si]=np.sum(vals)
-# plot traces
-ax[1].plot(np.diff(np.transpose(trace_data)), 'o-', markersize=2)
-ax[1].set_title('traces')
-fig.show()
-
-
-#save traces
+#load traces
 trace_data_name="collected_data_" + label + str(".csv")
-csv_target=moviepath /  trace_data_name
-with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
-    # create the csv writer
-    writer = csv.writer(csv_f, delimiter=";")
-    #f = open("test.csv", "a")
-    #writer.writerow(row.keys())
-    for data_row in trace_data:  
-        
-        # create the csv writer
-        writer = csv.writer(csv_f, delimiter=";")
-        #f = open("test.csv", "a")
-        writer.writerow(data_row) 
+csv_source=moviepath /  trace_data_name
+csv_path_in = Path(csv_source)
+trace_data=[]
+print(csv_source.stem)
+
+trace_data = np.loadtxt(csv_source, delimiter=';')
+
+
+# plot traces
+frs,N_events=np.shape(trace_data)
+
+fig, ax=plt.subplots(2,2)
+for trace in trace_data.T:
+    dif_trace=np.diff(trace)
+    mxi=np.argmax(dif_trace)
+
+    start=np.max([mxi-50, 0])
+    stop=np.min([mxi+50, frs])
+    trace_cut=trace[start:stop]
+    dif_trace_cut=dif_trace[start:stop]
+
+    #show:
+    if np.max(trace)>2E6:
+        ax[0,0].plot(trace, '-', markersize=2)
+        ax[0,0].plot(mxi,trace[mxi], 'ro-', markersize=4)
+        ax[0,0].set_title('traces')
+        ax[0,1].plot(dif_trace, '-', markersize=2)
+        ax[0,1].plot(mxi, dif_trace[mxi], 'ro-', markersize=4)
+        ax[0,1].set_title('derivative')
+        ax[1,0].plot(trace_cut, '-')
+        ax[1,0].set_title('aligned')
+        ax[1,1].plot(trace_cut/np.max(trace_cut), '-')
+        ax[1,1].set_title('normalized')
+fig.show()
+dum=1
+plt.close('all')
+
 
     
 
