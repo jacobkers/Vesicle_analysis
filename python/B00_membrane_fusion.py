@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import csv
 from os.path import normpath
 from PIL import Image
 from scipy import ndimage
@@ -150,7 +151,10 @@ frame_number = 10  # Load the 11th frame (frame 10 is the 11th in zero-indexing)
 #frame = load_tiff_frame(movie_path, frame_number)
 frames=load_tiff_movie(movie_path)
 
-trace_data=np.zeros((len(frames),len(speck_centers)),dtype='float')
+ff=len(frames)
+N_events=len(speck_centers)
+
+trace_data=np.zeros((ff,N_events),dtype='float')
 for fri, frame in enumerate(frames):
     print(fri)
     img_array = np.array(frame)
@@ -162,11 +166,31 @@ for fri, frame in enumerate(frames):
                 vals.append(img_array[coord[x1], coord[y1]])  # Collect value
                 img_array[coord[x1], coord[y1]] += 0.1*maxim  # Increment pixel value
         trace_data[fri,si]=np.sum(vals)
-    # Display the frame using matplotlib
+# plot traces
 ax[1].plot(np.diff(np.transpose(trace_data)), 'o-', markersize=2)
 ax[1].set_title('traces')
 fig.show()
-dum=-1
+
+
+#save traces
+trace_data_name="collected_data" + str(".csv")
+csv_target=moviepath /  trace_data_name
+with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
+    # create the csv writer
+    writer = csv.writer(csv_f, delimiter=";")
+    #f = open("test.csv", "a")
+    writer.writerow(row.keys())
+    for data_row in trace_data:  
+        
+        # create the csv writer
+        writer = csv.writer(csv_f, delimiter=";")
+        #f = open("test.csv", "a")
+        writer.writerow(data_row.values()) 
+
+    
+
+
+
 
 
 
