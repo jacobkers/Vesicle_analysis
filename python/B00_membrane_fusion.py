@@ -91,13 +91,13 @@ def circular_area_around(x=0, y=0, radius=25):
     return coords
 
 # Example usage
-if 0: 
+if 1: 
     label='short'
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
     #moviepath=Path('D:/jkerssemakers/CD_Data_in/2023_Rafa/2024_10_02 membrane fusion')
     movie_filename = '2_TIRF_488_001_PCPG_Chol-1_small_short.tif'
     filename ='STD_2_TIRF_488_001_PCPG_Chol-1_small_short.tif'
-if 1:
+if 0:
     label='long'
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
     #moviepath=Path('D:/jkerssemakers/CD_Data_in/2023_Rafa/2024_10_02 membrane fusion')
@@ -157,6 +157,7 @@ ff=len(frames)
 N_events=len(speck_centers)
 
 trace_data=np.zeros((ff,N_events),dtype='float')
+
 for fri, frame in enumerate(frames):
     print(fri)
     img_array = np.array(frame)
@@ -168,14 +169,36 @@ for fri, frame in enumerate(frames):
                 vals.append(img_array[coord[x1], coord[y1]])  # Collect value
                 img_array[coord[x1], coord[y1]] += 0.1*maxim  # Increment pixel value
         trace_data[fri,si]=np.sum(vals)
-# plot traces
-ax[1].plot(np.diff(np.transpose(trace_data)), 'o-', markersize=2)
-ax[1].set_title('traces')
-fig.show()
+        
+
+frs,N_events=np.shape(trace_data)
+fig, ax=plt.subplots(2,2)
+event_data=np.zeros((N_events,3),dtype='int')
+for ti, trace in enumerate(trace_data.T):
+    dif_trace=np.diff(trace)
+    t0=np.argmax(dif_trace)
+    x0=int(speck_centers[ti][0])
+    y0=int(speck_centers[ti][0])
+    event_data[ti]=(x0,y0,t0)
+
+#save centers
+event_data_name=label +'_events' + str(".csv")
+csv_target_c=moviepath /  event_data_name
+with open(csv_target_c, "w",newline='') as csv_c:  # will overwrite existing
+    # create the csv writer
+    writer = csv.writer(csv_c, delimiter=";")
+    #f = open("test.csv", "a")
+    #writer.writerow(row.keys())
+    for data_row in event_data:  
+        # create the csv writer
+        writer = csv.writer(csv_c, delimiter=";")
+        #f = open("test.csv", "a")
+        writer.writerow(data_row) 
 
 
 #save traces
-trace_data_name="collected_data_" + label + str(".csv")
+trace_data_name=label +"_traces" +  str(".csv")
+
 csv_target=moviepath /  trace_data_name
 with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
     # create the csv writer

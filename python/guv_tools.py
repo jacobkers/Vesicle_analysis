@@ -638,3 +638,34 @@ def get_nearby(x0=1, y0=1, xx=1, yy=1, r0=1, demo=0):
     # demo section stop  ------------------------
     return xx_near, yy_near, rn_near
 
+def extract_subarray(array, x0, y0, z0, L, W, H):
+    """
+    Extracts a 3D sub-array from a larger 3D array around a center (x0, y0, z0),
+    adjusting the size if necessary to stay within the bounds of the original array.
+    
+    Parameters:
+    array (numpy.ndarray): The input 3D array.
+    x0, y0, z0 (int): The center coordinates of the sub-array.
+    L, W, H (int): The desired size (length, width, height) of the sub-array.
+    
+    Returns:
+    numpy.ndarray: The extracted sub-array.
+    """
+    
+    # Get the size of the input array
+    Nx, Ny, Nz = array.shape
+    
+    # Calculate the boundaries of the sub-array
+    x_min = max(0, x0 - L // 2)
+    x_max = min(Nx, x0 + (L + 1) // 2)
+    
+    y_min = max(0, y0 - W // 2)
+    y_max = min(Ny, y0 + (W + 1) // 2)
+    
+    z_min = max(0, z0 - H // 2)
+    z_max = min(Nz, z0 + (H + 1) // 2)
+    
+    # Extract the sub-array
+    sub_array = array[x_min:x_max, y_min:y_max, z_min:z_max]
+    
+    return sub_array

@@ -123,7 +123,7 @@ print(csv_source.stem)
 trace_data = np.loadtxt(csv_source, delimiter=';')
 
 
-# plot traces
+# plot traces and start_time
 frs,N_events=np.shape(trace_data)
 
 fig, ax=plt.subplots(2,2)
@@ -131,7 +131,7 @@ for trace in trace_data.T:
     dif_trace=np.diff(trace)
     mxi=np.argmax(dif_trace)
 
-    start=np.max([mxi-50, 0])
+    start=np.max([mxi-20, 0])
     stop=np.min([mxi+50, frs])
     trace_cut=trace[start:stop]
     dif_trace_cut=dif_trace[start:stop]
