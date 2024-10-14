@@ -160,7 +160,7 @@ def treshold_it(im):
     im_BW=(im>treshold)*1.0
     im_tres=(im>treshold)*im
 
-    return im_tres, im_BW
+    return  im_tres, im_BW, treshold
 
 def get_xy_contour(edge_map, presets):
     # get a smooth xy contour from polar coordinates

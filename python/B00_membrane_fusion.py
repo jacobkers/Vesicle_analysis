@@ -1,13 +1,13 @@
 import numpy as np
 import cv2
 import csv
-from os.path import normpath
 from PIL import Image
 from scipy import ndimage
 from pathlib import Path
 import matplotlib.pyplot as plt
 import tifffile as tf
 import time
+import guv_tools
 
 
 def load_tiff_frame(file_path, frame_index):
@@ -16,46 +16,6 @@ def load_tiff_frame(file_path, frame_index):
         # Load a specific frame (zero-indexed)
         frame = tif.pages[frame_index].asarray()
     return frame
-
-def treshold_it(im):
-    """ treshold by triangulation, following Margreet Docter 
-    JacobKerts, 2023"""
-    rr,cc=im.shape
-    # sort and scale on number of pixels (to equalize axes)
-    impixels=im.flatten()
-    impixels_sorted=np.sort(impixels)
-    Npix=len(impixels)
-    pix_ax=np.arange(0, Npix, 1)
-    Ipix=np.max(impixels)
-    impixels_sorted=impixels_sorted/Ipix*Npix
-
-    #fit on lower half of N:
-    lowerhalf_N=impixels_sorted[0:int(Npix/2)]
-    lowerhalf_pix_ax=pix_ax[0:int(Npix/2)]
-    lowerfit_p=np.polyfit(lowerhalf_pix_ax,lowerhalf_N,1)
-    lowerfit=np.polyval(lowerfit_p, pix_ax)
-
-    #fit on higher half of I:
-    upperhalf_I=impixels_sorted[impixels_sorted>Npix/2]
-    upperhalf_pix_ax=pix_ax[impixels_sorted>Npix/2]
-    upperfit_p=np.polyfit(upperhalf_pix_ax,upperhalf_I,1)
-    upperfit=np.polyval(upperfit_p, pix_ax)
-    #get cross-point
-    xc=(lowerfit_p[1]-upperfit_p[1])/(upperfit_p[0]-lowerfit_p[0])
-    yc=np.polyval(lowerfit_p,xc)
-
-    #get 'knee'
-    #rr=np.hypot((1:length(sim))-xc).'.^2, (sim-yc).^2);
-    rr=np.hypot(pix_ax-xc,impixels_sorted-yc)
-    x_kn=pix_ax[(rr== min(rr))]
-    y_kn=impixels_sorted[(rr== min(rr))]
-    #scale value back
-    treshold=y_kn/Npix*Ipix
-
-    im_BW=(im>treshold)*1.0
-    im_tres=(im>treshold)*im
-
-    return treshold, im_tres, im_BW
 
 def find_white_speck_centers(img_array, threshold=1, min_size=2):
     """Find the centers of white specks in an image image."""
@@ -91,14 +51,14 @@ def circular_area_around(x=0, y=0, radius=25):
     return coords
 
 # Example usage
-if 1: 
-    label='short'
+if 0: 
+    label='2_TIRF_488_001_PCPG_Chol-1_small_short'
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
     #moviepath=Path('D:/jkerssemakers/CD_Data_in/2023_Rafa/2024_10_02 membrane fusion')
     movie_filename = '2_TIRF_488_001_PCPG_Chol-1_small_short.tif'
     filename ='STD_2_TIRF_488_001_PCPG_Chol-1_small_short.tif'
-if 0:
-    label='long'
+if 1:
+    label='2_TIRF_488_001_PCPG_Chol_long'
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
     #moviepath=Path('D:/jkerssemakers/CD_Data_in/2023_Rafa/2024_10_02 membrane fusion')
     movie_filename = '2_TIRF_488_001_PCPG_Chol.tif'
@@ -108,19 +68,18 @@ if 0:
     movie_filename = '40 uM LUVsWITHCerC6_RealTime_Series002_t000_crp-1_red.tif'
     filename = 'MAX_40 uM LUVsWITHCerC6_RealTime_Series002_t000_crp-1.tif (red).tif'
 
-image_path =  moviepath/ filename
+projection_image_path =  moviepath/ filename
 movie_path =  moviepath/ movie_filename
 
-with Image.open(image_path) as img:
-    #gray_img = img.convert('L')
-    img_array = np.array(img)
+with Image.open(projection_image_path) as img:
+    projection_image_array = np.array(img)
 
-img_array=img_array-np.min(img_array)
-maxim=np.max(img_array)
+projection_image_array=projection_image_array-np.min(projection_image_array)
+maxim=np.max(projection_image_array)
 
-threshold=treshold_it(img_array)[0]
+threshold=guv_tools.treshold_it(projection_image_array)[2]
 
-speck_centers = find_white_speck_centers(img_array,threshold=threshold)
+speck_centers = find_white_speck_centers(projection_image_array,threshold=threshold)
 
 print(f"Found {len(speck_centers)} white specks.")
 
@@ -134,30 +93,28 @@ for center in speck_centers:
     coords = circular_area_around(center[0], center[1], radius=9)
     vals = []
     for coord in coords:
-        if 0 <= coord[x1] < img_array.shape[y1] and 0 <= coord[y1] < img_array.shape[x1]:
-            vals.append(img_array[coord[x1], coord[y1]])  # Collect value
-            img_array[coord[x1], coord[y1]] += 0.1*maxim  # Increment pixel value
+        if 0 <= coord[x1] < projection_image_array.shape[y1] and 0 <= coord[y1] < projection_image_array.shape[x1]:
+            vals.append(projection_image_array[coord[x1], coord[y1]])  # Collect value
+            projection_image_array[coord[x1], coord[y1]] += 0.1*maxim  # Increment pixel value
 fig, ax=plt.subplots(1,2)
-ax[0].imshow(img_array, cmap='gray')
+ax[0].imshow(projection_image_array, cmap='gray')
 ax[0].set_title('Image with Circular Areas Around Specks')
 
 for center in speck_centers:
     ax[0].plot(center[x1], center[y1], 'o', color='r')
 
-#plt.show()
+plt.show()
 
 # Load TIFF movie
-frame_number = 10  # Load the 11th frame (frame 10 is the 11th in zero-indexing)
-
-# Load the frame
+# Load the frames
+#frame_number = 10  # Load the 11th frame (frame 10 is the 11th in zero-indexing)
 #frame = load_tiff_frame(movie_path, frame_number)
 frames=load_tiff_movie(movie_path)
-
 ff=len(frames)
 N_events=len(speck_centers)
 
+#build traces
 trace_data=np.zeros((ff,N_events),dtype='float')
-
 for fri, frame in enumerate(frames):
     print(fri)
     img_array = np.array(frame)
@@ -170,16 +127,17 @@ for fri, frame in enumerate(frames):
                 img_array[coord[x1], coord[y1]] += 0.1*maxim  # Increment pixel value
         trace_data[fri,si]=np.sum(vals)
         
-
+#find start points events:
 frs,N_events=np.shape(trace_data)
 fig, ax=plt.subplots(2,2)
-event_data=np.zeros((N_events,3),dtype='int')
+event_data=np.zeros((N_events,4),dtype='int')
 for ti, trace in enumerate(trace_data.T):
     dif_trace=np.diff(trace)
     t0=np.argmax(dif_trace)
+    slope=int(dif_trace[t0])
     x0=int(speck_centers[ti][0])
-    y0=int(speck_centers[ti][0])
-    event_data[ti]=(x0,y0,t0)
+    y0=int(speck_centers[ti][1])
+    event_data[ti]=(t0,x0,y0, slope)
 
 #save centers
 event_data_name=label +'_events' + str(".csv")

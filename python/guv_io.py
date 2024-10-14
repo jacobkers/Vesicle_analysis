@@ -337,6 +337,9 @@ def cut_tif_to_roi_tiffs_hardwired(im_ori_name,guv_xyr,initval):
     shrink_tiff=st
  """
 
+def 
+
+
 
 
 def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
