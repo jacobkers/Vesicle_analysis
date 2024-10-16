@@ -17,7 +17,7 @@ def load_tiff_frame(file_path, frame_index):
         frame = tif.pages[frame_index].asarray()
     return frame
 
-def find_white_speck_centers(img_array, threshold=1, min_size=2):
+def find_white_speck_centers(img_array, threshold=1, min_size=1):
     """Find the centers of white specks in an image image."""
     binary = img_array > threshold
     labeled, num_features = ndimage.label(binary)
@@ -51,22 +51,21 @@ def circular_area_around(x=0, y=0, radius=25):
     return coords
 
 # Example usage
-if 0: 
+if 1: 
     label='2_TIRF_488_001_PCPG_Chol-1_small_short'
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
+    savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
     #moviepath=Path('D:/jkerssemakers/CD_Data_in/2023_Rafa/2024_10_02 membrane fusion')
     movie_filename = '2_TIRF_488_001_PCPG_Chol-1_small_short.tif'
     filename ='STD_2_TIRF_488_001_PCPG_Chol-1_small_short.tif'
-if 1:
+if 0:
     label='2_TIRF_488_001_PCPG_Chol_long'
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
+    savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
     #moviepath=Path('D:/jkerssemakers/CD_Data_in/2023_Rafa/2024_10_02 membrane fusion')
     movie_filename = '2_TIRF_488_001_PCPG_Chol.tif'
     filename ='STD_2_TIRF_488_001_PCPG_Chol.tif'
-if 0:
-    moviepath= Path.cwd()
-    movie_filename = '40 uM LUVsWITHCerC6_RealTime_Series002_t000_crp-1_red.tif'
-    filename = 'MAX_40 uM LUVsWITHCerC6_RealTime_Series002_t000_crp-1.tif (red).tif'
+
 
 projection_image_path =  moviepath/ filename
 movie_path =  moviepath/ movie_filename
@@ -141,7 +140,7 @@ for ti, trace in enumerate(trace_data.T):
 
 #save centers
 event_data_name=label +'_events' + str(".csv")
-csv_target_c=moviepath /  event_data_name
+csv_target_c=savepath /  event_data_name
 with open(csv_target_c, "w",newline='') as csv_c:  # will overwrite existing
     # create the csv writer
     writer = csv.writer(csv_c, delimiter=";")
@@ -157,7 +156,7 @@ with open(csv_target_c, "w",newline='') as csv_c:  # will overwrite existing
 #save traces
 trace_data_name=label +"_traces" +  str(".csv")
 
-csv_target=moviepath /  trace_data_name
+csv_target=savepath /  trace_data_name
 with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
     # create the csv writer
     writer = csv.writer(csv_f, delimiter=";")

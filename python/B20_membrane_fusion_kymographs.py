@@ -7,13 +7,6 @@ import tifffile as tf
 import guv_tools
 
 
-def load_tiff_frame(file_path, frame_index):
-    # Open the TIFF file
-    with tf.TiffFile(file_path) as tif:
-        # Load a specific frame (zero-indexed)
-        frame = tif.pages[frame_index].asarray()
-    return frame
-
 def load_tiff_movie(input_path):
     """Load a TIFF movie as a list of frames."""
     with Image.open(input_path) as img:
@@ -26,27 +19,18 @@ def load_tiff_movie(input_path):
                 break
     return frames
 
-def circular_area_around(x=0, y=0, radius=25):
-    """Generate coordinates for a circular area around a center point."""
-    binary_image = np.zeros((2 * radius, 2 * radius), dtype=np.uint8)
-    center = (radius, radius)
-    cv2.circle(binary_image, center, radius, 255, -1)
-    coords = np.argwhere(binary_image == 255)
-    coords = coords - radius + [int(y), int(x)]
-    return coords
-
 
 # Example usage
 if 0: 
     label='2_TIRF_488_001_PCPG_Chol-1_small_short'
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
-    #moviepath=Path('D:/jkerssemakers/CD_Data_in/2023_Rafa/2024_10_02 membrane fusion')
+    savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
     movie_filename = '2_TIRF_488_001_PCPG_Chol-1_small_short.tif'
     filename ='STD_2_TIRF_488_001_PCPG_Chol-1_small_short.tif'
 if 1:
     label='2_TIRF_488_001_PCPG_Chol_long'
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
-    #moviepath=Path('D:/jkerssemakers/CD_Data_in/2023_Rafa/2024_10_02 membrane fusion')
+    savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
     movie_filename = '2_TIRF_488_001_PCPG_Chol.tif'
     filename ='STD_2_TIRF_488_001_PCPG_Chol.tif'
 if 0:
@@ -68,7 +52,7 @@ frames_array=np.array(frames_array)
 
 #load events
 event_data_name=label +"_events" +  str(".csv")
-csv_events=moviepath /  event_data_name
+csv_events=savepath /  event_data_name
 csv_path_in = Path(csv_events)
 event_data = np.loadtxt(csv_events, delimiter=';')
 
@@ -102,7 +86,7 @@ for event_no, event in enumerate(event_data):
     
     #final savings:
     kymo_name = 'kymographs_' + label +'/' + 'event' + str(event_no).zfill(4) +  str("_kymo.png")
-    kymo_path= moviepath/ kymo_name
+    kymo_path= savepath/ kymo_name
     fig.savefig(kymo_path)
     dum=1
     plt.close()

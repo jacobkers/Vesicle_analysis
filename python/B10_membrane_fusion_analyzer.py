@@ -7,13 +7,13 @@ import matplotlib.pyplot as plt
 if 0: 
     label='2_TIRF_488_001_PCPG_Chol-1_small_short'
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
-    #moviepath=Path('D:/jkerssemakers/CD_Data_in/2023_Rafa/2024_10_02 membrane fusion')
+    savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
     movie_filename = '2_TIRF_488_001_PCPG_Chol-1_small_short.tif'
     filename ='STD_2_TIRF_488_001_PCPG_Chol-1_small_short.tif'
 if 1:
     label='2_TIRF_488_001_PCPG_Chol_long'
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
-    #moviepath=Path('D:/jkerssemakers/CD_Data_in/2023_Rafa/2024_10_02 membrane fusion')
+    savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
     movie_filename = '2_TIRF_488_001_PCPG_Chol.tif'
     filename ='STD_2_TIRF_488_001_PCPG_Chol.tif'
 if 0:
@@ -27,14 +27,14 @@ movie_path =  moviepath/ movie_filename
 
 #load traces
 trace_data_name=label +"_traces" +  str(".csv")
-csv_traces=moviepath /  trace_data_name
+csv_traces=savepath /  trace_data_name
 csv_path_in = Path(csv_traces)
 print(csv_traces.stem)
 trace_data = np.loadtxt(csv_traces, delimiter=';')
 
 #load events
 event_data_name=label +"_events" +  str(".csv")
-csv_events=moviepath /  event_data_name
+csv_events=savepath /  event_data_name
 csv_path_in = Path(csv_events)
 event_data = np.loadtxt(csv_events, delimiter=';')
 
