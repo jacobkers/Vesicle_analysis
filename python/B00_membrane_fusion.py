@@ -152,7 +152,6 @@ with open(csv_target_c, "w",newline='') as csv_c:  # will overwrite existing
         #f = open("test.csv", "a")
         writer.writerow(data_row) 
 
-
 #save traces
 trace_data_name=label +"_traces" +  str(".csv")
 
@@ -162,8 +161,7 @@ with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
     writer = csv.writer(csv_f, delimiter=";")
     #f = open("test.csv", "a")
     #writer.writerow(row.keys())
-    for data_row in trace_data:  
-        
+    for data_row in trace_data:         
         # create the csv writer
         writer = csv.writer(csv_f, delimiter=";")
         #f = open("test.csv", "a")

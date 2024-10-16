@@ -21,13 +21,13 @@ def load_tiff_movie(input_path):
 
 
 # Example usage
-if 0: 
-    label='2_TIRF_488_001_PCPG_Chol-1_small_short'
+if 1: 
+    label='2_TIRF_488_001_PCPG_Chol_small_short'
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
     savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
-    movie_filename = '2_TIRF_488_001_PCPG_Chol-1_small_short.tif'
-    filename ='STD_2_TIRF_488_001_PCPG_Chol-1_small_short.tif'
-if 1:
+    movie_filename = '2_TIRF_488_001_PCPG_Chol_small_short.tif'
+    filename ='STD_2_TIRF_488_001_PCPG_Chol_small_short.tif'
+if 0:
     label='2_TIRF_488_001_PCPG_Chol_long'
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
     savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
@@ -62,25 +62,42 @@ DX=30
 DY=30
 pre_shift=25
 for event_no, event in enumerate(event_data):
-    fig, ax=plt.subplots(1,3)
+    fig, ax=plt.subplots(2,3)
     x0=int(event[1])
     y0=int(event[2])
     t0=int(event[0])+int(DT/2)-pre_shift
     subarray=guv_tools.extract_subarray(frames_array, t0, x0, y0, DT, DX, DY)
-    projection_0=np.sum(subarray,axis=0)
-    projection_1=np.sum(subarray,axis=1)
-    projection_2=np.sum(subarray,axis=2)
+    #sum:
+    sumprojection_0=np.sum(subarray,axis=0)
+    sumprojection_1=np.sum(subarray,axis=1)
+    sumprojection_2=np.sum(subarray,axis=2)
+    #max
+    maxprojection_0=np.max(subarray,axis=0)
+    maxprojection_1=np.max(subarray,axis=1)
+    maxprojection_2=np.max(subarray,axis=2)
+
     #show:
-    ax[0].imshow(projection_0, aspect=1)
-    ax[0].set_title('event' + str(event_no).zfill(4))
-    ax[0].set_xlabel("X-pos, pixels")
-    ax[0].set_ylabel("Y-pos,pixels")
-    ax[1].imshow(projection_1, aspect='auto')
-    ax[1].set_xlabel("X-pos, pixels")
-    ax[1].set_ylabel("Time,frames")
-    ax[2].imshow(projection_2,aspect='auto')
-    ax[2].set_xlabel("Y-pos, pixels")
-    ax[2].set_ylabel("Time,frames")
+    ax[0,0].imshow(sumprojection_0, aspect=1)
+    ax[0,0].set_title('SUM_event' + str(event_no).zfill(4))
+    ax[0,0].set_xlabel("X-pos, pixels")
+    ax[0,0].set_ylabel("Y-pos,pixels")
+    ax[0,1].imshow(sumprojection_1, aspect='auto')
+    ax[0,1].set_xlabel("X-pos, pixels")
+    ax[0,1].set_ylabel("Time,frames")
+    ax[0,2].imshow(sumprojection_2,aspect='auto')
+    ax[0,2].set_xlabel("Y-pos, pixels")
+    ax[0,2].set_ylabel("Time,frames")
+
+    ax[1,0].imshow(maxprojection_0, aspect=1)
+    ax[1,0].set_title('MAX_event' + str(event_no).zfill(4))
+    ax[1,0].set_xlabel("X-pos, pixels")
+    ax[1,0].set_ylabel("Y-pos,pixels")
+    ax[1,1].imshow(maxprojection_1, aspect='auto')
+    ax[1,1].set_xlabel("X-pos, pixels")
+    ax[1,1].set_ylabel("Time,frames")
+    ax[1,2].imshow(maxprojection_2,aspect='auto')
+    ax[1,2].set_xlabel("Y-pos, pixels")
+    ax[1,2].set_ylabel("Time,frames")
     fig.tight_layout()
     fig.show()
     
