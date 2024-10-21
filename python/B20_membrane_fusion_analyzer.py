@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from openpyxl import load_workbook
 from scipy.optimize import curve_fit
 
-# Define the exponential function with background
+# exponential function with background
 def exponential_model(t, A, k, B, t0):
     return A * np.exp(-k * (t - t0)) + B
 
@@ -18,21 +18,20 @@ class Event:
         self.type = 0
 
 # Example usage
-if 1: 
+if 0: 
     label='2_TIRF_488_001_PCPG_Chol_small_short'
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
     savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
     movie_filename = '2_TIRF_488_001_PCPG_Chol_small_short.tif'
     filename ='STD_2_TIRF_488_001_PCPG_Chol_small_short.tif'
-    xls_classification = savepath / "Events_classification_jacob_short.xlsx"
-    csv_classification = savepath / "Events_classification_jacob_short.csv"  
-if 0:
+    xls_classification = savepath / "Events_classification_jacob_short.xlsx"  
+if 1:
     label='2_TIRF_488_001_PCPG_Chol_long'
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
     savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
     movie_filename = '2_TIRF_488_001_PCPG_Chol.tif'
     filename ='STD_2_TIRF_488_001_PCPG_Chol.tif'
-    xls_source = savepath / "Events_classification_jacob.xlsx"  
+    xls_classification  = savepath / "Events_classification_jacob.xlsx"  
 if 0:
     moviepath= Path.cwd()
     movie_filename = '40 uM LUVsWITHCerC6_RealTime_Series002_t000_crp-1_red.tif'
@@ -67,6 +66,13 @@ for row_cells in sheet_events.iter_rows(min_row=2):
     event.t0=((row_cells[ColNames['t0']].value))
     event_list.append(event)
 
+#we need to add:
+# dark treshold
+# end-of-trace residu
+# dock time
+# event starts (maxima)
+# release times (minima)
+# end-of-event (=eot or back-to-dark)
 
 # plot traces and start_time
 xls_source = savepath / xls_source 
@@ -75,20 +81,23 @@ frs,N_events=np.shape(pre_trace_data)
 fig, ax=plt.subplots(2,2)
 for event,pre_trace in zip(event_list,pre_trace_data.T):
     dif_trace=np.diff(pre_trace)
-    mxi=int(event.t0)
-    tp=event.type
-    start=np.max([mxi-20, 0])
-    stop=np.min([mxi+50, frs])
+    t0=int(event.t0)
+    tp=event.type   
+    start=np.max([t0-20, 0])
+    stop=np.min([t0+100, frs])
     trace_cut=pre_trace[start:stop]
     dif_trace_cut=dif_trace[start:stop]
-
+    t1=np.argmin(dif_trace)
+    
+    
     #show:
     if tp == "hemifusion":
         ax[0,0].plot(pre_trace, '-', markersize=2)
-        ax[0,0].plot(mxi,pre_trace[mxi], 'ro-', markersize=4)
+        ax[0,0].plot(t0,pre_trace[t0], 'ro-', markersize=4)
         ax[0,0].set_title('traces')
         ax[0,1].plot(dif_trace, '-', markersize=2)
-        ax[0,1].plot(mxi, dif_trace[mxi], 'ro-', markersize=4)
+        ax[0,1].plot(t0, dif_trace[t0], 'ro-', markersize=4)
+        ax[0,1].plot(t1, dif_trace[t1], 'go-', markersize=4)
         ax[0,1].set_title('derivative')
         ax[1,0].plot(trace_cut, '-')
         ax[1,0].set_title('aligned')
