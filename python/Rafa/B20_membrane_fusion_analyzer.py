@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from openpyxl import load_workbook
 from scipy.optimize import curve_fit
 
+
+
 # exponential function with background
 def exponential_model(t, A, k, B, t0):
     return A * np.exp(-k * (t - t0)) + B
