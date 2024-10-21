@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#Bert
 """
 examples of binary operations 
 @author: jkerssemakers
