@@ -1,21 +1,38 @@
 import numpy as np
+import csv
 from pathlib import Path
 import matplotlib.pyplot as plt
+from openpyxl import load_workbook
+from scipy.optimize import curve_fit
 
+# Define the exponential function with background
+def exponential_model(t, A, k, B, t0):
+    return A * np.exp(-k * (t - t0)) + B
+
+class Event:
+    def __init__(self):
+        self.index = 0
+        self.x0 = 0
+        self.y0 = 0
+        self.t0 = 0
+        self.type = 0
 
 # Example usage
-if 0: 
-    label='2_TIRF_488_001_PCPG_Chol-1_small_short'
+if 1: 
+    label='2_TIRF_488_001_PCPG_Chol_small_short'
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
     savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
-    movie_filename = '2_TIRF_488_001_PCPG_Chol-1_small_short.tif'
-    filename ='STD_2_TIRF_488_001_PCPG_Chol-1_small_short.tif'
-if 1:
+    movie_filename = '2_TIRF_488_001_PCPG_Chol_small_short.tif'
+    filename ='STD_2_TIRF_488_001_PCPG_Chol_small_short.tif'
+    xls_classification = savepath / "Events_classification_jacob_short.xlsx"
+    csv_classification = savepath / "Events_classification_jacob_short.csv"  
+if 0:
     label='2_TIRF_488_001_PCPG_Chol_long'
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
     savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
     movie_filename = '2_TIRF_488_001_PCPG_Chol.tif'
     filename ='STD_2_TIRF_488_001_PCPG_Chol.tif'
+    xls_source = savepath / "Events_classification_jacob.xlsx"  
 if 0:
     moviepath= Path.cwd()
     movie_filename = '40 uM LUVsWITHCerC6_RealTime_Series002_t000_crp-1_red.tif'
@@ -30,34 +47,45 @@ trace_data_name=label +"_traces" +  str(".csv")
 csv_traces=savepath /  trace_data_name
 csv_path_in = Path(csv_traces)
 print(csv_traces.stem)
-trace_data = np.loadtxt(csv_traces, delimiter=';')
+pre_trace_data = np.loadtxt(csv_traces, delimiter=';')
 
-#load events
-event_data_name=label +"_events" +  str(".csv")
-csv_events=savepath /  event_data_name
-csv_path_in = Path(csv_events)
-event_data = np.loadtxt(csv_events, delimiter=';')
-
-#load classification file of events
+#load classification file of events (contains t0,x,y,type)
+xls_source = savepath / xls_classification 
+wb = load_workbook(filename = xls_classification)
+sheet_events = wb['events']
+ColNames = {}
+Current  = 0
+for COL in sheet_events.iter_cols(1, sheet_events.max_column):
+    ColNames[COL[0].value] = Current
+    Current += 1
+event_list=[]
+for row_cells in sheet_events.iter_rows(min_row=2):
+    event=Event()
+    event.type=((row_cells[ColNames['type']].value))
+    event.x0=((row_cells[ColNames['x']].value))
+    event.y0=((row_cells[ColNames['y']].value))
+    event.t0=((row_cells[ColNames['t0']].value))
+    event_list.append(event)
 
 
 # plot traces and start_time
-frs,N_events=np.shape(trace_data)
+xls_source = savepath / xls_source 
+frs,N_events=np.shape(pre_trace_data)
 
 fig, ax=plt.subplots(2,2)
-for event,trace in zip(event_data,trace_data.T):
-    dif_trace=np.diff(trace)
-    #mxi=np.argmax(dif_trace)
-    mxi=int(event[0])
+for event,pre_trace in zip(event_list,pre_trace_data.T):
+    dif_trace=np.diff(pre_trace)
+    mxi=int(event.t0)
+    tp=event.type
     start=np.max([mxi-20, 0])
     stop=np.min([mxi+50, frs])
-    trace_cut=trace[start:stop]
+    trace_cut=pre_trace[start:stop]
     dif_trace_cut=dif_trace[start:stop]
 
     #show:
-    if np.max(trace)>0.2E6:
-        ax[0,0].plot(trace, '-', markersize=2)
-        ax[0,0].plot(mxi,trace[mxi], 'ro-', markersize=4)
+    if tp == "hemifusion":
+        ax[0,0].plot(pre_trace, '-', markersize=2)
+        ax[0,0].plot(mxi,pre_trace[mxi], 'ro-', markersize=4)
         ax[0,0].set_title('traces')
         ax[0,1].plot(dif_trace, '-', markersize=2)
         ax[0,1].plot(mxi, dif_trace[mxi], 'ro-', markersize=4)
