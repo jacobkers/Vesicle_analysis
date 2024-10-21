@@ -14,6 +14,30 @@ import matplotlib.font_manager as fm
 import guv_tools
 from PIL import Image, ImageSequence
 
+
+class Event:
+    def __init__(self, row_dict):
+        self.data = row_dict  # Store the row data as a dictionary
+
+    def __repr__(self):
+        return f"Event({self.data})"
+
+
+def read_csv_to_events(file_path):
+    events = []
+    
+    # Open the CSV file and read its contents
+    with open(file_path, mode='r', newline='') as csvfile:
+        csv_reader = csv.DictReader(csvfile)  # Automatically uses headers as keys
+        
+        # Iterate over each row in the CSV file
+        for row in csv_reader:
+            # Create an Event object for each row
+            event = Event(row)
+            events.append(event)
+    
+    return events
+
 def get_XY_info(csv_source):
     """ ead roi data as acquired via ImageJ:
     ImageJ area selection
