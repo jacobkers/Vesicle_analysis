@@ -122,7 +122,12 @@ for guvno, Guv in enumerate(Guv_list):
         axs[color_i].imshow(chan) 
     axs[color_i+1].imshow(roi_work)
     fig.tight_layout()
-    plt.show()              
+    plt.show()
+    #save
+    target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/misc/output_figs/separate_channels_' + str(guvno).zfill(3) +'.png'
+    fig.savefig(target)
+    plt.close('all')
+             
 
 
 # # Isolating a GUV
