@@ -671,4 +671,4 @@ def extract_subarray(array, x0, y0, z0, L, W, H):
     # Extract the sub-array
     sub_array = array[x_min:x_max, y_min:y_max, z_min:z_max]
     
-    return sub_array
+    return sub_array, x_min, x_max, y_min, y_max, z_min, z_max

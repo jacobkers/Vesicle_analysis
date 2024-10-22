@@ -4,7 +4,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from openpyxl import load_workbook
 from scipy.optimize import curve_fit
-
+from common_tools import guv_tools
 
 
 # exponential function with background
@@ -18,6 +18,33 @@ class Event:
         self.y0 = 0
         self.t0 = 0
         self.type = 0
+
+def travel_from_start(pre_trace, t_rise, type):
+    #this function analyzes a single event in more detail
+    #we start at the steepest rise
+    #back in time we find the last time-above_background
+    #forward we do the same
+    #in both cases, times may be at be at the begin- or end-of-movie
+    #we also find the maximum intensity
+    #for hemifusion, this may be a list of 2
+    
+    #get background
+    inliers, outliers, flags=guv_tools.outlier_flag(data=pre_trace, tolerance=2, sig_change=0.7, how=1, sho=0, demo=0)
+    bck=np.median(inliers)
+    
+    t_dock=t_rise
+    t_scanback=t_rise
+    while t_scanback>0:
+        t_scanback=t_scanback-1
+        if pre_trace[t_scanback]>bck:
+            t_dock=t_scanback
+
+
+    if type == 'hemifusion':
+        t_max_list=[]
+        t_min_list=[]
+    t_end_of_event
+    return t_dock
 
 # Example usage
 if 0: 
@@ -82,14 +109,21 @@ frs,N_events=np.shape(pre_trace_data)
 
 fig, ax=plt.subplots(2,2)
 for event,pre_trace in zip(event_list,pre_trace_data.T):
+    
+
     dif_trace=np.diff(pre_trace)
+    # get typical times
     t0=int(event.t0)
-    tp=event.type   
+
+    #travel_from_start(pre_trace, t_rise, type)
+
+    t1=np.argmin(dif_trace)
+    tp=event.type
     start=np.max([t0-20, 0])
     stop=np.min([t0+100, frs])
     trace_cut=pre_trace[start:stop]
     dif_trace_cut=dif_trace[start:stop]
-    t1=np.argmin(dif_trace)
+    
     
     
     #show:
