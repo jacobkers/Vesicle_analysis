@@ -1,4 +1,5 @@
-# Define a logger
-#from utils.Log import Log
-#Logr = Log()
-#_print = Logr._print
+from Rafa import B20_membrane_fusion_analyzer
+
+if __name__ == "__main__":
+    print("Running from vesicles directory:")
+    B20_membrane_fusion_analyzer()  

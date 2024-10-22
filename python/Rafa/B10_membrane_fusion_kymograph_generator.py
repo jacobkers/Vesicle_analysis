@@ -5,7 +5,7 @@ from PIL import Image
 from pathlib import Path
 import matplotlib.pyplot as plt
 import tifffile as tf
-import guv_tools
+from common_tools import guv_tools
 
 
 def load_tiff_movie(input_path):
@@ -22,13 +22,13 @@ def load_tiff_movie(input_path):
 
 
 # Example usage
-if 0: 
+if 1: 
     label='2_TIRF_488_001_PCPG_Chol_small_short'
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
     savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
     movie_filename = '2_TIRF_488_001_PCPG_Chol_small_short.tif'
     filename ='STD_2_TIRF_488_001_PCPG_Chol_small_short.tif'
-if 1:
+if 0:
     label='2_TIRF_488_001_PCPG_Chol_long'
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
     savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
@@ -41,7 +41,6 @@ if 0:
 
 image_path =  moviepath/ filename
 movie_path =  moviepath/ movie_filename
-
 
 #load movie:
 frames=load_tiff_movie(movie_path)
