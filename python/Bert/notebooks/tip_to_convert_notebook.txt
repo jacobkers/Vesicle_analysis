@@ -1,0 +1,3 @@
+in terminal:
+
+(min_analysis) D:\jkerssemakers\Dropbox\CD_recent\BN_CD23_Rafael\analysis\CD23_vesicles\python\Bert\notebooks>jupyter nbconvert --to python Bert_basic_pipeline_notebook.ipynb
