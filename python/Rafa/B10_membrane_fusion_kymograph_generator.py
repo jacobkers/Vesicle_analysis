@@ -22,13 +22,13 @@ def load_tiff_movie(input_path):
 
 
 # Example usage
-if 0: 
+if 1: 
     label='2_TIRF_488_001_PCPG_Chol_small_short'
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
     savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
     movie_filename = '2_TIRF_488_001_PCPG_Chol_small_short.tif'
     filename ='STD_2_TIRF_488_001_PCPG_Chol_small_short.tif'
-if 1:
+if 0:
     label='2_TIRF_488_001_PCPG_Chol_long'
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
     savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
@@ -58,15 +58,14 @@ csv_path_in = Path(csv_events)
 event_data = np.loadtxt(csv_events, delimiter=';')
 
 rws=[0,1]
-DT_list=[75, 3000]
+DT_list=[75, 20000]
 pre_shift_list=[25,200000]
  
 DX=30 
 DY=30
 
-for event_no, event in enumerate(event_data):  
-    plt.close('all')
-    fig, ax=plt.subplots(3,1)
+for event_no, event in enumerate(event_data): 
+    fig, ax=plt.subplots(4,1)   
     for rw, DT, pre_shift in zip(rws, DT_list, pre_shift_list):   
         x0=int(event[1])
         y0=int(event[2])
@@ -81,33 +80,39 @@ for event_no, event in enumerate(event_data):
         rr,cc= np.shape(sumprojection_0)
         if rr>cc:
             used_proj=sumprojection_2
+            used_trace=np.sum(sumprojection_2.T,axis=0)
             pos_min=y_min
-            pos_max=y_max_max
+            pos_max=y_max
         else:
             used_proj=sumprojection_1
+            used_trace=np.sum(sumprojection_1.T, axis=0)
             pos_min=x_min
             pos_max=x_max
         #show:
         if rw == 0:
-            ax[0].imshow(sumprojection_0, aspect=1, extent=[x_min,x_max,y_min, y_max])
+            ax[0].imshow(sumprojection_0, extent=[x_min,x_max,y_min, y_max])
             ax[0].set_title('SUM_event' + str(event_no).zfill(4))
-            ax[1].imshow(used_proj.T, aspect='auto', extent=[t_min,t_max,pos_min,pos_max,])
-            ax[1].set_ylabel("pos, pixels")
+            ax[3].imshow(used_proj.T, aspect='auto', extent=[t_min,t_max,pos_min,pos_max])
+            ax[3].set_ylabel("pos, pixels")
+            ax[3].set_xlabel("Time,frames")
+        if rw == 1:
+            ax[1].plot(used_trace)
+            ax[1].set_ylabel("sum intensity, a.u.")
             ax[1].set_xlabel("Time,frames")
-        if rw == 1:  
+            ax[1].autoscale(enable=True, axis='x', tight=True)
             ax[2].imshow(used_proj.T,aspect='auto', extent=[t_min,t_max,pos_min,pos_max,])
             ax[2].set_ylabel("pos, pixels")
             ax[2].set_xlabel("Time,frames")
         
         #final savings:
         if rw==1:
-            fig.tight_layout()
-            fig.show()
+            #fig.tight_layout()
+            #fig.show()
             #jpeg overview:
             kymo_overview_name = 'kymographs_' + label +'/' + 'event' + str(event_no).zfill(4) +  str("_kymo.png")
             kymo_path= savepath/  kymo_overview_name
             fig.savefig(kymo_path)
-            plt.close('All')
+        
         if 0:
             #tiff files:
             kymo0_name = 'kymographs_' + label +'/' + 'event' + str(event_no).zfill(4) +  str("_XY.tif")
@@ -126,7 +131,8 @@ for event_no, event in enumerate(event_data):
             #io.imsave(savepath/  kymo0_name, sumprojection_0)
             io.imsave(savepath / f"{kymo2_name}", sumprojection_2, check_contrast=False)
             dum=1
-        
+    plt.close('All')    
+
 
 
     
