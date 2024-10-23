@@ -58,11 +58,11 @@ csv_path_in = Path(csv_events)
 event_data = np.loadtxt(csv_events, delimiter=';')
 
 rws=[0,1]
-DT_list=[75, 20000]
-pre_shift_list=[25,200000]
+DT_list=[100, 20000]
+pre_shift_list=[10,200000]
  
-DX=30 
-DY=30
+DX=70 
+DY=70
 
 for event_no, event in enumerate(event_data): 
     fig, ax=plt.subplots(4,1)   
@@ -73,8 +73,8 @@ for event_no, event in enumerate(event_data):
         subarray, t_min, t_max, x_min, x_max, y_min, y_max=guv_tools.extract_subarray(frames_array, t0, x0, y0, DT, DX, DY)
         #sum:
         sumprojection_0=np.sum(subarray,axis=0)
-        sumprojection_1=np.sum(subarray,axis=1)
-        sumprojection_2=np.sum(subarray,axis=2)
+        sumprojection_1=np.sum(subarray,axis=1) #keeps y around Y0
+        sumprojection_2=np.sum(subarray,axis=2) #keeps x around X0
 
         #choose full side if close to edge
         rr,cc= np.shape(sumprojection_0)
@@ -89,21 +89,27 @@ for event_no, event in enumerate(event_data):
             pos_min=x_min
             pos_max=x_max
         #show:
-        if rw == 0:
+        if rw == 0:  #zoom
             ax[0].imshow(sumprojection_0, extent=[x_min,x_max,y_min, y_max])
             ax[0].set_title('SUM_event' + str(event_no).zfill(4))
             ax[3].imshow(used_proj.T, aspect='auto', extent=[t_min,t_max,pos_min,pos_max])
             ax[3].set_ylabel("pos, pixels")
             ax[3].set_xlabel("Time,frames")
-        if rw == 1:
+            t_start=t_min
+            t_stop=t_max
+        if rw == 1: #overview
             ax[1].plot(used_trace)
             ax[1].set_ylabel("sum intensity, a.u.")
-            ax[1].set_xlabel("Time,frames")
             ax[1].autoscale(enable=True, axis='x', tight=True)
+            ax[1].get_xaxis().set_visible(False)
+            #white lines
+            
             ax[2].imshow(used_proj.T,aspect='auto', extent=[t_min,t_max,pos_min,pos_max,])
+            ax[2].plot([t_start,t_start],[pos_min,pos_max], 'w--',linewidth=0.5)
+            ax[2].plot([t_stop,t_stop],[pos_min,pos_max], 'w--',linewidth=0.5)
             ax[2].set_ylabel("pos, pixels")
-            ax[2].set_xlabel("Time,frames")
-        
+
+        fig.tight_layout()
         #final savings:
         if rw==1:
             #fig.tight_layout()

@@ -32,7 +32,7 @@ current_directory = os.getcwd()
 two_levels_up = os.path.abspath(os.path.join(current_directory, "..", ".."))
 one_level_up = os.path.abspath(os.path.join(current_directory, ".."))
 # Insert the path to sys.path
-sys.path.insert(0, current_directory)
+sys.path.insert(0, one_level_up)
 
 from common_tools import guv_binary_ops
 from common_tools import guv_tools
