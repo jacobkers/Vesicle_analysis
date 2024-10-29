@@ -78,36 +78,27 @@ def fusion():
     # Example usage
     if 0: 
         label='2_TIRF_488_001_PCPG_Chol_small_short'
-        moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
-        savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
-        movie_filename = '2_TIRF_488_001_PCPG_Chol_small_short.tif'
-        filename ='STD_2_TIRF_488_001_PCPG_Chol_small_short.tif'
-        xls_classification = savepath / "Events_classification_jacob_short.xlsx"  
+        data_source_path=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
+        xls_classification = data_source_path / "Events_classification_jacob_short.xlsx"  
+    if 0:
+        label='2_TIRF_488_001_PCPG_Chol_long'
+        data_source_path=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
+        xls_classification  = data_source_path / "Events_classification_jacob.xlsx"  
     if 1:
         label='2_TIRF_488_001_PCPG_Chol_long'
-        moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
-        savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
-        movie_filename = '2_TIRF_488_001_PCPG_Chol.tif'
-        filename ='STD_2_TIRF_488_001_PCPG_Chol.tif'
-        xls_classification  = savepath / "Events_classification_jacob.xlsx"  
-    if 0:
-        moviepath= Path.cwd()
-        movie_filename = '40 uM LUVsWITHCerC6_RealTime_Series002_t000_crp-1_red.tif'
-        filename = 'MAX_40 uM LUVsWITHCerC6_RealTime_Series002_t000_crp-1.tif (red).tif'
-
-    image_path =  moviepath/ filename
-    movie_path =  moviepath/ movie_filename
+        data_source_path=Path('C:/Users/jkerssemakers/Dropbox/CD_Data_out/2023_Rafa/2024_10_02 membrane fusion')
+        xls_classification  = data_source_path / "Events_classification_jacob.xlsx"  
 
 
-    #load traces
+    #load pre-traces
     trace_data_name=label +"_traces" +  str(".csv")
-    csv_traces=savepath /  trace_data_name
+    csv_traces=data_source_path /  trace_data_name
     csv_path_in = Path(csv_traces)
     print(csv_traces.stem)
     pre_trace_data = np.loadtxt(csv_traces, delimiter=';')
 
     #load classification file of events (contains t0,x,y,type)
-    xls_source = savepath / xls_classification 
+    xls_source = data_source_path / xls_classification 
     wb = load_workbook(filename = xls_classification)
     sheet_events = wb['events']
     ColNames = {}
@@ -134,17 +125,22 @@ def fusion():
     # end-of-event (=eot or back-to-dark)
 
     # plot traces and start_time
-    xls_source = savepath / xls_source 
+    xls_source = data_source_path / xls_source 
     frs,N_events=np.shape(pre_trace_data)
 
     
     for event,pre_trace in zip(event_list,pre_trace_data.T):
+        #collect ring traces of this event
+        trace_data_name='kymographs_' + label +'/' + 'event' + str(event.index).zfill(4) +  str("_ring_traces.csv")
+        csv_ring_traces=data_source_path /  trace_data_name
+        ring_traces = np.loadtxt(csv_ring_traces, delimiter=';')
+
         # start of rise:
         t_maxrise=int(event.t0)
 
         # get background:
         inliers, outliers, flags=guv_tools.outlier_flag(data=pre_trace[0:t_maxrise], tolerance=3, sig_change=0.7, how=1, sho=0, demo=0)
-        I_tresh=np.median(inliers)+2*np.std(inliers)
+        I_tresh=np.median(inliers)+4*np.std(inliers)
 
 
         #first detection:
@@ -171,14 +167,13 @@ def fusion():
         dif_trace_cut=dif_trace[start:stop]
         
         print(event.index, t_maxrise-t_begin,t_end-t_maxrise)
-        
         #show:
         if  1: #tp== "hemifusion":
             fig, ax=plt.subplots(2,2)
-            ax[0,0].plot(pre_trace, '-', markersize=2)
-            ax[0,0].plot(t_maxrise,pre_trace[t_maxrise], 'ro-', markersize=8)
-            ax[0,0].plot(t_begin,pre_trace[t_begin], 'ko-', markersize=4)
-            ax[0,0].plot(t_end,pre_trace[t_end], 'mo-', markersize=4)
+            ax[0,0].plot(pre_trace[t_begin:t_end], 'o-', markersize=2)
+            ax[0,0].plot(ring_traces[t_begin:t_end], '-', markersize=2)
+            ax[0,0].plot(t_maxrise-t_begin,pre_trace[t_maxrise], 'ro-', markersize=8)
+            ax[0,0].plot(t_begin-t_begin,pre_trace[t_begin], 'ko-', markersize=4)
             ax[0,0].set_title('traces')
             ax[0,1].plot(dif_trace, '-', markersize=2)
             ax[0,1].plot(t_maxrise, dif_trace[t_maxrise], 'ro-', markersize=4)
