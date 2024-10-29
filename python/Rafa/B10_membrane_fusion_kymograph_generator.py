@@ -1,5 +1,5 @@
 import numpy as np
-import cv2
+import csv
 import math as mt
 from skimage import io
 from PIL import Image
@@ -29,7 +29,7 @@ def extract_ring_values(intensity_array, center, Rmin, Rmax):
             distance = np.sqrt((x - center_x)**2 + (y - center_y)**2)
             
             # Check if the distance is within the ring boundaries
-            if Rmin <= distance <= Rmax:
+            if Rmin < distance <= Rmax:
                 ring_values.append(intensity_array[x, y])
                   
     return np.array(ring_values)
@@ -48,13 +48,13 @@ def load_tiff_movie(input_path):
 
 def kymo():
     # Example usage
-    if 0: 
+    if 1: 
         label='2_TIRF_488_001_PCPG_Chol_small_short'
         moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
         savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
         movie_filename = '2_TIRF_488_001_PCPG_Chol_small_short.tif'
         filename ='STD_2_TIRF_488_001_PCPG_Chol_small_short.tif'
-    if 1:
+    if 0:
         label='2_TIRF_488_001_PCPG_Chol_long'
         moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
         savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
@@ -77,7 +77,7 @@ def kymo():
     frames_array=np.array(frames_array)
 
 
-    #load events
+    #load events (start time and position of event)
     event_data_name=label +"_events" +  str(".csv")
     csv_events=savepath /  event_data_name
     csv_path_in = Path(csv_events)
@@ -90,6 +90,16 @@ def kymo():
     
     DX=70 
     DY=70
+    #define a series of rings of constant surface, based on R0
+    R0=7
+    rings=[0, R0]
+    if 1: #equal surface
+        for i in np.arange(8):
+            Ri=rings[i+1]
+            R_nxt=(Ri**2+R0**2)**0.5
+            rings.append(R_nxt)
+    else:
+        rings=[0,5, 10, 15, 20, 25, 30, 35]
 
     for event_no, event in enumerate(event_data): 
         fig, ax=plt.subplots(4,1)   
@@ -98,18 +108,16 @@ def kymo():
             y0=int(event[2])
             t0=np.max([0, int(event[0])+int(DT/2)-pre_shift])
             subarray, t_min, t_max, x_min, x_max, y_min, y_max=guv_tools.extract_subarray(frames_array, t0, x0, y0, DT, DX, DY)
-            
-            intensity_center=[]
-            intensity_ring1=[]
+            ringdata=[]
             for sub_frame in subarray:
-                center= np.unravel_index(np.argmax(sub_frame), sub_frame.shape)
-                intensity_center.append(np.sum(extract_ring_values(sub_frame, center, 0, 5)))
-                intensity_ring1.append(np.sum(extract_ring_values(sub_frame, center, 15, 16)))
-            
-            
+                #collect ring intensities:
+                intensity_rings=[]
+                for ri in np.arange(len(rings)-1):  
+                    center= np.unravel_index(np.argmax(sub_frame), sub_frame.shape)
+                    intensity_rings.append(np.sum(extract_ring_values(sub_frame, center, rings[ri], rings[ri+1])))
+                ringdata.append(intensity_rings)        
             
             #kymograph section:
-
             #sum:
             sumprojection_0=np.sum(subarray,axis=0)
             sumprojection_1=np.sum(subarray,axis=1) #keeps y around Y0
@@ -135,19 +143,15 @@ def kymo():
                 ax[2].set_ylabel("pos, pixels")
                 ax[2].set_xlabel("Time,frames")
                 
-                ax[3].plot(intensity_center, 'r-')
-                ax[3].plot(intensity_ring1, 'b-')
-                ax[3].legend(["center","ring"])
+                ax[3].plot(ringdata, '-')
                 ax[3].set_ylabel("sum intensity, a.u.")
                 ax[3].autoscale(enable=True, axis='x', tight=True)
                 ax[3].get_xaxis().set_visible(False)
 
-
                 t_start=t_min
                 t_stop=t_max
             if rw == 1: #overview
-                ax[0].plot(intensity_center, 'r-')
-                ax[0].plot(intensity_ring1, 'b-')
+                ax[0].plot(ringdata, '-')
                 ax[0].legend(["center","ring"])
                 ax[0].set_ylabel("sum intensity, a.u.")
                 ax[0].autoscale(enable=True, axis='x', tight=True)
@@ -160,17 +164,35 @@ def kymo():
                 ax[1].set_ylabel("pos, pixels")
 
             fig.tight_layout()
-            #final savings:
+
+
+
+            #final savings 
+            #overview png:
             if rw==1:
-                #fig.tight_layout()
-                #fig.show()
                 #jpeg overview:
                 kymo_overview_name = 'kymographs_' + label +'/' + 'event' + str(event_no).zfill(4) +  str("_kymo.png")
                 kymo_path= savepath/  kymo_overview_name
                 fig.savefig(kymo_path)
             
-            if 0:
-                #tiff files:
+            #full traces center and ring
+            #save traces
+            trace_data_name='kymographs_' + label +'/' + 'event' + str(event_no).zfill(4) +  str("_ring_traces.csv")
+            csv_target=savepath /  trace_data_name
+            with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
+                # create the csv writer
+                writer = csv.writer(csv_f, delimiter=";")
+                #f = open("test.csv", "a")
+                #writer.writerow(row.keys())
+                for data_row in ringdata:         
+                    # create the csv writer
+                    writer = csv.writer(csv_f, delimiter=";")
+                    #f = open("test.csv", "a")
+                    writer.writerow(data_row)
+
+            #tiffs:
+            if rw==0:
+                #tiff files full section:
                 kymo0_name = 'kymographs_' + label +'/' + 'event' + str(event_no).zfill(4) +  str("_XY.tif")
                 kymo0_path= savepath/  kymo0_name
                 #io.imsave(savepath/  kymo0_name, sumprojection_0)
@@ -187,6 +209,7 @@ def kymo():
                 #io.imsave(savepath/  kymo0_name, sumprojection_0)
                 io.imsave(savepath / f"{kymo2_name}", sumprojection_2, check_contrast=False)
                 dum=1
+            
         plt.close('All')    
 
 
