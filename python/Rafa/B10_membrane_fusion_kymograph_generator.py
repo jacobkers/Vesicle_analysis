@@ -54,13 +54,13 @@ def kymo():
         savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
         movie_filename = '2_TIRF_488_001_PCPG_Chol_small_short_B.tif'
         filename ='STD_2_TIRF_488_001_PCPG_Chol_small_short_B.tif'
-    if 1: 
+    if 0: 
         label='2_TIRF_488_001_PCPG_Chol_small_short'
         moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
         savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
         movie_filename = '2_TIRF_488_001_PCPG_Chol_small_short.tif'
         filename ='STD_2_TIRF_488_001_PCPG_Chol_small_short.tif'
-    if 0:
+    if 1:
         label='2_TIRF_488_001_PCPG_Chol_long'
         moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
         savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
