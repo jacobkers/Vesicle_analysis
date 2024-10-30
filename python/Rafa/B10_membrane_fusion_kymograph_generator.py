@@ -49,12 +49,18 @@ def load_tiff_movie(input_path):
 def kymo():
     # Example usage
     if 0: 
+        label='2_TIRF_488_001_PCPG_Chol_small_short_B'
+        moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
+        savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
+        movie_filename = '2_TIRF_488_001_PCPG_Chol_small_short_B.tif'
+        filename ='STD_2_TIRF_488_001_PCPG_Chol_small_short_B.tif'
+    if 1: 
         label='2_TIRF_488_001_PCPG_Chol_small_short'
         moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
         savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
         movie_filename = '2_TIRF_488_001_PCPG_Chol_small_short.tif'
         filename ='STD_2_TIRF_488_001_PCPG_Chol_small_short.tif'
-    if 1:
+    if 0:
         label='2_TIRF_488_001_PCPG_Chol_long'
         moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
         savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
@@ -91,10 +97,10 @@ def kymo():
     DX=70 
     DY=70
     #define a series of rings of constant surface, based on R0
-    R0=7
+    R0=10
     rings=[0, R0]
     if 1: #equal surface
-        for i in np.arange(8):
+        for i in np.arange(4):
             Ri=rings[i+1]
             R_nxt=(Ri**2+R0**2)**0.5
             rings.append(R_nxt)
@@ -108,21 +114,41 @@ def kymo():
             y0=int(event[2])
             t0=np.max([0, int(event[0])+int(DT/2)-pre_shift])
             subarray, t_min, t_max, x_min, x_max, y_min, y_max=guv_tools.extract_subarray(frames_array, t0, x0, y0, DT, DX, DY)
-            ringdata=[]
+            ringdata_intensity=[]
+            ringdata_mn=[]
+            ringdata_std=[]
             for sub_frame in subarray:
                 #collect ring intensities:
                 intensity_rings=[]
+                intensity_rings_mn=[]
+                intensity_rings_std=[]
                 for ri in np.arange(len(rings)-1):  
-                    center= np.unravel_index(np.argmax(sub_frame), sub_frame.shape)
+                    #center= np.unravel_index(np.argmax(sub_frame), sub_frame.shape)
+                    #center=[sub_frame.shape[1]/2, sub_frame.shape[0]/2]
+                    center=[x0-x_min, y0-y_min]
+                  
                     intensity_rings.append(np.sum(extract_ring_values(sub_frame, center, rings[ri], rings[ri+1])))
-                ringdata.append(intensity_rings)        
+                    if 0:
+                        intensity_rings_mn.append(np.mean(extract_ring_values(sub_frame, center, rings[ri], rings[ri+1])))
+                        intensity_rings_std.append(np.std(extract_ring_values(sub_frame, center, rings[ri], rings[ri+1])))
+                    else:
+                        intensity_rings_mn.append(0)
+                        intensity_rings_std.append(0)
+                ringdata_intensity.append(intensity_rings)
+                ringdata_mn.append(intensity_rings_mn)
+                ringdata_std.append(intensity_rings_std)        
             
             #kymograph section:
             #sum:
             sumprojection_0=np.sum(subarray,axis=0)
             sumprojection_1=np.sum(subarray,axis=1) #keeps y around Y0
             sumprojection_2=np.sum(subarray,axis=2) #keeps x around X0
-
+            if 0:
+                fig, ax=plt.subplots(1,1)  
+                ax.imshow(sumprojection_0, extent=[x_min,x_max,y_min, y_max])
+                ax.set_title('SUM_event' + str(event_no).zfill(4))
+                fig.show()
+                dum=1
             #choose full side if close to edge
             rr,cc= np.shape(sumprojection_0)
             if rr>cc:
@@ -137,13 +163,12 @@ def kymo():
                 pos_max=x_max
             #show:
             if rw == 0:  #zoom
-                #ax[0].imshow(sumprojection_0, extent=[x_min,x_max,y_min, y_max])
-                #ax[0].set_title('SUM_event' + str(event_no).zfill(4))
+                
                 ax[2].imshow(used_proj.T, aspect='auto', extent=[t_min,t_max,pos_min,pos_max])
                 ax[2].set_ylabel("pos, pixels")
                 ax[2].set_xlabel("Time,frames")
                 
-                ax[3].plot(ringdata, '-')
+                ax[3].plot(ringdata_intensity, '-')
                 ax[3].set_ylabel("sum intensity, a.u.")
                 ax[3].autoscale(enable=True, axis='x', tight=True)
                 ax[3].get_xaxis().set_visible(False)
@@ -151,7 +176,7 @@ def kymo():
                 t_start=t_min
                 t_stop=t_max
             if rw == 1: #overview
-                ax[0].plot(ringdata, '-')
+                ax[0].plot(ringdata_intensity, '-')
                 ax[0].legend(["center","ring"])
                 ax[0].set_ylabel("sum intensity, a.u.")
                 ax[0].autoscale(enable=True, axis='x', tight=True)
@@ -168,6 +193,13 @@ def kymo():
 
 
             #final savings 
+            kymopath =savepath / str('kymographs_' + label +'/')
+            csvpath = savepath / str('kymographs_' + label +'/csv/')
+            if not kymopath.is_dir():
+                kymopath.mkdir()
+            if not csvpath.is_dir():
+                csvpath.mkdir()
+
             #overview png:
             if rw==1:
                 #jpeg overview:
@@ -176,19 +208,18 @@ def kymo():
                 fig.savefig(kymo_path)
             
             #full traces center and ring
-            #save traces
-            trace_data_name='kymographs_' + label +'/' + 'event' + str(event_no).zfill(4) +  str("_ring_traces.csv")
-            csv_target=savepath /  trace_data_name
-            with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
-                # create the csv writer
-                writer = csv.writer(csv_f, delimiter=";")
-                #f = open("test.csv", "a")
-                #writer.writerow(row.keys())
-                for data_row in ringdata:         
+            #save ring data as columns per event for simple handling  
+            savelabels=[str("_intensity"), str("_mean"),str("_std")]
+            savedata=zip(ringdata_intensity, ringdata_mn, ringdata_std)
+            for _savelabel, _ringdata in zip(savelabels,savedata):
+                trace_data_name='kymographs_' + label +'/csv/' + 'event' + str(event_no).zfill(4) +  str("_ring_traces") + _savelabel + str(".csv")
+                csv_target=savepath /  trace_data_name
+                with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
                     # create the csv writer
                     writer = csv.writer(csv_f, delimiter=";")
-                    #f = open("test.csv", "a")
-                    writer.writerow(data_row)
+                    for data_row in _ringdata:         
+                        writer = csv.writer(csv_f, delimiter=";")
+                        writer.writerow(data_row)
 
             #tiffs:
             if rw==0:

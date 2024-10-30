@@ -157,8 +157,16 @@ def fusion():
 
 
         t1a=np.argmin(dif_trace[t_begin:t_end])
-        t1=t_begin+t1a
+        t2a=np.argmax(pre_trace[t_begin:t_end])
         
+        t1=t_begin+t1a
+        t2=t_begin+t2a
+        
+        #adjust end of event:
+        peakval=pre_trace[t2]
+        lowval=0.2*pre_trace[t2]
+        t_end=travel_from_start(pre_trace, t_maxrise, lowval, direction=1)
+
         tp=event.type
         start=np.max([t_maxrise-20, 0])
         start=0 
@@ -169,23 +177,22 @@ def fusion():
         print(event.index, t_maxrise-t_begin,t_end-t_maxrise)
         #show:
         if  1: #tp== "hemifusion":
-            fig, ax=plt.subplots(2,2)
-            ax[0,0].plot(pre_trace[t_begin:t_end], 'o-', markersize=2)
-            ax[0,0].plot(ring_traces[t_begin:t_end], '-', markersize=2)
-            ax[0,0].plot(t_maxrise-t_begin,pre_trace[t_maxrise], 'ro-', markersize=8)
-            ax[0,0].plot(t_begin-t_begin,pre_trace[t_begin], 'ko-', markersize=4)
-            ax[0,0].set_title('traces')
-            ax[0,1].plot(dif_trace, '-', markersize=2)
-            ax[0,1].plot(t_maxrise, dif_trace[t_maxrise], 'ro-', markersize=4)
-            ax[0,1].plot(t1, dif_trace[t1], 'go-', markersize=4)
-            ax[0,1].plot(drop_indices,dif_trace[drop_indices], 'bo', markersize=4)
-            ax[0,1].set_title('derivative')
-            ax[1,0].plot(trace_cut, '-')
-            ax[1,0].set_title('aligned')
-            ax[1,1].plot(trace_cut/np.max(trace_cut), '-')
-            ax[1,1].set_title('normalized')
+            fig, ax=plt.subplots(1,1)
+            ax.plot(pre_trace[t_begin:t_end], 'o-', markersize=2)
+            ax.plot(ring_traces[t_begin:t_end], '-', markersize=2)
+
+            ax.plot(t_maxrise-t_begin,pre_trace[t_maxrise], 'ro-', markersize=8)
+            ax.plot(0,pre_trace[t_begin], 'ko-', markersize=4)
+            ax.plot(t2a,pre_trace[t2], 'ko-', markersize=4)
+            ax.set_title('traces')
+            ax.legend(['pre-trace','center','ring 1'])
+            fig.tight_layout()
             fig.show()
             dum=1
+            #outplot:
+            plot_name='kymographs_' + label +'/' + 'event' + str(event.index).zfill(4) +  str("_ring_traces.png")
+            plot_target=data_source_path /  plot_name
+            fig.savefig(plot_target)
             plt.close('all')
 
 

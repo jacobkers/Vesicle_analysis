@@ -7,7 +7,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import tifffile as tf
 import time
-import guv_tools
+from common_tools import guv_tools
 
 
 def load_tiff_frame(file_path, frame_index):
@@ -17,7 +17,7 @@ def load_tiff_frame(file_path, frame_index):
         frame = tif.pages[frame_index].asarray()
     return frame
 
-def find_white_speck_centers(img_array, threshold=1, min_size=1):
+def find_white_speck_centers(img_array, threshold=2, min_size=1):
     """Find the centers of white specks in an image image."""
     binary = img_array > threshold
     labeled, num_features = ndimage.label(binary)
@@ -52,6 +52,12 @@ def circular_area_around(x=0, y=0, radius=25):
 
 # Example usage
 if 1: 
+        label='2_TIRF_488_001_PCPG_Chol_small_short_B'
+        moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
+        savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
+        movie_filename = '2_TIRF_488_001_PCPG_Chol_small_short_B.tif'
+        filename ='STD_2_TIRF_488_001_PCPG_Chol_small_short_B.tif'
+if 0: 
     label='2_TIRF_488_001_PCPG_Chol-1_small_short'
     moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
     savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
@@ -76,7 +82,7 @@ with Image.open(projection_image_path) as img:
 projection_image_array=projection_image_array-np.min(projection_image_array)
 maxim=np.max(projection_image_array)
 
-threshold=guv_tools.treshold_it(projection_image_array)[2]
+threshold=3*guv_tools.treshold_it(projection_image_array)[2]
 
 speck_centers = find_white_speck_centers(projection_image_array,threshold=threshold)
 
