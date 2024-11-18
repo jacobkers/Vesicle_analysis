@@ -13,10 +13,10 @@ sys.path.insert(0, current_directory)
 #import Rafa's
 #from Rafa import B00_membrane_fusion_event_detector
 if 1:
-    from Rafa import B10_membrane_fusion_kymograph_generator
-    #from Rafa import B20_membrane_fusion_analyzer
+    #from Rafa import B10_membrane_fusion_kymograph_generator
+    from Rafa import B20_membrane_fusion_analyzer
 
     if __name__ == "__main__":
         print("Running from vesicles directory:")
-        B10_membrane_fusion_kymograph_generator.kymo()
-        #B20_membrane_fusion_analyzer.fusion()
+        #B10_membrane_fusion_kymograph_generator.kymo()
+        B20_membrane_fusion_analyzer.fusion()

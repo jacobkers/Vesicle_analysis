@@ -135,7 +135,7 @@ def fusion():
     
     for event,pre_trace in zip(event_list,pre_trace_data.T):
         tp=event.type
-        if  tp == "fullfusion"
+        if  1: #tp == "full fusion":
             #collect ring traces of this event
             trace_data_name='kymographs_' + label +'/csv/' + 'event' + str(event.index).zfill(4) +  str("_ring_traces_intensity.csv")
             csv_ring_traces=data_source_path /  trace_data_name
@@ -144,9 +144,13 @@ def fusion():
             # start of rise:
             t_maxrise=int(event.t0)
 
-            # get background:
+            # get background from the third ring, before the start
+            ring4_full=ring_traces[:,3]
+            start4=np.max([t_maxrise-100, 0])
+            ring4_pre=ring4_full[start4:t_maxrise]
+            I_tresh=np.min(ring4_pre)+2*np.std(ring4_pre)
             inliers, outliers, flags=guv_tools.outlier_flag(data=pre_trace[0:t_maxrise], tolerance=3, sig_change=0.7, how=1, sho=0, demo=0)
-            I_tresh=np.median(inliers)+4*np.std(inliers)
+            #I_tresh=np.median(inliers)+4*np.std(inliers)
 
 
             #first detection:
@@ -184,13 +188,13 @@ def fusion():
             #show:
         
             fig, ax=plt.subplots(1,1)
-            ax.plot(pre_trace[t_begin:t_end], 'o-', markersize=2)
-            ax.plot(ring_traces[t_begin:t_end], '-', markersize=2)
+            ax.plot(pre_trace[t_begin:t_end], 'ko--', markersize=2)
+            ax.plot(ring_traces[t_begin:t_end], 'o-', markersize=2)
 
             ax.plot(t_maxrise-t_begin,pre_trace[t_maxrise], 'ro-', markersize=8)
             ax.plot(0,pre_trace[t_begin], 'ko-', markersize=4)
             ax.plot(t2a,pre_trace[t2], 'ko-', markersize=4)
-            ax.set_title('traces')
+            ax.set_title('trace' + str(event.index).zfill(4))
             ax.legend(['pre-trace','center','ring 1'])
             fig.tight_layout()
             fig.show()
