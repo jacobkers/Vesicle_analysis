@@ -117,7 +117,8 @@ def kymo():
             ringdata_intensity=[]
             ringdata_mn=[]
             ringdata_std=[]
-            for sub_frame in subarray:
+            for fri, sub_frame in enumerate(subarray):
+                #print(fri)
                 #collect ring intensities:
                 intensity_rings=[]
                 intensity_rings_mn=[]
@@ -126,14 +127,10 @@ def kymo():
                     #center= np.unravel_index(np.argmax(sub_frame), sub_frame.shape)
                     #center=[sub_frame.shape[1]/2, sub_frame.shape[0]/2]
                     center=[x0-x_min, y0-y_min]
-                  
-                    intensity_rings.append(np.sum(extract_ring_values(sub_frame, center, rings[ri], rings[ri+1])))
-                    if 0:
-                        intensity_rings_mn.append(np.mean(extract_ring_values(sub_frame, center, rings[ri], rings[ri+1])))
-                        intensity_rings_std.append(np.std(extract_ring_values(sub_frame, center, rings[ri], rings[ri+1])))
-                    else:
-                        intensity_rings_mn.append(0)
-                        intensity_rings_std.append(0)
+                    ringvals=extract_ring_values(sub_frame, center, rings[ri], rings[ri+1])
+                    intensity_rings.append(np.round(np.sum(ringvals)))
+                    intensity_rings_mn.append(np.round(np.mean(ringvals)))
+                    intensity_rings_std.append(np.round(np.std(ringvals)))
                 ringdata_intensity.append(intensity_rings)
                 ringdata_mn.append(intensity_rings_mn)
                 ringdata_std.append(intensity_rings_std)        
@@ -207,19 +204,19 @@ def kymo():
                 kymo_path= savepath/  kymo_overview_name
                 fig.savefig(kymo_path)
             
-            #full traces center and ring
-            #save ring data as columns per event for simple handling  
-            savelabels=[str("_intensity"), str("_mean"),str("_std")]
-            savedata=zip(ringdata_intensity, ringdata_mn, ringdata_std)
-            for _savelabel, _ringdata in zip(savelabels,savedata):
-                trace_data_name='kymographs_' + label +'/csv/' + 'event' + str(event_no).zfill(4) +  str("_ring_traces") + _savelabel + str(".csv")
-                csv_target=savepath /  trace_data_name
-                with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
-                    # create the csv writer
-                    writer = csv.writer(csv_f, delimiter=";")
-                    for data_row in _ringdata:         
+                #full traces center and ring
+                #save ring data as columns per event for simple handling  
+                savelabels=[str("_intensity"), str("_mean"),str("_std")]
+                savedata=[ringdata_intensity, ringdata_mn, ringdata_std]
+                for _savelabel, _ringdata in zip(savelabels,savedata):
+                    trace_data_name='kymographs_' + label +'/csv/' + 'event' + str(event_no).zfill(4) +  str("_ring_traces") + _savelabel + str(".csv")
+                    csv_target=savepath /  trace_data_name
+                    with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
+                        # create the csv writer
                         writer = csv.writer(csv_f, delimiter=";")
-                        writer.writerow(data_row)
+                        for data_row in _ringdata:         
+                            writer = csv.writer(csv_f, delimiter=";")
+                            writer.writerow(data_row)
 
             #tiffs:
             if rw==0:
