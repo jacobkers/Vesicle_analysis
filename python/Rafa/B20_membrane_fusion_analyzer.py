@@ -19,6 +19,26 @@ class Event:
         self.t0 = 0
         self.type = 0
 
+def find_peak_from(trace,t_start, direction, max_or_min):
+    #find first maximum or minimum before or after
+    #we start at the steepest rise
+    #back or forward in time we find the last time-above_background
+    #in both cases, times may be at be at the begin- or end-of-movie
+    t_scan=t_start
+    t_ext=t_start
+    stopit=False
+    while t_scan>1 and t_scan<len(trace)-2 and stopit == False:
+        t_scan=t_scan+direction
+        local_extremum=(max_or_min*trace[t_scan]>max_or_min*trace[t_scan+direction] and 
+                        max_or_min*trace[t_scan]>max_or_min*trace[t_scan-direction])
+        if local_extremum:
+            t_ext=t_scan
+            stopit=True
+        else:
+            stopit=False
+   
+    return t_ext
+
 def travel_from_start(pre_trace, t_rise, bck, direction):
     #this function analyzes a single event in more detail
     #we start at the steepest rise
@@ -90,6 +110,25 @@ def fusion():
         xls_classification  = data_source_path / "Events_classification_jacob.xlsx"  
 
 
+    #on the rings!
+    """ 
+        R0=10
+        rings=[0, R0]
+        if 1: #equal surface
+            for i in np.arange(4):
+                Ri=rings[i+1]
+                R_nxt=(Ri**2+R0**2)**0.5
+                rings.append(R_nxt)
+
+    used ring sizes (mean)
+    mean
+    5.00
+    12.07
+    15.73
+    18.66
+    21.18 """
+    ring_radii=[5,12.07,15.73,18.66,21.18]
+
     #load pre-traces
     trace_data_name=label +"_traces" +  str(".csv")
     csv_traces=data_source_path /  trace_data_name
@@ -103,6 +142,7 @@ def fusion():
     sheet_events = wb['events']
     ColNames = {}
     Current  = 0
+
     for COL in sheet_events.iter_cols(1, sheet_events.max_column):
         ColNames[COL[0].value] = Current
         Current += 1
@@ -131,85 +171,134 @@ def fusion():
     # plot traces and start_time
     xls_source = data_source_path / xls_source 
     frs,N_events=np.shape(pre_trace_data)
-
-    
+    all_ring_peak_t=[]
     for event,pre_trace in zip(event_list,pre_trace_data.T):
         tp=event.type
-        if  1: #tp == "full fusion":
+        if  tp == "full fusion":
             #collect ring traces of this event
             trace_data_name='kymographs_' + label +'/csv/' + 'event' + str(event.index).zfill(4) +  str("_ring_traces_intensity.csv")
             csv_ring_traces=data_source_path /  trace_data_name
             ring_traces = np.loadtxt(csv_ring_traces, delimiter=';')
 
-            # start of rise:
-            t_maxrise=int(event.t0)
+            fig, ax=plt.subplots(1,2)
+            ring_peak_t=[]
+            for counter, ring_trace in enumerate(ring_traces.T):
 
-            # get background from the third ring, before the start
-            ring4_full=ring_traces[:,3]
-            start4=np.max([t_maxrise-100, 0])
-            ring4_pre=ring4_full[start4:t_maxrise]
-            I_tresh=np.min(ring4_pre)+2*np.std(ring4_pre)
-            inliers, outliers, flags=guv_tools.outlier_flag(data=pre_trace[0:t_maxrise], tolerance=3, sig_change=0.7, how=1, sho=0, demo=0)
-            #I_tresh=np.median(inliers)+4*np.std(inliers)
+                #tr=relative time, ta=absolute 
+                ta_maxrise=int(event.t0)  # start of rise:
+                lo=np.min([ta_maxrise, 60])
+                hi=np.min([len(ring_trace)-ta_maxrise, 60])
+                tr_maxrise=lo
 
+                #we only look in a range around the event:
+                zoomsection=list(range(ta_maxrise-lo,ta_maxrise+hi))           
+                ring_trace_r=ring_trace[zoomsection]
 
-            #first detection:
-            t_begin=travel_from_start(pre_trace, t_maxrise, I_tresh, direction=-1)
-            t_end=travel_from_start(pre_trace, t_maxrise, I_tresh, direction=1)
-            
-            # analyze differential trace
-            dif_trace=np.diff(pre_trace)
-            dif_in, dif_out, flags=guv_tools.outlier_flag(data=dif_trace, tolerance=2, sig_change=0.7, how=-1, sho=0, demo=0)
-            drop_tres=np.mean(dif_in)-4*np.std(dif_in)
-            
-            # Run the function
-            drop_indices = find_steep_drops(pre_trace,t_maxrise, I_tresh, drop_tres)
+                tr_maxdrop=  np.argmin(np.diff(ring_trace_r))+1   #relative       
+                ta_maxdrop=  lo + tr_maxdrop                    #absolute
 
 
-            t1a=np.argmin(dif_trace[t_begin:t_end])
-            t2a=np.argmax(pre_trace[t_begin:t_end])
-            
-            t1=t_begin+t1a
-            t2=t_begin+t2a
-            
-            #adjust end of event:
-            peakval=pre_trace[t2]
-            lowval=0.2*pre_trace[t2]
-            t_end=travel_from_start(pre_trace, t_maxrise, lowval, direction=1)
 
-            
-            start=np.max([t_maxrise-20, 0])
-            start=0 
-            stop=np.min([t_maxrise+100, frs])
-            trace_cut=pre_trace[start:stop]
-            dif_trace_cut=dif_trace[start:stop]
-            
-            print(event.index, t_maxrise-t_begin,t_end-t_maxrise)
-            #show:
-        
-            fig, ax=plt.subplots(1,1)
-            ax.plot(pre_trace[t_begin:t_end], 'ko--', markersize=2)
-            ax.plot(ring_traces[t_begin:t_end], 'o-', markersize=2)
+                #find the first maximum before the steepest drop:
+                tr_pk=find_peak_from(ring_trace_r,tr_maxdrop, direction=-1, max_or_min=1)
+                
+                #subpixel step
+                spx=guv_tools.subpix_step(ring_trace_r[tr_pk-1:tr_pk+2])
+                tr_pk_spx=tr_pk+spx
 
-            ax.plot(t_maxrise-t_begin,pre_trace[t_maxrise], 'ro-', markersize=8)
-            ax.plot(0,pre_trace[t_begin], 'ko-', markersize=4)
-            ax.plot(t2a,pre_trace[t2], 'ko-', markersize=4)
-            ax.set_title('trace' + str(event.index).zfill(4))
-            ax.legend(['pre-trace','center','ring 1'])
+                ring_peak_t.append(tr_pk_spx)
+
+                ax[0].plot(tr_maxrise,ring_trace_r[tr_maxrise], 'ro-', markersize=8)
+
+                ax[0].plot(tr_maxdrop,ring_trace_r[tr_maxdrop], 'mo-', markersize=8)
+                ax[0].plot(tr_pk,ring_trace_r[tr_pk], 'go-', markersize=8)
+                ax[0].plot(tr_pk_spx,ring_trace_r[tr_pk], 'gx-', markersize=8)
+                ax[0].plot(ring_trace_r, 'o-', markersize=2)
+
+                
+                ax[0].set_title('trace' + str(event.index).zfill(4))
+                ax[0].legend(['start','ring 0'])
+            all_ring_peak_t.append(ring_peak_t)
+            for old_ring in all_ring_peak_t:
+                ax[1].plot(ring_radii, old_ring, 'o-',markersize=2)
+            ax[1].plot(ring_radii,ring_peak_t, 'ro-')
+            #ax[1].set_ylim(55,70)
             fig.tight_layout()
             fig.show()
-            dum=1
-
-            #savings:
-            plot_path = data_source_path / str('kymographs_' + label +'/' + tp +'/')
-            if not plot_path.is_dir():
-                plot_path.mkdir()
-
-
-            plot_name='kymographs_' + label +'/'  + tp +'/' + 'event' + str(event.index).zfill(4) +  str("_ring_traces.png")
-            plot_target=data_source_path /  plot_name
-            fig.savefig(plot_target)
+            print(event.index)
+            if event.index>=250:
+                dum=1  
             plt.close('all')
+
+            if 0:
+                # get background from the third ring, before the start
+                ring4_full=ring_traces[:,3]
+                start4=np.max([ta_maxrise-100, 0])
+                ring4_pre=ring4_full[start4:ta_maxrise]
+                I_tresh=np.min(ring4_pre)+2*np.std(ring4_pre)
+                inliers, outliers, flags=guv_tools.outlier_flag(data=pre_trace[0:ta_maxrise], tolerance=3, sig_change=0.7, how=1, sho=0, demo=0)
+                #I_tresh=np.median(inliers)+4*np.std(inliers)
+
+                
+
+
+                #first detection:
+                t_begin=travel_from_start(pre_trace, ta_maxrise, I_tresh, direction=-1)
+                t_end=travel_from_start(pre_trace, ta_maxrise, I_tresh, direction=1)
+                
+                # analyze differential trace
+                dif_trace=np.diff(pre_trace)
+                dif_in, dif_out, flags=guv_tools.outlier_flag(data=dif_trace, tolerance=2, sig_change=0.7, how=-1, sho=0, demo=0)
+                drop_tres=np.mean(dif_in)-4*np.std(dif_in)
+                
+                # Run the function
+                drop_indices = find_steep_drops(pre_trace,ta_maxrise, I_tresh, drop_tres)
+
+
+                t1a=np.argmin(dif_trace[t_begin:t_end])
+                t2a=np.argmax(pre_trace[t_begin:t_end])
+                
+                t1=t_begin+t1a
+                t2=t_begin+t2a
+                
+                #adjust end of event:
+                peakval=pre_trace[t2]
+                lowval=0.2*pre_trace[t2]
+                t_end=travel_from_start(pre_trace, ta_maxrise, lowval, direction=1)
+
+                
+                start=np.max([ta_maxrise-20, 0])
+                start=0 
+                stop=np.min([ta_maxrise+100, frs])
+                trace_cut=pre_trace[start:stop]
+                dif_trace_cut=dif_trace[start:stop]
+                
+                print(event.index, ta_maxrise-t_begin,t_end-ta_maxrise)
+                #show:
+                if 0:
+                    fig, ax=plt.subplots(1,1)
+                    ax.plot(pre_trace[t_begin:t_end], 'ko--', markersize=2)
+                    ax.plot(ring_traces[t_begin:t_end], 'o-', markersize=2)
+
+                    ax.plot(ta_maxrise-t_begin,pre_trace[ta_maxrise], 'ro-', markersize=8)
+                    ax.plot(0,pre_trace[t_begin], 'ko-', markersize=4)
+                    ax.plot(t2a,pre_trace[t2], 'ko-', markersize=4)
+                    ax.set_title('trace' + str(event.index).zfill(4))
+                    ax.legend(['pre-trace','center','ring 1'])
+                    fig.tight_layout()
+                    fig.show()
+                    dum=1
+
+                    #savings:
+                    plot_path = data_source_path / str('kymographs_' + label +'/' + tp +'/')
+                    if not plot_path.is_dir():
+                        plot_path.mkdir()
+
+
+                    plot_name='kymographs_' + label +'/'  + tp +'/' + 'event' + str(event.index).zfill(4) +  str("_ring_traces.png")
+                    plot_target=data_source_path /  plot_name
+                    fig.savefig(plot_target)
+                    plt.close('all')
 
 
         
