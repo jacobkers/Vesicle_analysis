@@ -105,21 +105,24 @@ def fusion():
         label='2_TIRF_488_001_PCPG_Chol_long'
         data_source_path=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
         xls_classification  = data_source_path / "Events_classification_jacob.xlsx"  
+        
     if 0:
         label='2_TIRF_488_001_PCPG_Chol_long'
         data_source_path=Path('C:/Users/jkerssemakers/Dropbox/CD_Data_out/2023_Rafa/2024_10_02 membrane fusion')
         xls_classification  = data_source_path / "Events_classification_jacob.xlsx"  
 
-
-    #on the rings!
+    pix2um=0.1254
+    frame_to_ms=50
+    
     """ 
-        R0=10
-        rings=[0, R0]
-        if 1: #equal surface
-            for i in np.arange(4):
-                Ri=rings[i+1]
-                R_nxt=(Ri**2+R0**2)**0.5
-                rings.append(R_nxt)
+    Ring sizes are calculated such that each covers the same area as the central disk (with radius R0)
+    R0=10
+    rings=[0, R0]
+    if 1: #equal surface
+        for i in np.arange(4):
+            Ri=rings[i+1]
+            R_nxt=(Ri**2+R0**2)**0.5
+            rings.append(R_nxt)
 
     used ring sizes (mean)
     mean
@@ -128,7 +131,11 @@ def fusion():
     15.73
     18.66
     21.18 """
-    ring_radii=[5,12.07,15.73,18.66,21.18]
+
+    ring_radii_pix=[5,12.07,15.73,18.66,21.18]
+    ring_radii_mu=[]
+    for Ri_pix in ring_radii_pix:
+        ring_radii_mu.append(Ri_pix*pix2um)
 
     #load pre-traces
     trace_data_name=label +"_traces" +  str(".csv")
@@ -194,7 +201,9 @@ def fusion():
                 tr_maxrise=lo
 
                 #we only look in a range around the event:
-                zoomsection=list(range(ta_maxrise-lo,ta_maxrise+hi))           
+                
+                zoomsection=list(range(ta_maxrise-lo,ta_maxrise+hi))  
+                zoomax=np.arange(-lo, -lo+len(zoomsection))*frame_to_ms         
                 ring_trace_r=ring_trace[zoomsection]
                 diff_ring=np.diff(ring_trace_r)
 
@@ -221,40 +230,41 @@ def fusion():
                 tr_pk_spx=tr_pk+spx
 
                 ring_peak_t.append(tr_pk_spx)
-                ring_area.append(np.pi*ring_radii[ring_i]**2)
+                ring_area.append(ring_radii_mu[ring_i]**2)
                 if ring_i==0:
                     this_event_savedata=[
                         event.index,
                         event.type,
-                        np.round((t_begin_r-tr_maxrise2)*50), 
+                        np.round((t_begin_r-tr_maxrise2)*frame_to_ms), 
                         0,
-                        np.round((tr_pk-tr_maxrise2)*50),
-                        np.round((tr_maxdrop -tr_maxrise2)*50)
+                        np.round((tr_pk-tr_maxrise2)*frame_to_ms),
+                        np.round((tr_maxdrop -tr_maxrise2)*frame_to_ms),
                         0    
                     ]
                               
 
-                    ax[0].plot(t_begin_r,ring_trace_r[t_begin_r], 'bo-', markersize=8)
-                    ax[0].plot(tr_maxrise2,ring_trace_r[tr_maxrise], 'rx-', markersize=8)
-                ax[0].plot(tr_pk_spx,ring_trace_r[tr_pk], 'go-', markersize=4)
-                ax[0].plot(tr_maxdrop,ring_trace_r[tr_maxdrop], 'kx-', markersize=8)
+                    ax[0].plot((t_begin_r-lo)*frame_to_ms,ring_trace_r[t_begin_r], 'bo-', markersize=8)
+                    ax[0].plot((tr_maxrise2-lo)*frame_to_ms,ring_trace_r[tr_maxrise+1], 'rx-', markersize=8)
+                ax[0].plot((tr_pk_spx-lo)*frame_to_ms,ring_trace_r[tr_pk], 'go-', markersize=4)
+                ax[0].plot((tr_maxdrop-lo)*frame_to_ms,ring_trace_r[tr_maxdrop], 'kx-', markersize=8)
                 #ax[0].plot(tr_pk,ring_trace_r[tr_pk], 'go-', markersize=8)
                 #ring_trace
-                ax[0].plot(ring_trace_r, 'o-', markersize=2)
+                
+                ax[0].plot(zoomax, ring_trace_r, 'o-', markersize=2)
             
             ax[0].set_title('trace' + str(event.index).zfill(4))
             ax[0].legend(['begin', 'max_rise_subpix','peak_subpix','maxdrop'],loc='upper right')
-            ax[0].set_xlabel('frame index, r.u')
+            ax[0].set_xlabel('relative time, ms')
             ax[0].set_ylabel('ring sum, a.u')
             all_ring_peak_t.append(ring_peak_t)
             #for old_ring in all_ring_peak_t:
             #    ax[1].plot(ring_radii, old_ring, 'o-',markersize=2)         
-            ax[1].plot(t_begin_r,0, 'bo')
-            ax[1].plot(tr_maxrise2,0, 'rx-')
-            ax[1].plot(ring_peak_t, ring_area, 'go-')
+            ax[1].plot((t_begin_r-tr_maxrise2)*frame_to_ms,0, 'bo')
+            ax[1].plot((tr_maxrise2-tr_maxrise2)*frame_to_ms,0, 'rx-')
+            ax[1].plot((ring_peak_t-tr_maxrise2)*frame_to_ms, ring_area, 'go-')
             ax[1].legend(['begin', 'max_rise_subpix', 'ring_peaks'],loc='upper left')
-            ax[1].set_xlabel('frame index, r.u')
-            ax[1].set_ylabel('(ring area, pixel^2')
+            ax[1].set_xlabel('relative time, ms')
+            ax[1].set_ylabel('(ring R^2, mu^2')
             #ax[1].set_ylim(55,70)
             fig.tight_layout()
             fig.show()
@@ -269,7 +279,6 @@ def fusion():
             if not plot_path.is_dir():
                 plot_path.mkdir()
 
-
             plot_name='kymographs_' + label +'/'  + tp +'/' + 'event' + str(event.index).zfill(4) +  str("_release_analysis.png")
             plot_target=data_source_path /  plot_name
             fig.savefig(plot_target)
@@ -280,6 +289,27 @@ def fusion():
             #save collected data
             # 
 
+    #now: ["index","type","first appearance", "rise" ,"peak", "drop","use_it"]
+    #to add, all in ms: 
+    # event	
+    # t0	
+    # x	
+    # y	
+    # type(user)	
+    # docking	
+    # umbrella count	
+    # undocking?	
+    # residu?	
+    # "r0_first appearance", 
+    # "r0_rise" ,
+    # "r0_mainpeak",  
+    # "r0_maindrop",
+    # "r0_2ndpeak",
+    # "r0_mainpeak",
+    # "r1_mainpeak",
+    # "r2_mainpeak",
+    # "r3_mainpeak",
+    # "r4_mainpeak",
 
 
     event_data_name='kymographs_' + label +'/' + 'B20_event_times.csv'
