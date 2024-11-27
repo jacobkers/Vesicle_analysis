@@ -159,9 +159,14 @@ def fusion():
         event=Event()
         event.index=((row_cells[ColNames['event']].value))
         event.type=((row_cells[ColNames['type']].value))
+        event.t0=((row_cells[ColNames['t0']].value))
         event.x0=((row_cells[ColNames['x']].value))
         event.y0=((row_cells[ColNames['y']].value))
-        event.t0=((row_cells[ColNames['t0']].value))
+        event.docking=((row_cells[ColNames['docking']].value))
+        event.umbrella_count=((row_cells[ColNames['umbrella count']].value))
+        event.undocking=((row_cells[ColNames['undocking?']].value))
+        event.residu=((row_cells[ColNames['residu?']].value))
+        event.use_it=((row_cells[ColNames['use_it']].value))			
         event_list.append(event)
 
     #we need to add:
@@ -231,25 +236,66 @@ def fusion():
 
                 ring_peak_t.append(tr_pk_spx)
                 ring_area.append(ring_radii_mu[ring_i]**2)
+
+                #building data set:
+                #now: ["index","type","first appearance", "rise" ,"peak", "drop","use_it"]
+                #to add, all in ms: 
+                #if ring_i==0:
+                    # event index		
+                    # x	
+                    # y	
+                    # t0
+                    # type(user)	
+                    # docking	
+                    # umbrella count	
+                    # undocking	
+                    # residu
+                    # "use_it"	
+                    # "r0_first appearance", 
+                    # "r0_rise" ,
+                    # "r0_mainpeak",  
+                    # "r0_maindrop",
+                    # "r0_2ndpeak",
+                    # "r0_mainpeak",
+                #if ring_i>0: 
+                    #   append:
+                    # append "r1(2,3,4)_mainpeak",
+                # if last ring:   
+                    # append "use_4diff"
+
                 if ring_i==0:
-                    this_event_savedata=[
-                        event.index,
+                    this_event_savedata= [
+                        event.index,                                   #transfer info:
+                        event.x0,
+                        event.y0,
+                        event.t0,
                         event.type,
-                        np.round((t_begin_r-tr_maxrise2)*frame_to_ms), 
-                        0,
-                        np.round((tr_pk-tr_maxrise2)*frame_to_ms),
-                        np.round((tr_maxdrop -tr_maxrise2)*frame_to_ms),
-                        0    
+                        event.docking,
+                        event.umbrella_count,
+                        event.undocking,
+                        event.use_it,
+                        np.round((t_begin_r-tr_maxrise2)*frame_to_ms),      # "r0_first appearance"
+                        0,                                                  # "r0_rise"
+                        np.round((tr_pk_spx-tr_maxrise2)*frame_to_ms),          # "r0_mainpeak"
+                        np.round((tr_maxdrop -tr_maxrise2)*frame_to_ms),    # "r0_maindrop"
+                        0,                                                  # "r0_2ndpeak"
+                        np.round((tr_pk_spx-tr_maxrise2)*frame_to_ms)           # "r0_mainpeak (repeat)"
                     ]
-                              
 
                     ax[0].plot((t_begin_r-lo)*frame_to_ms,ring_trace_r[t_begin_r], 'bo-', markersize=8)
                     ax[0].plot((tr_maxrise2-lo)*frame_to_ms,ring_trace_r[tr_maxrise+1], 'rx-', markersize=8)
+                    
+                if ring_i>0: 
+                    this_event_savedata.append(
+                        np.round((tr_pk_spx-tr_maxrise2)*frame_to_ms))      #"r1(2,3,4)_mainpeak"
+                #   append:
+                if ring_i==len(ring_traces.T)-1:
+                    this_event_savedata.append(1)                       #"use_4diff"
+                    
                 ax[0].plot((tr_pk_spx-lo)*frame_to_ms,ring_trace_r[tr_pk], 'go-', markersize=4)
                 ax[0].plot((tr_maxdrop-lo)*frame_to_ms,ring_trace_r[tr_maxdrop], 'kx-', markersize=8)
                 #ax[0].plot(tr_pk,ring_trace_r[tr_pk], 'go-', markersize=8)
-                #ring_trace
-                
+                #ring_trace 
                 ax[0].plot(zoomax, ring_trace_r, 'o-', markersize=2)
             
             ax[0].set_title('trace' + str(event.index).zfill(4))
@@ -270,8 +316,6 @@ def fusion():
             fig.show()
             print(event.index)
 
-
-
             #savings:
             save_data.append(this_event_savedata)
 
@@ -288,36 +332,37 @@ def fusion():
 
             #save collected data
             # 
-
     #now: ["index","type","first appearance", "rise" ,"peak", "drop","use_it"]
-    #to add, all in ms: 
-    # event	
-    # t0	
-    # x	
-    # y	
-    # type(user)	
-    # docking	
-    # umbrella count	
-    # undocking?	
-    # residu?	
-    # "r0_first appearance", 
-    # "r0_rise" ,
-    # "r0_mainpeak",  
-    # "r0_maindrop",
-    # "r0_2ndpeak",
-    # "r0_mainpeak",
-    # "r1_mainpeak",
-    # "r2_mainpeak",
-    # "r3_mainpeak",
-    # "r4_mainpeak",
-
+    #to add, all in ms:
+    hdr=[
+    "event",
+    "x0",
+    "y0",	
+    "t0",
+    "type(user)",
+    "docking",
+    "umbrella count",
+    "undocking?",
+    "residu?",
+    "r0_first appearance", 
+    "r0_rise" ,
+    "r0_mainpeak",  
+    "r0_maindrop",
+    "r0_2ndpeak",
+    "r0_mainpeak",
+    "r1_mainpeak",
+    "r2_mainpeak",
+    "r3_mainpeak",
+    "r4_mainpeak"
+    "use_it_4diff"
+    ]
 
     event_data_name='kymographs_' + label +'/' + 'B20_event_times.csv'
     csv_target=data_source_path /  event_data_name
     with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
         # create the csv writer
         writer = csv.writer(csv_f, delimiter=";")
-        writer.writerow(["index","type","first appearance", "rise" ,"peak", "drop","use_it"])
+        writer.writerow(hdr)
         for data_row in save_data:         
             writer = csv.writer(csv_f, delimiter=";")
             writer.writerow(data_row)
