@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from openpyxl import load_workbook
 from scipy.optimize import curve_fit
 from common_tools import guv_tools
+from scipy.stats import linregress
 
 
 # exponential function with background
@@ -196,7 +197,7 @@ def fusion():
 
             fig, ax=plt.subplots(2,1)
             ring_peak_t=[]
-            ring_area=[]
+            ring_squ_rad_mu=[]
             for ring_i, ring_trace in enumerate(ring_traces.T):
 
                 #tr=relative time, ta=absolute 
@@ -233,9 +234,10 @@ def fusion():
                 #subpixel step
                 spx=guv_tools.subpix_step(ring_trace_r[tr_pk-1:tr_pk+2])
                 tr_pk_spx=tr_pk+spx
-
+                #collect:
                 ring_peak_t.append(tr_pk_spx)
-                ring_area.append(ring_radii_mu[ring_i]**2)
+                ring_squ_rad_mu.append(ring_radii_mu[ring_i]**2)
+
 
                 #building data set:
                 #now: ["index","type","first appearance", "rise" ,"peak", "drop","use_it"]
@@ -279,7 +281,8 @@ def fusion():
                         np.round((tr_pk_spx-tr_maxrise2)*frame_to_ms),          # "r0_mainpeak"
                         np.round((tr_maxdrop -tr_maxrise2)*frame_to_ms),    # "r0_maindrop"
                         0,                                                  # "r0_2ndpeak"
-                        np.round((tr_pk_spx-tr_maxrise2)*frame_to_ms)           # "r0_mainpeak (repeat)"
+                        np.round((tr_pk_spx-tr_maxrise2)*frame_to_ms)       # "r0_mainpeak (repeat)"
+                       
                     ]
 
                     ax[0].plot((t_begin_r-lo)*frame_to_ms,ring_trace_r[t_begin_r], 'bo-', markersize=8)
@@ -288,9 +291,6 @@ def fusion():
                 if ring_i>0: 
                     this_event_savedata.append(
                         np.round((tr_pk_spx-tr_maxrise2)*frame_to_ms))      #"r1(2,3,4)_mainpeak"
-                #   append:
-                if ring_i==len(ring_traces.T)-1:
-                    this_event_savedata.append(1)                       #"use_4diff"
                     
                 ax[0].plot((tr_pk_spx-lo)*frame_to_ms,ring_trace_r[tr_pk], 'go-', markersize=4)
                 ax[0].plot((tr_maxdrop-lo)*frame_to_ms,ring_trace_r[tr_maxdrop], 'kx-', markersize=8)
@@ -298,6 +298,22 @@ def fusion():
                 #ring_trace 
                 ax[0].plot(zoomax, ring_trace_r, 'o-', markersize=2)
             
+            #further analysis on peaks:----------------------------------------
+            ring_squ_rad_mu
+            diff_peak_t_s=(ring_peak_t-ring_peak_t[0])*frame_to_ms/1000
+            # Perform linear regression
+            slope, intercept, r_value, p_value, std_err = linregress(diff_peak_t_s, ring_squ_rad_mu)
+            # Calculate zero-crossing (x-intercept)
+            zero_crossing = -intercept / slope
+            # Calculate R² value
+            r_squared = r_value**2
+
+            this_event_savedata.append(slope/4)  # diffusion constant
+            this_event_savedata.append(r_squared)  # # goodness of fit
+            this_event_savedata.append(zero_crossing)  # # goodness of fit
+            this_event_savedata.append(1)                    #"use_4diff"
+
+
             ax[0].set_title('trace' + str(event.index).zfill(4))
             ax[0].legend(['begin', 'max_rise_subpix','peak_subpix','maxdrop'],loc='upper right')
             ax[0].set_xlabel('relative time, ms')
@@ -307,7 +323,7 @@ def fusion():
             #    ax[1].plot(ring_radii, old_ring, 'o-',markersize=2)         
             ax[1].plot((t_begin_r-tr_maxrise2)*frame_to_ms,0, 'bo')
             ax[1].plot((tr_maxrise2-tr_maxrise2)*frame_to_ms,0, 'rx-')
-            ax[1].plot((ring_peak_t-tr_maxrise2)*frame_to_ms, ring_area, 'go-')
+            ax[1].plot((ring_peak_t-tr_maxrise2)*frame_to_ms, ring_squ_rad_mu, 'go-')
             ax[1].legend(['begin', 'max_rise_subpix', 'ring_peaks'],loc='upper left')
             ax[1].set_xlabel('relative time, ms')
             ax[1].set_ylabel('(ring R^2, mu^2')
@@ -353,8 +369,11 @@ def fusion():
     "r1_mainpeak",
     "r2_mainpeak",
     "r3_mainpeak",
-    "r4_mainpeak"
-    "use_it_4diff"
+    "r4_mainpeak",
+    "D_mu^2/s",
+    "R2_value",
+    "zero_crossing",
+    "use_it_4diff",
     ]
 
     event_data_name='kymographs_' + label +'/' + 'B20_event_times.csv'
