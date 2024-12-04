@@ -230,10 +230,18 @@ def fusion():
 
                 #find the first maximum before the steepest drop:
                 tr_pk=find_peak_from(ring_trace_r,tr_maxdrop, direction=-1, max_or_min=1)
-                
-                #subpixel step
-                spx=guv_tools.subpix_step(ring_trace_r[tr_pk-1:tr_pk+2])
+                spx=guv_tools.subpix_step(ring_trace_r[tr_pk-1:tr_pk+2])   #subpixel step
                 tr_pk_spx=tr_pk+spx
+                
+                #IF there is more than one user classified peak, find the first one AFTER the steepest drop
+                if event.umbrella_count>1:
+                    tr_pk2=find_peak_from(ring_trace_r,tr_maxdrop, direction=1, max_or_min=1)
+                    spx2=guv_tools.subpix_step(ring_trace_r[tr_pk-1:tr_pk+2])   #subpixel step
+                    tr_pk2_spx=tr_pk2+spx2
+                else:
+                    tr_pk2_spx=-1 #no result
+
+
                 #collect:
                 ring_peak_t.append(tr_pk_spx)
                 ring_squ_rad_mu.append(ring_radii_mu[ring_i]**2)
@@ -277,12 +285,11 @@ def fusion():
                         event.undocking,
                         event.use_it,
                         np.round((t_begin_r-tr_maxrise2)*frame_to_ms),      # "r0_first appearance"
-                        0,                                                  # "r0_rise"
-                        np.round((tr_pk_spx-tr_maxrise2)*frame_to_ms),          # "r0_mainpeak"
+                        0,                                                  # "r0_rise (=zero per definition)"
+                        np.round((tr_pk_spx-tr_maxrise2)*frame_to_ms),      # "r0_mainpeak"
                         np.round((tr_maxdrop -tr_maxrise2)*frame_to_ms),    # "r0_maindrop"
-                        0,                                                  # "r0_2ndpeak"
+                        np.round((tr_pk_spx2-tr_maxrise2)*frame_to_ms),     # "r0_2ndpeak"
                         np.round((tr_pk_spx-tr_maxrise2)*frame_to_ms)       # "r0_mainpeak (repeat)"
-                       
                     ]
 
                     ax[0].plot((t_begin_r-lo)*frame_to_ms,ring_trace_r[t_begin_r], 'bo-', markersize=8)
