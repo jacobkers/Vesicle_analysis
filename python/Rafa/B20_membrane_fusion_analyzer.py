@@ -7,7 +7,17 @@ from openpyxl import load_workbook
 from scipy.optimize import curve_fit
 from common_tools import guv_tools
 from scipy.stats import linregress
+from itertools import combinations
 
+def pick_combination_indices_with_full(array):
+    # Generate all possible combinations of 3 indices
+    indices = range(len(array))
+    combinations_list = list(combinations(indices, 4))
+    
+    # Add the full set of indices as the last tuple
+    combinations_list.append(tuple(indices))
+    
+    return combinations_list
 
 # exponential function with background
 def exponential_model(t, A, k, B, t0):
@@ -135,8 +145,17 @@ def fusion():
 
     ring_radii_pix=[5,12.07,15.73,18.66,21.18]
     ring_radii_mu=[]
-    for Ri_pix in ring_radii_pix:
+    ring_areas_musq=[]
+    for ri, Ri_pix in enumerate(ring_radii_pix):
         ring_radii_mu.append(Ri_pix*pix2um)
+        if ri==0:
+            area=(np.pi*(Ri_pix*pix2um)**2)
+        else:
+            Ri_pix0=ring_radii_pix[ri-1]
+            area=(np.pi*(Ri_pix*pix2um)**2-
+                  np.pi*(Ri_pix0*pix2um)**2)
+        ring_areas_musq.append(area)
+        
 
     #load pre-traces
     trace_data_name=label +"_traces" +  str(".csv")
@@ -189,7 +208,7 @@ def fusion():
     save_data=[]
     for event,pre_trace in zip(event_list,pre_trace_data.T):
         tp=event.type
-        if  1: #tp == "full fusion": #'dock only': #"full fusion":
+        if 1: #event.index<20: #tp == "full fusion": #'dock only': #"full fusion":
             #collect ring traces of this event
             trace_data_name='kymographs_' + label +'/csv/' + 'event' + str(event.index).zfill(4) +  str("_ring_traces_intensity.csv")
             csv_ring_traces=data_source_path /  trace_data_name
@@ -199,6 +218,10 @@ def fusion():
             ring_peak_t=[]
             ring_squ_rad_mu=[]
             for ring_i, ring_trace in enumerate(ring_traces.T):
+                if ring_i==0:
+                    ring_sumsignal=ring_trace
+                else:
+                    ring_sumsignal=ring_sumsignal+ring_trace
 
                 #tr=relative time, ta=absolute 
                 ta_maxrise=int(event.t0)  # start of rise, initial detection:
@@ -239,10 +262,10 @@ def fusion():
                     spx2=guv_tools.subpix_step(ring_trace_r[tr_pk-1:tr_pk+2])   #subpixel step
                     tr_pk2_spx=tr_pk2+spx2
                 else:
-                    tr_pk2_spx=-1 #no result
+                    tr_pk2_spx=np.nan #no result
 
 
-                #collect:
+                #collect some values:
                 ring_peak_t.append(tr_pk_spx)
                 ring_squ_rad_mu.append(ring_radii_mu[ring_i]**2)
 
@@ -288,7 +311,7 @@ def fusion():
                         0,                                                  # "r0_rise (=zero per definition)"
                         np.round((tr_pk_spx-tr_maxrise2)*frame_to_ms),      # "r0_mainpeak"
                         np.round((tr_maxdrop -tr_maxrise2)*frame_to_ms),    # "r0_maindrop"
-                        np.round((tr_pk_spx2-tr_maxrise2)*frame_to_ms),     # "r0_2ndpeak"
+                        np.round((tr_pk2_spx-tr_maxrise2)*frame_to_ms),     # "r0_2ndpeak"
                         np.round((tr_pk_spx-tr_maxrise2)*frame_to_ms)       # "r0_mainpeak (repeat)"
                     ]
 
@@ -298,31 +321,52 @@ def fusion():
                 if ring_i>0: 
                     this_event_savedata.append(
                         np.round((tr_pk_spx-tr_maxrise2)*frame_to_ms))      #"r1(2,3,4)_mainpeak"
-                    
-                ax[0].plot((tr_pk_spx-lo)*frame_to_ms,ring_trace_r[tr_pk], 'go-', markersize=4)
+                ax[0].plot((tr_pk_spx-lo)*frame_to_ms,ring_trace_r[tr_pk], 'go-', markersize=4) #ring peaks  
                 ax[0].plot((tr_maxdrop-lo)*frame_to_ms,ring_trace_r[tr_maxdrop], 'kx-', markersize=8)
+                if event.umbrella_count>1 and ring_i==0:  
+                    ax[0].plot((tr_pk2_spx-lo)*frame_to_ms,ring_trace_r[tr_pk2], 'g*-', markersize=4)
                 #ax[0].plot(tr_pk,ring_trace_r[tr_pk], 'go-', markersize=8)
                 #ring_trace 
                 ax[0].plot(zoomax, ring_trace_r, 'o-', markersize=2)
             
-            #further analysis on peaks:----------------------------------------
-            ring_squ_rad_mu
+            #further analysis on peaks, with possibility to drop 1 point:
             diff_peak_t_s=(ring_peak_t-ring_peak_t[0])*frame_to_ms/1000
-            # Perform linear regression
-            slope, intercept, r_value, p_value, std_err = linregress(diff_peak_t_s, ring_squ_rad_mu)
-            # Calculate zero-crossing (x-intercept)
-            zero_crossing = -intercept / slope
-            # Calculate R² value
-            r_squared = r_value**2
+            
+            # Perform linear regression:
+            #pick a random set of the four points:
+            all_picks_idxes= pick_combination_indices_with_full(ring_peak_t)
+            r_value_best=0
+            slope_best=0
+            zero_crossing_best=0
+            for indices in all_picks_idxes:
+                try_t=[diff_peak_t_s[i] for i in indices]
+                try_pk=[ring_squ_rad_mu[i] for i in indices]
+                slope, intercept, r_value, p_value, std_err = linregress(try_t, try_pk)
+                r_squared = r_value**2 # Calculate R² value
+                zero_crossing = -intercept / slope # Calculate zero-crossing (x-intercept)
+                if r_value>r_value_best:
+                    slope_best=slope
+                    zero_crossing_best=zero_crossing
+                    r_squared_best=r_squared
+                    usedcode=99
+                    for ix in indices:
+                        usedcode=10*usedcode+ix
+                   
+                    
 
-            this_event_savedata.append(slope/4)  # diffusion constant
-            this_event_savedata.append(r_squared)  # # goodness of fit
-            this_event_savedata.append(zero_crossing)  # # goodness of fit
-            this_event_savedata.append(1)                    #"use_4diff"
+            
+            this_event_savedata.append(np.max(ring_sumsignal))  # diffusion constant
+            this_event_savedata.append(np.round(slope_best/4,2))  # diffusion constant
+            this_event_savedata.append(np.round(r_squared_best,2))  # # goodness of fit
+            this_event_savedata.append(np.round(zero_crossing_best,2))  # # goodness of fit
+            this_event_savedata.append(usedcode)                    #"use_4diff"
 
 
             ax[0].set_title('trace' + str(event.index).zfill(4))
-            ax[0].legend(['begin', 'max_rise_subpix','peak_subpix','maxdrop'],loc='upper right')
+            if event.umbrella_count>1 and ring_i==0:  
+                ax[0].legend(['begin', 'max_rise_subpix','peak_subpix', 'maxdrop', 'peak2_subpix'],loc='upper right')
+            if event.umbrella_count<=1 and ring_i==0: 
+                ax[0].legend(['begin', 'max_rise_subpix','peak_subpix','maxdrop'],loc='upper right')
             ax[0].set_xlabel('relative time, ms')
             ax[0].set_ylabel('ring sum, a.u')
             all_ring_peak_t.append(ring_peak_t)
@@ -367,20 +411,21 @@ def fusion():
     "umbrella count",
     "undocking?",
     "residu?",
-    "r0_first appearance", 
-    "r0_rise" ,
-    "r0_mainpeak",  
-    "r0_maindrop",
-    "r0_2ndpeak",
-    "r0_mainpeak",
-    "r1_mainpeak",
-    "r2_mainpeak",
-    "r3_mainpeak",
-    "r4_mainpeak",
-    "D_mu^2/s",
-    "R2_value",
-    "zero_crossing",
-    "use_it_4diff",
+    "t_r0_first appearance", 
+    "t_r0_rise" ,
+    "t_r0_mainpeak",  
+    "t_r0_maindrop",
+    "t_r0_2ndpeak",
+    "t_r0_mainpeak",
+    "t_r1_mainpeak",
+    "t_r2_mainpeak",
+    "t_r3_mainpeak",
+    "t_r4_mainpeak",
+    "I_allrings_peakval",
+    "fit_D_mu^2/s",
+    "fit_R2_value",
+    "fit_zero_crossing",
+    "fit_use_it_4diff",
     ]
 
     event_data_name='kymographs_' + label +'/' + 'B20_event_times.csv'
