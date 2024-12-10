@@ -350,17 +350,13 @@ def fusion():
                     r_squared_best=r_squared
                     usedcode=99
                     for ix in indices:
-                        usedcode=10*usedcode+ix
+                        usedcode=10*usedcode+ix 
                    
-                    
-
-            
             this_event_savedata.append(np.max(ring_sumsignal))  # diffusion constant
             this_event_savedata.append(np.round(slope_best/4,2))  # diffusion constant
             this_event_savedata.append(np.round(r_squared_best,2))  # # goodness of fit
             this_event_savedata.append(np.round(zero_crossing_best,2))  # # goodness of fit
             this_event_savedata.append(usedcode)                    #"use_4diff"
-
 
             ax[0].set_title('trace' + str(event.index).zfill(4))
             if event.umbrella_count>1 and ring_i==0:  
@@ -437,12 +433,3 @@ def fusion():
         for data_row in save_data:         
             writer = csv.writer(csv_f, delimiter=";")
             writer.writerow(data_row)
-
-        
-
-
-
-
-
-
-
