@@ -71,9 +71,14 @@ def travel_from_start(pre_trace, t_rise, bck, direction):
 import numpy as np
 import pandas as pd
 
-def fusion():
+def fusion(modus):
     # Example usage
-    if 1:
+    if modus == 'short':
+        label='2_TIRF_488_001_PCPG_Chol_small_short'
+        data_source_path=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
+        xls_source  = data_source_path / "kymographs_2_TIRF_488_001_PCPG_Chol_small_short/B20_event_times_edits.xlsx" 
+        xls_target  = data_source_path / "kymographs_2_TIRF_488_001_PCPG_Chol_small_short/B30_TEST.xlsx"  
+    else:
         label='2_TIRF_488_001_PCPG_Chol_long'
         data_source_path=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
         xls_source  = data_source_path / "kymographs_2_TIRF_488_001_PCPG_Chol_long/B20_event_times_edits.xlsx" 
@@ -90,47 +95,53 @@ def fusion():
     pre_trace_data = np.loadtxt(csv_traces, delimiter=';')
 
 
-
     # Read the existing Excel file
     xls_source = data_source_path / xls_source
     df = pd.read_excel(xls_source)
 
     # Display the data read from the Excel file
-    print("Original Data:")
-    print(df)
+    #print("Original Data:")
+    #print(df)
 
 
     # Apply a filter to include only rows where the 'length' column equals 1
     filtered_df = df[df['umbrella count'] >= 1]
 
     # Display the filtered data
-    print("\nFiltered Data (length == 1):")
-    print(filtered_df)
+    #print("\nFiltered Data (length == 1):")
+    #print(filtered_df)
 
     # Add new columns with data
     man_appear=[]
     new_data2=[]
     for ix, umbra in enumerate(filtered_df['umbrella count']):
         event_index=filtered_df.iloc[ix]["event"]
+        print("B30_event:" + str(ix))
         t0=filtered_df.iloc[ix]["t0"]
         #collect ring traces of this event
+    
         trace_data_name='kymographs_' + label +'/csv/' + 'event' + str(event_index).zfill(4) +  str("_ring_traces_intensity.csv")
         csv_ring_traces=data_source_path /  trace_data_name
         ring_traces = np.loadtxt(csv_ring_traces, delimiter=';')
+        
         # and the kymograph
-        kymo1_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_index).zfill(4) +  str("_XT.tif")
+        kymo1_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_index).zfill(4) +  str("_XT_full.tif")
         kymo=io.imread(data_source_path / f"{kymo1_name}")
-
-        
-        
-        fig, ax=plt.subplots(2,1)
-        
-        ax[0].plot(ring_traces)
-        ax[0].plot(t0, ring_traces[t0,0],'ro')
-        ax[1].imshow(np.log10(kymo.T),aspect='auto')
-        fig.show()
-        dum=1
-        plt.close('all')
+        if 0:
+            rr,cc=np.shape(kymo)
+            plot_ring_traces = 0.9*cc-ring_traces/np.max(ring_traces)*0.8*cc
+            fig, ax=plt.subplots(2,1)
+            ax[0].imshow(np.log10(kymo.T),aspect='auto')
+            ax[0].plot(plot_ring_traces)
+            ax[0].plot(t0, plot_ring_traces[t0,0],'ro')
+            ax[0].autoscale(enable=True, axis='x', tight=True)
+            ax[1].plot(np.sum(ring_traces, axis=1))
+            ax[1].legend(["sum"])
+            ax[1].set_xlabel("frame no.")
+            ax[1].set_ylabel("intnesity, a.u.")
+            fig.show()
+            dum=1
+            plt.close('all')
         if umbra>1:
             pick_time=umbra
             man_appear.append(pick_time)
@@ -142,71 +153,11 @@ def fusion():
     filtered_df['New Column 2'] = new_data2 # Example values
 
     # Display the updated data
-    print("\nUpdated Data with New Columns:")
-    print(filtered_df)
+    #print("\nUpdated Data with New Columns:")
+    #print(filtered_df)
 
     # Write the updated data to a new Excel file
     output_file = "output.xlsx"  # Replace with your desired output file path
     filtered_df.to_excel(xls_target, index=False)
 
     print(f"\nUpdated data has been written to {output_file}")
-
-
- 
-    # plot traces and start_time
-    xls_source = data_source_path / xls_source 
-    frs,N_events=np.shape(pre_trace_data)
-    all_ring_peak_t=[]
-    save_data=[]
-    for event,pre_trace in zip(event_list, pre_trace_data.T):
-        tp=event.type
-        if 1: #event.index<20: #tp == "full fusion": #'dock only': #"full fusion":
-            #collect ring traces of this event
-            trace_data_name='kymographs_' + label +'/csv/' + 'event' + str(event.index).zfill(4) +  str("_ring_traces_intensity.csv")
-            csv_ring_traces=data_source_path /  trace_data_name
-            ring_traces = np.loadtxt(csv_ring_traces, delimiter=';')
-
-            fig, ax=plt.subplots(2,1)
-            ring_peak_t=[]
-            ring_squ_rad_mu=[]
-            for ring_i, ring_trace in enumerate(ring_traces.T):
-                if ring_i==0:
-                    ring_sumsignal=ring_trace
-                else:
-                    ring_sumsignal=ring_sumsignal+ring_trace
-            print(event.index)   
-            plt.close('all')
-
-            #save collected data
-            # 
-    #now: ["index","type","first appearance", "rise" ,"peak", "drop","use_it"]
-    #to add, all in ms:
-    hdr=[
-    "event",
-    "x0",
-    "y0",	
-    "t0",
-    "type(user)",
-    "docking",
-    "umbrella count",
-    "undocking?",
-    "residu?",
-    "t_r0_first appearance", 
-    "t_r0_rise" ,
-    "t_r0_mainpeak",  
-    "t_r0_maindrop",
-    "t_r0_2ndpeak",
-    "t_r0_mainpeak",
-    "t_r1_mainpeak",
-    "t_r2_mainpeak",
-    "t_r3_mainpeak",
-    "t_r4_mainpeak",
-    "I_allrings_peakval",
-    "fit_D_mu^2/s",
-    "fit_R2_value",
-    "fit_zero_crossing",
-    "fit_use_it_4diff",
-    ]
-
-    event_data_name='kymographs_' + label +'/' + 'B20_event_times.csv'
-    csv_target=data_source_path /  event_data_name

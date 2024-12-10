@@ -46,31 +46,20 @@ def load_tiff_movie(input_path):
                 break
     return frames
 
-def kymo():
+def kymo(modus):
     # Example usage
-    if 0: 
-        label='2_TIRF_488_001_PCPG_Chol_small_short_B'
-        moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
-        savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
-        movie_filename = '2_TIRF_488_001_PCPG_Chol_small_short_B.tif'
-        filename ='STD_2_TIRF_488_001_PCPG_Chol_small_short_B.tif'
-    if 0: 
+    if modus == 'short': 
         label='2_TIRF_488_001_PCPG_Chol_small_short'
         moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
         savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
         movie_filename = '2_TIRF_488_001_PCPG_Chol_small_short.tif'
         filename ='STD_2_TIRF_488_001_PCPG_Chol_small_short.tif'
-    if 1:
+    else:
         label='2_TIRF_488_001_PCPG_Chol_long'
         moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
         savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
         movie_filename = '2_TIRF_488_001_PCPG_Chol.tif'
         filename ='STD_2_TIRF_488_001_PCPG_Chol.tif'
-    if 0:
-        moviepath= Path.cwd()
-        movie_filename = '40 uM LUVsWITHCerC6_RealTime_Series002_t000_crp-1_red.tif'
-        filename = 'MAX_40 uM LUVsWITHCerC6_RealTime_Series002_t000_crp-1.tif (red).tif'
-
     image_path =  moviepath/ filename
     movie_path =  moviepath/ movie_filename
 
@@ -78,7 +67,8 @@ def kymo():
     #load movie:
     frames=load_tiff_movie(movie_path)
     frames_array=[]
-    for frame in frames:
+    for fri, frame in enumerate(frames):
+        print("B10:frame" + str(fri))
         frames_array.append(np.array(frame))
     frames_array=np.array(frames_array)
 
@@ -108,6 +98,7 @@ def kymo():
         rings=[0,5, 10, 15, 20, 25, 30, 35]
 
     for event_no, event in enumerate(event_data): 
+        print("B10:event" + str(event_no))
         fig, ax=plt.subplots(4,1)   
         for rw, DT, pre_shift in zip(rws, DT_list, pre_shift_list):   
             x0=int(event[1])

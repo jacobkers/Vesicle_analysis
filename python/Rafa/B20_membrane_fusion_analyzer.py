@@ -106,21 +106,16 @@ def find_steep_drops(trace, idx0, I_thresh, drop_threshold, max_drops=20):
                 
     return idxs_down
 
-def fusion():
+def fusion(modus):
     # Example usage
-    if 0: 
+    if modus == 'short': 
         label='2_TIRF_488_001_PCPG_Chol_small_short'
         data_source_path=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
-        xls_classification = data_source_path / "Events_classification_jacob_short.xlsx"  
-    if 1:
+        xls_classification = data_source_path / "kymographs_2_TIRF_488_001_PCPG_Chol_small_short_events_classification_jacob.xlsx"  
+    else:
         label='2_TIRF_488_001_PCPG_Chol_long'
         data_source_path=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
-        xls_classification  = data_source_path / "Events_classification_jacob.xlsx"  
-        
-    if 0:
-        label='2_TIRF_488_001_PCPG_Chol_long'
-        data_source_path=Path('C:/Users/jkerssemakers/Dropbox/CD_Data_out/2023_Rafa/2024_10_02 membrane fusion')
-        xls_classification  = data_source_path / "Events_classification_jacob.xlsx"  
+        xls_classification  = data_source_path / "kymographs_2_TIRF_488_001_PCPG_Chol_long_events_classification_jacob.xlsx"  
 
     pix2um=0.1254
     frame_to_ms=50
@@ -189,24 +184,15 @@ def fusion():
         event.use_it=((row_cells[ColNames['use_it']].value))			
         event_list.append(event)
 
-    #we need to add:
-    # dark treshold (best seems: zoom section, median or minimum from outside ring)
-    # ring peaks (= first maximum before steepest decrease)
-    # health check: 
-    #   - center should peak before third ring
-    #   - should not be IDd to other
-    # end-of-trace residu
-    # dock time = earliest above-local background (ring 1 vs 3)
-    # residu check: 20 second after peak, check 3rd ring/center
-    # release times (maximum of third ring)
-    # end-of-event (=eot or back-to-dark)
-
     # plot traces and start_time
     xls_source = data_source_path / xls_source 
     frs,N_events=np.shape(pre_trace_data)
     all_ring_peak_t=[]
     save_data=[]
+    evi=0
     for event,pre_trace in zip(event_list,pre_trace_data.T):
+        print("B20_event:" + str(evi))
+        evi=evi+1
         tp=event.type
         if 1: #event.index<20: #tp == "full fusion": #'dock only': #"full fusion":
             #collect ring traces of this event
@@ -377,7 +363,7 @@ def fusion():
             #ax[1].set_ylim(55,70)
             fig.tight_layout()
             fig.show()
-            print(event.index)
+            
 
             #savings:
             save_data.append(this_event_savedata)
