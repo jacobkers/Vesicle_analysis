@@ -21,6 +21,6 @@ modus = 'long'  #options 'short' or 'long' (or anything)
 
 if __name__ == "__main__":
     print("Running from vesicles directory:")
-    B10_membrane_fusion_kymograph_generator.kymo(modus)
-    B20_membrane_fusion_analyzer.fusion(modus)
-    B30_membrane_fusion_analyzer_user_additions.fusion(modus)
+    if 0: B10_membrane_fusion_kymograph_generator.kymo(modus)
+    if 0: B20_membrane_fusion_analyzer.fusion(modus)
+    if 1: B30_membrane_fusion_analyzer_user_additions.fusion(modus)

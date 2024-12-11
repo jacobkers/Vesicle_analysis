@@ -30,6 +30,44 @@ class Event:
         self.t0 = 0
         self.type = 0
 
+def on_click(click_event, points, ax, cid, cids):
+    if click_event.button == 1 and click_event.inaxes == ax:  # Left-click
+        # Find the nearest data point
+        xdata, ydata = ax.lines[0].get_data()
+        #distances = np.hypot(xdata - click_event.xdata, ydata - click_event.ydata)
+        distances = abs(xdata - click_event.xdata)
+        index = np.argmin(distances)
+        point = (xdata[index], ydata[index])
+        points.append(point)
+        print(f"Selected point: {point}")
+        ax.plot(point[0], point[1], 'ro')  # Mark the selected point
+        plt.draw()
+    elif click_event.button == 3:  # Right-click
+        print("Selection ended for this plot.")
+        plt.disconnect(cid)
+        cids.remove(cid)
+        plt.close()
+
+def select_points(plots_data):
+    all_selected_points = []
+
+    for data in plots_data:
+        fig, ax = plt.subplots()
+        ax.plot(data[0], data[1], label='Data')
+        ax.legend()
+        plt.title("Left-click to select points, Right-click to erase last, y<0 to finish")
+
+        selected_points = []
+        cids = []
+        cid = fig.canvas.mpl_connect('button_press_event', 
+                                     lambda event: on_click(event, selected_points, ax, cid, cids))
+        cids.append(cid)
+        plt.show()
+
+        all_selected_points.append(selected_points)
+
+    return all_selected_points
+
 def find_peak_from(trace,t_start, direction, max_or_min):
     #find first maximum or minimum before or after
     #we start at the steepest rise
@@ -86,6 +124,11 @@ def fusion(modus):
     pix2um=0.1254
     frame_to_ms=50
     
+    theme="double_release_timings"
+    """  them, only two-peak events are considered.
+    User clicks appearance, peak 1, peak 2
+    """
+
 
     #load pre-traces
     trace_data_name=label +"_traces" +  str(".csv")
@@ -105,7 +148,7 @@ def fusion(modus):
 
 
     # Apply a filter to include only rows where the 'length' column equals 1
-    filtered_df = df[df['umbrella count'] >= 1]
+    filtered_df = df[df['umbrella count'] == 2]
 
     # Display the filtered data
     #print("\nFiltered Data (length == 1):")
@@ -113,9 +156,12 @@ def fusion(modus):
 
     # Add new columns with data
     man_appear=[]
-    new_data2=[]
+    man_rise=[]
+    man_peak1=[]
+    man_peak2=[]
     for ix, umbra in enumerate(filtered_df['umbrella count']):
         event_index=filtered_df.iloc[ix]["event"]
+        t0=filtered_df.iloc[ix]["t0"]
         print("B30_event:" + str(ix))
         t0=filtered_df.iloc[ix]["t0"]
         #collect ring traces of this event
@@ -124,40 +170,74 @@ def fusion(modus):
         csv_ring_traces=data_source_path /  trace_data_name
         ring_traces = np.loadtxt(csv_ring_traces, delimiter=';')
         
-        # and the kymograph
+        # collect the kymograph
         kymo1_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_index).zfill(4) +  str("_XT_full.tif")
         kymo=io.imread(data_source_path / f"{kymo1_name}")
-        if 0:
+        if 1: #event_index == 209:
+            sumtrace=np.sum(ring_traces, axis=1)
+            centertrace=ring_traces[:,0]
             rr,cc=np.shape(kymo)
             plot_ring_traces = 0.9*cc-ring_traces/np.max(ring_traces)*0.8*cc
             fig, ax=plt.subplots(2,1)
+            
             ax[0].imshow(np.log10(kymo.T),aspect='auto')
             ax[0].plot(plot_ring_traces)
+            ax[0].plot(0*sumtrace+cc/2, 'w--')
             ax[0].plot(t0, plot_ring_traces[t0,0],'ro')
             ax[0].autoscale(enable=True, axis='x', tight=True)
-            ax[1].plot(np.sum(ring_traces, axis=1))
+            ax[1].plot(sumtrace)
+            ax[1].plot(t0, sumtrace[t0],'ro')
             ax[1].legend(["sum"])
             ax[1].set_xlabel("frame no.")
-            ax[1].set_ylabel("intnesity, a.u.")
+            ax[1].set_ylabel("intensity, a.u.")
+            ax[1].set_title('event:'+ str(event_index))
             fig.show()
-            dum=1
+            #let the user click:
+            if theme =="double_release_timings":
+                """  only two-peak events are considered.
+                User clicks appearance, rise, peak 1, peak 2
+                """
+                axz=np.arange(len(centertrace))
+                clickdata=[(axz,centertrace)]
+                selpo=select_points(clickdata)
+                selpo=selpo[0][-4:]  #last four points: appear, rise, peak1, peak2!
+                t_appear_pix=selpo[0][0]
+                t_rise_pix=selpo[1][0]
+                t_pk1_pix=selpo[2][0]
+                t_pk2_pix=selpo[3][0]
+                
+                #subpixel steps for peaks:
+                spx1=guv_tools.subpix_step(centertrace[t_pk1_pix-1:t_pk1_pix+2])
+                t_pk1_spx=t_pk1_pix+spx1
+                spx2=guv_tools.subpix_step(centertrace[t_pk2_pix-1:t_pk2_pix+2])
+                t_pk2_spx=t_pk2_pix+spx2
+
+                #absolute, pixels
+                t_appear_ms=(t_appear_pix-t_rise_pix)*frame_to_ms     #relative
+                t_pk1_ms=(t_pk1_spx-t_rise_pix)*frame_to_ms         #relative
+                t_pk2_ms=(t_pk2_spx-t_rise_pix)*frame_to_ms         #relative
+                #allocate:
+                man_rise.append(t_rise_pix)                 #absolute pixels
+                man_appear.append(t_appear_ms)
+                man_peak1.append(t_pk1_ms)
+                man_peak2.append(t_pk2_ms)
+                
             plt.close('all')
-        if umbra>1:
-            pick_time=umbra
-            man_appear.append(pick_time)
-            new_data2.append(5)
         else:
-            man_appear.append(1)
-            new_data2.append(10)
-    filtered_df['man_appearance 1'] = man_appear  # Example values
-    filtered_df['New Column 2'] = new_data2 # Example values
+            man_appear.append(-1)
+            man_rise.append(-1)
+            man_peak1.append(-1)
+            man_peak2.append(-1)
+    filtered_df['man_t)_rise'] = man_rise # Example values
+    filtered_df['man_appearance(rel. to rise)'] = man_appear  # Example values
+    filtered_df['man_peak1(rel. to rise)'] = man_peak1 # Example values
+    filtered_df['man_peak2(rel. to rise)'] = man_peak2 # Example values
 
     # Display the updated data
     #print("\nUpdated Data with New Columns:")
     #print(filtered_df)
 
     # Write the updated data to a new Excel file
-    output_file = "output.xlsx"  # Replace with your desired output file path
     filtered_df.to_excel(xls_target, index=False)
 
-    print(f"\nUpdated data has been written to {output_file}")
+    print(f"\nUpdated data has been written to target")
