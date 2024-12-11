@@ -159,6 +159,9 @@ def fusion(modus):
     man_rise=[]
     man_peak1=[]
     man_peak2=[]
+    man_vesiclesum=[]
+    man_residusum=[]
+
     for ix, umbra in enumerate(filtered_df['umbrella count']):
         event_index=filtered_df.iloc[ix]["event"]
         t0=filtered_df.iloc[ix]["t0"]
@@ -173,7 +176,7 @@ def fusion(modus):
         # collect the kymograph
         kymo1_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_index).zfill(4) +  str("_XT_full.tif")
         kymo=io.imread(data_source_path / f"{kymo1_name}")
-        if 1: #event_index == 209:
+        if event_index == 209:
             sumtrace=np.sum(ring_traces, axis=1)
             centertrace=ring_traces[:,0]
             rr,cc=np.shape(kymo)
@@ -192,6 +195,7 @@ def fusion(modus):
             ax[1].set_ylabel("intensity, a.u.")
             ax[1].set_title('event:'+ str(event_index))
             fig.show()
+            
             #let the user click:
             if theme =="double_release_timings":
                 """  only two-peak events are considered.
@@ -216,11 +220,20 @@ def fusion(modus):
                 t_appear_ms=(t_appear_pix-t_rise_pix)*frame_to_ms     #relative
                 t_pk1_ms=(t_pk1_spx-t_rise_pix)*frame_to_ms         #relative
                 t_pk2_ms=(t_pk2_spx-t_rise_pix)*frame_to_ms         #relative
+                
+                residutime=50 #in frames
+                residu_time=min([len(sumtrace), t_pk1_pix+residutime])
+                vesiclesum=sumtrace[t_pk1_pix]
+                residusum=sumtrace[residu_time]
+
                 #allocate:
                 man_rise.append(t_rise_pix)                 #absolute pixels
                 man_appear.append(t_appear_ms)
                 man_peak1.append(t_pk1_ms)
                 man_peak2.append(t_pk2_ms)
+                man_vesiclesum.append(vesiclesum)
+                man_residusum.append(residusum)
+                
                 
             plt.close('all')
         else:
@@ -228,10 +241,15 @@ def fusion(modus):
             man_rise.append(-1)
             man_peak1.append(-1)
             man_peak2.append(-1)
+            man_vesiclesum.append(-1)
+            man_residusum.append(-1)
+
     filtered_df['man_t)_rise'] = man_rise # Example values
     filtered_df['man_appearance(rel. to rise)'] = man_appear  # Example values
     filtered_df['man_peak1(rel. to rise)'] = man_peak1 # Example values
     filtered_df['man_peak2(rel. to rise)'] = man_peak2 # Example values
+    filtered_df['man_vesiclepeaksum'] = man_vesiclesum # Example values
+    filtered_df['man_residusum'] = man_residusum # Example values
 
     # Display the updated data
     #print("\nUpdated Data with New Columns:")

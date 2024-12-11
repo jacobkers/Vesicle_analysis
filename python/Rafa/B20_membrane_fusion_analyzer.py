@@ -338,7 +338,7 @@ def fusion(modus):
                     for ix in indices:
                         usedcode=10*usedcode+ix 
                    
-            this_event_savedata.append(np.max(ring_sumsignal))  # diffusion constant
+            this_event_savedata.append(np.max(ring_sumsignal))  # 
             this_event_savedata.append(np.round(slope_best/4,2))  # diffusion constant
             this_event_savedata.append(np.round(r_squared_best,2))  # # goodness of fit
             this_event_savedata.append(np.round(zero_crossing_best,2))  # # goodness of fit
