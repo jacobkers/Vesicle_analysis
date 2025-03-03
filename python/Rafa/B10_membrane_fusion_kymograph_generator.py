@@ -7,6 +7,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import tifffile as tf
 from common_tools import guv_tools
+from Rafa.B00_init import get_exps
 
 def extract_ring_values(intensity_array, center, Rmin, Rmax):
     # Get the dimensions of the 2D array
@@ -46,20 +47,16 @@ def load_tiff_movie(input_path):
                 break
     return frames
 
-def kymo(modus):
-    # Example usage
-    if modus == 'short': 
-        label='2_TIRF_488_001_PCPG_Chol_small_short'
-        moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
-        savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
-        movie_filename = '2_TIRF_488_001_PCPG_Chol_small_short.tif'
-        filename ='STD_2_TIRF_488_001_PCPG_Chol_small_short.tif'
-    else:
-        label='2_TIRF_488_001_PCPG_Chol_long'
-        moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
-        savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
-        movie_filename = '2_TIRF_488_001_PCPG_Chol.tif'
-        filename ='STD_2_TIRF_488_001_PCPG_Chol.tif'
+
+def kymo(expi):
+    initval = get_exps(expi)
+
+    label=initval.label
+    moviepath=initval.moviepath
+    savepath=initval.savepath
+    movie_filename = initval.movie_filename
+    filename =initval.filename
+       
     image_path =  moviepath/ filename
     movie_path =  moviepath/ movie_filename
 

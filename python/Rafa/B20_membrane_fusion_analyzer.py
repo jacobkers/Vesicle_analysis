@@ -205,9 +205,10 @@ def fusion(modus):
             ring_squ_rad_mu=[]
             for ring_i, ring_trace in enumerate(ring_traces.T):
                 if ring_i==0:
-                    ring_sumsignal=ring_trace
+                    ring_trace_sum=ring_trace
+                    ring_trace_center=ring_trace
                 else:
-                    ring_sumsignal=ring_sumsignal+ring_trace
+                    ring_trace_sum=ring_trace_sum+ring_trace
 
                 #tr=relative time, ta=absolute 
                 ta_maxrise=int(event.t0)  # start of rise, initial detection:
@@ -235,7 +236,7 @@ def fusion(modus):
                     #first detection:
                     t_begin_r=travel_from_start(ring_trace_r, tr_maxrise, I_tresh, direction=-1)-1
 
-                ta_maxdrop=  lo + tr_maxdrop                    #absolute
+                ta_maxdrop=   tr_maxdrop - lo + ta_maxrise                   #absolute
 
                 #find the first maximum before the steepest drop:
                 tr_pk=find_peak_from(ring_trace_r,tr_maxdrop, direction=-1, max_or_min=1)
@@ -257,32 +258,8 @@ def fusion(modus):
 
 
                 #building data set:
-                #now: ["index","type","first appearance", "rise" ,"peak", "drop","use_it"]
-                #to add, all in ms: 
-                #if ring_i==0:
-                    # event index		
-                    # x	
-                    # y	
-                    # t0
-                    # type(user)	
-                    # docking	
-                    # umbrella count	
-                    # undocking	
-                    # residu
-                    # "use_it"	
-                    # "r0_first appearance", 
-                    # "r0_rise" ,
-                    # "r0_mainpeak",  
-                    # "r0_maindrop",
-                    # "r0_2ndpeak",
-                    # "r0_mainpeak",
-                #if ring_i>0: 
-                    #   append:
-                    # append "r1(2,3,4)_mainpeak",
-                # if last ring:   
-                    # append "use_4diff"
-
                 if ring_i==0:
+                    ta_maxdrop_ring0=ta_maxdrop #to be used later on
                     this_event_savedata= [
                         event.index,                                   #transfer info:
                         event.x0,
@@ -315,15 +292,37 @@ def fusion(modus):
                 #ring_trace 
                 ax[0].plot(zoomax, ring_trace_r, 'o-', markersize=2)
             
-            #further analysis on peaks, with possibility to drop 1 point:
-            diff_peak_t_s=(ring_peak_t-ring_peak_t[0])*frame_to_ms/1000
+            #----------------------------------------------------------------------------
+             #a bit of analysis on the center ring signal:
+            # find the first maximum in the CENTER trace before the steepest drop of the CENTER trace:
+            ta_pk_center=find_peak_from(ring_trace_center,ta_maxdrop_ring0, direction=-1, max_or_min=1)
             
-            # Perform linear regression:
+            centerval_min=np.min(ring_trace_center)
+            centerval_peak=ring_trace_sum[ta_pk_center]-centerval_min
+            
+            if ta_pk_center + 20<len(ring_trace_sum):
+                perc_residu20frs=np.round((ring_trace_sum[ta_pk_center+20]-centerval_min)/centerval_peak*100)
+            else:
+                perc_residu20frs=np.nan
+            if ta_pk_center + 40<len(ring_trace_center):
+                perc_residu40frs=np.round((ring_trace_sum[ta_pk_center+40]-centerval_min)/centerval_peak*100)
+            else:
+                perc_residu40frs=np.nan
+            #add to event data:
+            this_event_savedata.append(centerval_peak)    # 
+            this_event_savedata.append(perc_residu20frs)  # 
+            this_event_savedata.append(perc_residu40frs)  # 
+
+            #-------------------------------------------------------------------------
+            #Diffusion further analysis on peaks, with possibility to drop 1 point:
+            diff_peak_t_s=(ring_peak_t-ring_peak_t[0])*frame_to_ms/1000
             #pick a random set of the four points:
             all_picks_idxes= pick_combination_indices_with_full(ring_peak_t)
             r_value_best=0
             slope_best=0
             zero_crossing_best=0
+            #determine diffusion constant by a linear fit on the squared ring sizes vs peak times;
+            #for this, choose the best fit for three-or four pointpicks (and keep track of which points were used)
             for indices in all_picks_idxes:
                 try_t=[diff_peak_t_s[i] for i in indices]
                 try_pk=[ring_squ_rad_mu[i] for i in indices]
@@ -336,13 +335,12 @@ def fusion(modus):
                     r_squared_best=r_squared
                     usedcode=99
                     for ix in indices:
-                        usedcode=10*usedcode+ix 
-                   
-            this_event_savedata.append(np.max(ring_sumsignal))  # 
+                        usedcode=10*usedcode+ix   
+            #add to event data:
             this_event_savedata.append(np.round(slope_best/4,2))  # diffusion constant
-            this_event_savedata.append(np.round(r_squared_best,2))  # # goodness of fit
-            this_event_savedata.append(np.round(zero_crossing_best,2))  # # goodness of fit
-            this_event_savedata.append(usedcode)                    #"use_4diff"
+            this_event_savedata.append(np.round(r_squared_best,2))  # goodness of fit
+            this_event_savedata.append(np.round(zero_crossing_best,2))  # goodness of fit
+            this_event_savedata.append(usedcode)                    # "use_4diff"
 
             ax[0].set_title('trace' + str(event.index).zfill(4))
             if event.umbrella_count>1 and ring_i==0:  
@@ -404,6 +402,8 @@ def fusion(modus):
     "t_r3_mainpeak",
     "t_r4_mainpeak",
     "I_allrings_peakval",
+    "I_allrings_residu20frs_perc",
+    "I_allrings_residu40frs_perc",
     "fit_D_mu^2/s",
     "fit_R2_value",
     "fit_zero_crossing",
