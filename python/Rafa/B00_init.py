@@ -19,11 +19,11 @@ class Fusion_experiment:
         self.savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
         self.movie_filename = '2_TIRF_488_001_PCPG_Chol_small_short.tif'
         self.filename ='STD_2_TIRF_488_001_PCPG_Chol_small_short.tif'
-
+        self.xls_classification_file  =  "kymographs_2_TIRF_488_001_PCPG_Chol_long_events_classification_jacob.xlsx"  
+        
 
 # overview of experiments:
-def get_exps(exp_idx):
-   
+def get_exps(exp_idx):  
     all_fusion_exps=[]
 
     #set up various experiment configurations:    
@@ -33,6 +33,7 @@ def get_exps(exp_idx):
     Exp0.savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
     Exp0.movie_filename = '2_TIRF_488_001_PCPG_Chol_small_short.tif'
     Exp0.filename ='STD_2_TIRF_488_001_PCPG_Chol_small_short.tif'
+    Exp0.xls_classification_file  =  "kymographs_2_TIRF_488_001_PCPG_Chol_small_short_events_classification_jacob.xlsx"  
     Exp0.suffix='.tif'
     all_fusion_exps.append(Exp0)
 
@@ -42,6 +43,7 @@ def get_exps(exp_idx):
     Exp1.savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
     Exp1.movie_filename = '2_TIRF_488_001_PCPG_Chol.tif'
     Exp1.filename ='STD_2_TIRF_488_001_PCPG_Chol.tif'
+    Exp1.xls_classification_file  =  "kymographs_2_TIRF_488_001_PCPG_Chol_long_events_classification_jacob.xlsx"  
     Exp1.suffix='.tif'
     all_fusion_exps.append(Exp1)
 
@@ -50,7 +52,7 @@ def get_exps(exp_idx):
     Exp2.moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2024_Bert')
     Exp2.savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2024_Bert')
     Exp2.movie_filename = '50dotap_001_c1.tif'
-    Exp2.filename ='STD_50dotap_001_c1.tif'
+    Exp2.filename ='MAX_50dotap_001_c1.tif'
     Exp1.suffix='.tif'
     all_fusion_exps.append(Exp2)
 

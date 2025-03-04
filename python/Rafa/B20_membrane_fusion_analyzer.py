@@ -8,6 +8,7 @@ from scipy.optimize import curve_fit
 from common_tools import guv_tools
 from scipy.stats import linregress
 from itertools import combinations
+from Rafa.B00_init import get_exps
 
 def pick_combination_indices_with_full(array):
     # Generate all possible combinations of 3 indices
@@ -107,15 +108,10 @@ def find_steep_drops(trace, idx0, I_thresh, drop_threshold, max_drops=20):
     return idxs_down
 
 def fusion(modus):
-    # Example usage
-    if modus == 'short': 
-        label='2_TIRF_488_001_PCPG_Chol_small_short'
-        data_source_path=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
-        xls_classification = data_source_path / "kymographs_2_TIRF_488_001_PCPG_Chol_small_short_events_classification_jacob.xlsx"  
-    else:
-        label='2_TIRF_488_001_PCPG_Chol_long'
-        data_source_path=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
-        xls_classification  = data_source_path / "kymographs_2_TIRF_488_001_PCPG_Chol_long_events_classification_jacob.xlsx"  
+    initval = get_exps(expi)
+    label=initval.label
+    data_source_path=initval.moviepath
+    xls_classification = data_source_path / initval.xls_classification_file
 
     pix2um=0.1254
     frame_to_ms=50

@@ -179,12 +179,14 @@ def kymo(expi):
 
             #final savings 
             kymopath =savepath / str('kymographs_' + label +'/')
+            kymosubpath =savepath / str('kymographs_' + label +'/kymos/')
             csvpath = savepath / str('kymographs_' + label +'/csv/')
             if not kymopath.is_dir():
                 kymopath.mkdir()
             if not csvpath.is_dir():
                 csvpath.mkdir()
-
+            if not kymosubpath.is_dir():
+                kymosubpath.mkdir()
             #overview png:
             if rw==1:
                 #jpeg overview:
