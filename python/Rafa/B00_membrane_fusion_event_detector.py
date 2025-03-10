@@ -9,7 +9,7 @@ import tifffile as tf
 import time
 from common_tools import guv_tools
 from Rafa.B00_init import get_exps
-from common_tools.guv_io import load_tiff_movie, load_tiff_frame, load_nd2_movie
+from common_tools.guv_io import load_tiff_movie, load_tiff_frame, load_nd2_movie, load_nd2_movie_try2
 
         
 def find_white_speck_centers(img_array, threshold=2, min_size=1):
@@ -51,7 +51,7 @@ def detect(expi):
     projection_image_array=projection_image_array-np.min(projection_image_array)
     maxim=np.max(projection_image_array)
 
-    threshold=3*guv_tools.treshold_it(projection_image_array)[2]
+    threshold=1*guv_tools.treshold_it(projection_image_array)[2]
 
     speck_centers = find_white_speck_centers(projection_image_array,threshold=threshold)
 
@@ -86,6 +86,7 @@ def detect(expi):
     if initval.suffix=='.tif':
         frames=load_tiff_movie(movie_path)
     if initval.suffix=='.nd2':
+        load_nd2_movie_try2(movie_path,initval.dyechannel)
         frames=load_nd2_movie(movie_path,initval.dyechannel)
     ff=len(frames)
     N_events=len(speck_centers)

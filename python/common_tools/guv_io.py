@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 from common_tools import guv_tools
 from PIL import Image, ImageSequence
-
+import nd2
 
 class Event:
     def __init__(self, row_dict):
@@ -60,14 +60,20 @@ def load_tiff_movie(input_path):
 def load_nd2_movie(input_path, channel_index):
     #loop: 'images' contains all colors and all frames
     with nd2reader.Nd2(str(input_path)) as images:
+        # Change to the third channel (0-based indexing)
         num_frames = len(images)  # Total number of images in the stack
         num_channels = len(images.channels)  # Assuming 4 channels if not automatically detected
         # Select the proper channel 
-        channel_index = 1
         chan_images = [images[i] for i in range(channel_index, num_frames, num_channels)]
     
     # Convert to a NumPy array (optional, if needed for further processing)
     frames = np.array(chan_images)    
+    return frames
+
+def load_nd2_movie_try2(input_path, channel_index):
+    with nd2.ND2File(input_path) as ndfile:
+        data = ndfile.asarray()  # Load the full multi-dimensional dataset
+    frames=data[:,channel_index,:,:]
     return frames
 
 

@@ -7,7 +7,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import tifffile as tf
 from common_tools import guv_tools
-from common_tools.guv_io import load_tiff_movie, load_tiff_frame, load_nd2_movie
+from common_tools.guv_io import load_tiff_movie, load_tiff_frame, load_nd2_movie, load_nd2_movie_try2
 from Rafa.B00_init import get_exps
 
 def extract_ring_values(intensity_array, center, Rmin, Rmax):
@@ -49,7 +49,8 @@ def kymo(expi):
     if initval.suffix=='.tif':
         frames=load_tiff_movie(movie_path)
     if initval.suffix=='.nd2':
-        frames=load_nd2_movie(movie_path,initval.dyechannel)
+        frames=load_nd2_movie_try2(movie_path,initval.dyechannel)
+        #frames=load_nd2_movie(movie_path,initval.dyechannel)
     
     
     frames_array=[]

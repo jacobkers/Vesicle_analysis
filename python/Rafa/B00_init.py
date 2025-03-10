@@ -51,8 +51,8 @@ def get_exps(exp_idx):
     Exp2.label='Bert_nd2_test'
     Exp2.moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2024_Bert')
     Exp2.savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2024_Bert')
-    #Exp2.movie_filename = '50dotap_001_c1.tif'
-    Exp2.movie_filename = '50dotap_001.nd2'
+    Exp2.movie_filename = '50dotap_001_c1.tif'
+    #Exp2.movie_filename = '50dotap_001.nd2'
     Exp2.filename ='MAX_50dotap_001_c1.tif'
     Exp2.suffix=Exp2.movie_filename[-4:] #of movie
     Exp2.dyechannel=1
