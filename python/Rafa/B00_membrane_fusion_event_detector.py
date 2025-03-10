@@ -7,45 +7,10 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import tifffile as tf
 import time
-import nd2reader
 from common_tools import guv_tools
 from Rafa.B00_init import get_exps
+from common_tools.guv_io import load_tiff_movie, load_tiff_frame, load_nd2_movie
 
-
-def load_tiff_frame(file_path, frame_index):
-    # Open the TIFF file
-    with tf.TiffFile(file_path) as tif:
-        # Load a specific frame (zero-indexed)
-        frame = tif.pages[frame_index].asarray()
-    return frame
-
-def load_tiff_movie(input_path):
-    """Load a TIFF movie as a list of frames."""
-    with Image.open(input_path) as img:
-        frames = []
-        while True:
-            frames.append(img.copy())
-            try:
-                img.seek(img.tell() + 1)
-            except EOFError:
-                break
-    return frames
-
-def load_nd2_movie(input_path):
-    #loop: 'images' contains all colors and all frames
-    with nd2reader.Nd2(input_path) as images:
-        for (
-            color_i,
-            chan,
-        ) in enumerate(images):  #work each color channel per guv              
-            frames = []
-            while True:
-                frames.append(img.copy())
-                try:
-                    img.seek(img.tell() + 1)
-                except EOFError:
-                    break
-    return frames
         
 def find_white_speck_centers(img_array, threshold=2, min_size=1):
     """Find the centers of white specks in an image image."""
@@ -69,19 +34,14 @@ def circular_area_around(x=0, y=0, radius=25):
     return coords
 
 # Example usage
-def detect(expi):
-    # Example usage
-    
+def detect(expi):   
     initval = get_exps(expi)
-
     label=initval.label
     moviepath=initval.moviepath
     savepath=initval.savepath
     movie_filename = initval.movie_filename
-    filename =initval.filename
-        
-    movie_path =  moviepath/ movie_filename
-    
+    filename =initval.filename       
+    movie_path =  moviepath/ movie_filename   
     projection_image_path =  moviepath/ filename
     movie_path =  moviepath/ movie_filename
 
@@ -119,12 +79,14 @@ def detect(expi):
 
     plt.show()
 
-    # Load TIFF movie
+    # Load movie
     # Load the frames
     #frame_number = 10  # Load the 11th frame (frame 10 is the 11th in zero-indexing)
     #frame = load_tiff_frame(movie_path, frame_number)
-
-    frames=load_tiff_movie(movie_path)
+    if initval.suffix=='.tif':
+        frames=load_tiff_movie(movie_path)
+    if initval.suffix=='.nd2':
+        frames=load_nd2_movie(movie_path,initval.dyechannel)
     ff=len(frames)
     N_events=len(speck_centers)
 

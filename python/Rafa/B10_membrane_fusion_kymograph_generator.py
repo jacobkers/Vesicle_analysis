@@ -7,12 +7,12 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import tifffile as tf
 from common_tools import guv_tools
+from common_tools.guv_io import load_tiff_movie, load_tiff_frame, load_nd2_movie
 from Rafa.B00_init import get_exps
 
 def extract_ring_values(intensity_array, center, Rmin, Rmax):
     # Get the dimensions of the 2D array
-    rows, cols = intensity_array.shape
-    
+    rows, cols = intensity_array.shape   
     # Calculate the center coordinates
     if 0:
         center_x, center_y = rows // 2, cols // 2
@@ -31,44 +31,32 @@ def extract_ring_values(intensity_array, center, Rmin, Rmax):
             
             # Check if the distance is within the ring boundaries
             if Rmin < distance <= Rmax:
-                ring_values.append(intensity_array[x, y])
-                  
+                ring_values.append(intensity_array[x, y])            
     return np.array(ring_values)
-
-def load_tiff_movie(input_path):
-    """Load a TIFF movie as a list of frames."""
-    with Image.open(input_path) as img:
-        frames = []
-        while True:
-            frames.append(img.copy())
-            try:
-                img.seek(img.tell() + 1)
-            except EOFError:
-                break
-    return frames
 
 
 def kymo(expi):
     initval = get_exps(expi)
-
     label=initval.label
     moviepath=initval.moviepath
     savepath=initval.savepath
     movie_filename = initval.movie_filename
-    filename =initval.filename
-       
+    filename =initval.filename  
     image_path =  moviepath/ filename
     movie_path =  moviepath/ movie_filename
 
-
     #load movie:
-    frames=load_tiff_movie(movie_path)
+    if initval.suffix=='.tif':
+        frames=load_tiff_movie(movie_path)
+    if initval.suffix=='.nd2':
+        frames=load_nd2_movie(movie_path,initval.dyechannel)
+    
+    
     frames_array=[]
     for fri, frame in enumerate(frames):
         print("B10:frame" + str(fri))
         frames_array.append(np.array(frame))
     frames_array=np.array(frames_array)
-
 
     #load events (start time and position of event)
     event_data_name=label +"_events" +  str(".csv")
@@ -151,13 +139,11 @@ def kymo(expi):
                 
                 ax[2].imshow(used_proj.T, aspect='auto', extent=[t_min,t_max,pos_min,pos_max])
                 ax[2].set_ylabel("pos, pixels")
-                ax[2].set_xlabel("Time,frames")
-                
+                ax[2].set_xlabel("Time,frames")              
                 ax[3].plot(ringdata_intensity, '-')
                 ax[3].set_ylabel("sum intensity, a.u.")
                 ax[3].autoscale(enable=True, axis='x', tight=True)
                 ax[3].get_xaxis().set_visible(False)
-
                 t_start=t_min
                 t_stop=t_max
             if rw == 1: #overview
@@ -166,16 +152,13 @@ def kymo(expi):
                 ax[0].set_ylabel("sum intensity, a.u.")
                 ax[0].autoscale(enable=True, axis='x', tight=True)
                 ax[0].get_xaxis().set_visible(False)
-                #white lines
-                
+                #white lines               
                 ax[1].imshow(np.log10(used_proj.T),aspect='auto', extent=[t_min,t_max,pos_min,pos_max,])
                 ax[1].plot([t_start,t_start],[pos_min,pos_max], 'w--',linewidth=0.5)
                 ax[1].plot([t_stop,t_stop],[pos_min,pos_max], 'w--',linewidth=0.5)
                 ax[1].set_ylabel("pos, pixels")
 
             fig.tight_layout()
-
-
 
             #final savings 
             kymopath =savepath / str('kymographs_' + label +'/')
