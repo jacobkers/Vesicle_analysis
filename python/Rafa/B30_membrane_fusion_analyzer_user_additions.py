@@ -12,6 +12,7 @@ results should be saved per theme. data is added, but all the former acquired da
 
 from skimage import io
 import numpy as np
+import pandas as pd
 import csv
 import math as mt
 from pathlib import Path
@@ -106,8 +107,7 @@ def travel_from_start(pre_trace, t_rise, bck, direction):
    
     return t_border
 
-import numpy as np
-import pandas as pd
+
 
 def fusion(modus):
     # Example usage

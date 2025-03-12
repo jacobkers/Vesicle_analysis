@@ -86,6 +86,7 @@ def kymo(expi):
     for event_no, event in enumerate(event_data): 
         print("B10:event" + str(event_no))
         fig, ax=plt.subplots(4,1)   
+        #run twice: one time as full movie, one time as zoom
         for rw, DT, pre_shift in zip(rws, DT_list, pre_shift_list):   
             x0=int(event[1])
             y0=int(event[2])
@@ -195,40 +196,30 @@ def kymo(expi):
             #tiffs:
             if rw==0:
                 #tiff files zoom section:
+                ROI_movie_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_MV_zoom.tif")
+                io.imsave(savepath / f"{ROI_movie_name}", subarray, check_contrast=False)
+                
                 kymo0_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_XY_zoom.tif")
-                kymo0_path= savepath/  kymo0_name
-                #io.imsave(savepath/  kymo0_name, sumprojection_0)
                 io.imsave(savepath / f"{kymo0_name}", sumprojection_0, check_contrast=False)
 
                 kymo1_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_XT_zoom.tif")
-                kymo1_path= savepath/  kymo0_name
-                #io.imsave(savepath/  kymo0_name, sumprojection_0)
                 io.imsave(savepath / f"{kymo1_name}", sumprojection_1, check_contrast=False)
-                dum=1
 
                 kymo2_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_YT_zoom.tif")
-                kymo2_path= savepath/  kymo0_name
-                #io.imsave(savepath/  kymo0_name, sumprojection_0)
                 io.imsave(savepath / f"{kymo2_name}", sumprojection_2, check_contrast=False)
-                dum=1
             if rw==1:
                 #tiff files full section:
+                ROI_movie_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_MV_full.tif")
+                io.imsave(savepath / f"{ROI_movie_name}", subarray, check_contrast=False)
+
                 kymo0_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_XY_full.tif")
-                kymo0_path= savepath/  kymo0_name
-                #io.imsave(savepath/  kymo0_name, sumprojection_0)
                 io.imsave(savepath / f"{kymo0_name}", sumprojection_0, check_contrast=False)
 
                 kymo1_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_XT_full.tif")
-                kymo1_path= savepath/  kymo0_name
-                #io.imsave(savepath/  kymo0_name, sumprojection_0)
                 io.imsave(savepath / f"{kymo1_name}", sumprojection_1, check_contrast=False)
-                dum=1
 
                 kymo2_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_YT_full.tif")
-                kymo2_path= savepath/  kymo0_name
-                #io.imsave(savepath/  kymo0_name, sumprojection_0)
                 io.imsave(savepath / f"{kymo2_name}", sumprojection_2, check_contrast=False)
-                dum=1
             
         plt.close('All')    
 

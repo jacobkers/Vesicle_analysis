@@ -13,11 +13,9 @@ from Rafa.B00_init import get_exps
 def pick_combination_indices_with_full(array):
     # Generate all possible combinations of 3 indices
     indices = range(len(array))
-    combinations_list = list(combinations(indices, 4))
-    
+    combinations_list = list(combinations(indices, 4))    
     # Add the full set of indices as the last tuple
-    combinations_list.append(tuple(indices))
-    
+    combinations_list.append(tuple(indices))   
     return combinations_list
 
 # exponential function with background
@@ -30,7 +28,7 @@ class Event:
         self.x0 = 0
         self.y0 = 0
         self.t0 = 0
-        self.type = 0
+        self.type = 0  #user info
 
 def find_peak_from(trace,t_start, direction, max_or_min):
     #find first maximum or minimum before or after
@@ -66,8 +64,7 @@ def travel_from_start(pre_trace, t_rise, bck, direction):
         if pre_trace[t_scan]>bck:
             t_border=t_scan
         else:
-            stopit=True
-   
+            stopit=True 
     return t_border
 
 import numpy as np
@@ -107,11 +104,11 @@ def find_steep_drops(trace, idx0, I_thresh, drop_threshold, max_drops=20):
                 
     return idxs_down
 
-def fusion(modus):
+def fusion(expi):
     initval = get_exps(expi)
     label=initval.label
     data_source_path=initval.moviepath
-    xls_classification = data_source_path / initval.xls_classification_file
+    xls_classification = initval.savepath / initval.xls_classification_file
 
     pix2um=0.1254
     frame_to_ms=50
@@ -150,13 +147,20 @@ def fusion(modus):
 
     #load pre-traces
     trace_data_name=label +"_traces" +  str(".csv")
-    csv_traces=data_source_path /  trace_data_name
+    csv_traces=initval.savepath /  trace_data_name
     csv_path_in = Path(csv_traces)
     print(csv_traces.stem)
     pre_trace_data = np.loadtxt(csv_traces, delimiter=';')
 
-    #load classification file of events (contains t0,x,y,type)
-    xls_source = data_source_path / xls_classification 
+    #load pre events (x,y,start) (from B10)
+    events_data_name=label +"_events" +  str(".csv")
+    csv_events=initval.savepath /  events_data_name
+    csv_path_in = Path(csv_events)
+    pre_event_data = np.loadtxt(csv_events, delimiter=';')
+
+
+    #OR load classification file of events (contains t0,x,y,type)
+    xls_source = initval.savepath / xls_classification 
     wb = load_workbook(filename = xls_classification)
     sheet_events = wb['events']
     ColNames = {}
@@ -180,8 +184,9 @@ def fusion(modus):
         event.use_it=((row_cells[ColNames['use_it']].value))			
         event_list.append(event)
 
+
     # plot traces and start_time
-    xls_source = data_source_path / xls_source 
+    xls_source = initval.savepath / xls_source 
     frs,N_events=np.shape(pre_trace_data)
     all_ring_peak_t=[]
     save_data=[]
@@ -193,7 +198,7 @@ def fusion(modus):
         if 1: #event.index<20: #tp == "full fusion": #'dock only': #"full fusion":
             #collect ring traces of this event
             trace_data_name='kymographs_' + label +'/csv/' + 'event' + str(event.index).zfill(4) +  str("_ring_traces_intensity.csv")
-            csv_ring_traces=data_source_path /  trace_data_name
+            csv_ring_traces=initval.savepath /  trace_data_name
             ring_traces = np.loadtxt(csv_ring_traces, delimiter=';')
 
             fig, ax=plt.subplots(2,1)
@@ -294,18 +299,22 @@ def fusion(modus):
             ta_pk_center=find_peak_from(ring_trace_center,ta_maxdrop_ring0, direction=-1, max_or_min=1)
             
             centerval_min=np.min(ring_trace_center)
-            centerval_peak=ring_trace_sum[ta_pk_center]-centerval_min
-            
+            centerval_peak=ring_trace_center[ta_pk_center]-centerval_min
+            if ta_pk_center + 10<len(ring_trace_sum):
+                perc_residu10frs=np.round((ring_trace_center[ta_pk_center+10]-centerval_min)/centerval_peak*100)
+            else:
+                perc_residu10frs=np.nan
             if ta_pk_center + 20<len(ring_trace_sum):
-                perc_residu20frs=np.round((ring_trace_sum[ta_pk_center+20]-centerval_min)/centerval_peak*100)
+                perc_residu20frs=np.round((ring_trace_center[ta_pk_center+20]-centerval_min)/centerval_peak*100)
             else:
                 perc_residu20frs=np.nan
             if ta_pk_center + 40<len(ring_trace_center):
-                perc_residu40frs=np.round((ring_trace_sum[ta_pk_center+40]-centerval_min)/centerval_peak*100)
+                perc_residu40frs=np.round((ring_trace_center[ta_pk_center+40]-centerval_min)/centerval_peak*100)
             else:
                 perc_residu40frs=np.nan
             #add to event data:
             this_event_savedata.append(centerval_peak)    # 
+            this_event_savedata.append(perc_residu10frs)  # 
             this_event_savedata.append(perc_residu20frs)  # 
             this_event_savedata.append(perc_residu40frs)  # 
 
@@ -362,12 +371,12 @@ def fusion(modus):
             #savings:
             save_data.append(this_event_savedata)
 
-            plot_path = data_source_path / str('kymographs_' + label +'/' + tp +'/')
+            plot_path = initval.savepath / str('kymographs_' + label +'/' + tp +'/')
             if not plot_path.is_dir():
                 plot_path.mkdir()
 
             plot_name='kymographs_' + label +'/'  + tp +'/' + 'event' + str(event.index).zfill(4) +  str("_release_analysis.png")
-            plot_target=data_source_path /  plot_name
+            plot_target=initval.savepath /  plot_name
             fig.savefig(plot_target)
             if event.index>=50:
                 dum=1     
@@ -397,9 +406,10 @@ def fusion(modus):
     "t_r2_mainpeak",
     "t_r3_mainpeak",
     "t_r4_mainpeak",
-    "I_allrings_peakval",
-    "I_allrings_residu20frs_perc",
-    "I_allrings_residu40frs_perc",
+    "I_center_peakval",
+    "I_center_residu10frs_perc",
+    "I_center_residu20frs_perc",
+    "I_center_residu40frs_perc",
     "fit_D_mu^2/s",
     "fit_R2_value",
     "fit_zero_crossing",
@@ -407,7 +417,7 @@ def fusion(modus):
     ]
 
     event_data_name='kymographs_' + label +'/' + 'B20_event_times.csv'
-    csv_target=data_source_path /  event_data_name
+    csv_target=initval.savepath /  event_data_name
     with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
         # create the csv writer
         writer = csv.writer(csv_f, delimiter=";")
