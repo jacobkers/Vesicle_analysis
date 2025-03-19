@@ -109,18 +109,22 @@ def travel_from_start(pre_trace, t_rise, bck, direction):
 
 
 
-def fusion(modus):
+def fusion(expi):
     # Example usage
+    modus='short'
     if modus == 'short':
         label='2_TIRF_488_001_PCPG_Chol_small_short'
         data_source_path=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
-        xls_source  = data_source_path / "kymographs_2_TIRF_488_001_PCPG_Chol_small_short/B20_event_times_edits.xlsx" 
+        xls_source  = data_source_path / "kymographs_2_TIRF_488_001_PCPG_Chol_small_short/B20_event_times.xlsx" 
         xls_target  = data_source_path / "kymographs_2_TIRF_488_001_PCPG_Chol_small_short/B30_TEST.xlsx"  
     else:
         label='2_TIRF_488_001_PCPG_Chol_long'
         data_source_path=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
         xls_source  = data_source_path / "kymographs_2_TIRF_488_001_PCPG_Chol_long/B20_event_times_edits.xlsx" 
         xls_target  = data_source_path / "kymographs_2_TIRF_488_001_PCPG_Chol_long/B30_TEST.xlsx"  
+    
+    
+    
     pix2um=0.1254
     frame_to_ms=50
     
@@ -176,7 +180,7 @@ def fusion(modus):
         # collect the kymograph
         kymo1_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_index).zfill(4) +  str("_XT_full.tif")
         kymo=io.imread(data_source_path / f"{kymo1_name}")
-        if event_index == 209:
+        if 1: #event_index == 209:
             sumtrace=np.sum(ring_traces, axis=1)
             centertrace=ring_traces[:,0]
             rr,cc=np.shape(kymo)

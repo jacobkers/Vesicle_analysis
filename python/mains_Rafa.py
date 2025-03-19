@@ -26,10 +26,11 @@ exps_labels = {
     }
 
 expi=exps_labels["2_TIRF_488_001_PCPG_Chol_long"]
+expi=exps_labels["2_TIRF_488_001_PCPG_Chol_small_short"]
 
 if __name__ == "__main__":
     print("Running from vesicles directory:")
     if 0: B00_membrane_fusion_event_detector.detect(expi)
     if 0: B10_membrane_fusion_kymograph_generator.kymo(expi)
-    if 1: B20_membrane_fusion_analyzer.fusion(expi)
+    if 0: B20_membrane_fusion_analyzer.fusion(expi)
     if 0: B30_membrane_fusion_analyzer_user_additions.fusion(expi)

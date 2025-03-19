@@ -51,7 +51,7 @@ for hdr in list(df.columns.values):
 movie_filename = '25_01_14_sample1_1_000.nd2'
 movie_path =  moviepath/ movie_filename """
 
-max_frames=200
+max_frames=1000
 channel_index = 1
 counter=0
 for mv_pth, movie_filename in zip(df['Location on drive'], df['filename']):
@@ -90,9 +90,23 @@ for mv_pth, movie_filename in zip(df['Location on drive'], df['filename']):
             ax[1,1].set_title('STD')
             movie_filename_out = movie_filename[:-4] + '_C1' + '_section'+ str(slot_start) + '_' + str(slot_stop) + '.tif'
             fig.savefig(tiff_path / (movie_filename_out[:-4] + '_projections.png'))
-            movie_filename_out = movie_filename[:-4] + '_C1' + '_section'+ str(slot_start) + '_' + str(slot_stop) + '.tif'
             io.imsave(tiff_path / f"{movie_filename_out}", slot, check_contrast=False)
     else:
+        slot=frames
+        first_im=slot[0]
+        last_im=slot[-1]
+        max_projection = np.max(slot, axis=0)
+        std_projection = np.std(slot, axis=0)
+        fig,ax=plt.subplots(2,2)
+        ax[0,0].imshow(first_im)
+        ax[0,0].set_title('first image')
+        ax[0,1].imshow(last_im)
+        ax[0,1].set_title('last image')
+        ax[1,0].imshow(max_projection)
+        ax[1,0].set_title('MAX')
+        ax[1,1].imshow(std_projection)
+        ax[1,1].set_title('STD')
         movie_filename_out = movie_filename[:-4] + '_C1' + '_full' + '.tif'
+        fig.savefig(tiff_path / (movie_filename_out[:-4] + '_projections.png'))
         io.imsave(tiff_path / f"{movie_filename_out}", frames, check_contrast=False)
 
