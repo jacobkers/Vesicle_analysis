@@ -11,7 +11,7 @@ import csv
 from skimage import io
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
-from common_tools import guv_tools
+import guv_tools
 from PIL import Image, ImageSequence
 import nd2
 
@@ -44,6 +44,19 @@ def load_tiff_frame(file_path, frame_index):
         # Load a specific frame (zero-indexed)
         frame = tif.pages[frame_index].asarray()
     return frame
+
+def load_tiff_movie_as_array(input_path):
+    """Load a TIFF movie as a 3D NumPy array (frames, height, width)."""
+    with Image.open(input_path) as img:
+        frames = []
+        while True:
+            frames.append(np.array(img))  # Convert each frame to a NumPy array
+            try:
+                img.seek(img.tell() + 1)
+            except EOFError:
+                break
+    
+    return np.stack(frames)  # Convert list of frames into a 3D NumPy array
 
 def load_tiff_movie(input_path):
     """Load a TIFF movie as a list of frames."""
