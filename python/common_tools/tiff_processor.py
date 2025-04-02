@@ -122,70 +122,55 @@ for mv_pth, movie_filename in zip(df['Location on drive'], df['filename']):
     for i in range(3):
         slot_triplet.append(load_tiff_movie_as_array(slotnames[i]))
     counter=1 #we start at second slot
+    results = []
     while counter < N-2:
         slot=slot_triplet[1]
-        if 0:
-            first_im=slot[0]
-            last_im=slot[-1]
-            slot=slot-np.min(slot)
 
-            mean_projection = np.mean(slot, axis=0)
-            max_projection = np.max(slot, axis=0)
-            std_projection = np.std(slot, axis=0)
+        first_im=slot[0]
+        last_im=slot[-1]
+        slot=slot-np.min(slot)
+
+        mean_projection_1 = np.mean(slot_triplet[1], axis=0)
+        max_projection_1 = np.max(slot_triplet[1], axis=0)
+        std_projection_0 = np.std(slot_triplet[0], axis=0)  
+        std_projection_1 = np.std(slot_triplet[1], axis=0)
+        std_projection_2 = np.std(slot_triplet[2], axis=0)
+        
+        dif_st_02= (std_projection_2)-std_projection_0
+        
+
+        #normalize:
+        #background:
+        #mean_projection_1=mean_projection_1-np.min(mean_projection_1)
+        #std_projection_1=std_projection_2-np.min(std_projection_2)
+
+        #mean_projection_1=mean_projection_1/np.median(mean_projection_1)
+        #max_projection_1=max_projection_1/np.median(max_projection_1)
+        #std_projection_2_2=std_projection_2/np.median(std_projection_2)
+        
+
+        #get all action:
+        mx_tres, mx_BW, treshold_mx = guv_tools.treshold_it(max_projection_1)
+        
+        #get all prolonged action:
+        st_tres, st_BW, treshold_st = guv_tools.treshold_it(std_projection_1)
+        
+        action_peaks=find_local_maxima_2d(st_tres, sigma=1.0, min_distance=1)
+ 
+        R0=5
+        for x, y in action_peaks:
             
-
-            #normalize:
-            #background:
-            #mean_projection=mean_projection-np.min(mean_projection)
-            #std_projection=std_projection-np.min(std_projection)
-
-            #mean_projection=mean_projection/np.median(mean_projection)
-            #max_projection=max_projection/np.median(max_projection)
-            #std_projection=std_projection/np.median(std_projection)
+            # Create a circular mask for summing intensity within radius R0
+            y_indices, x_indices = np.ogrid[:mx_tres.shape[0], :mx_tres.shape[1]]
+            mask = (x_indices - y) ** 2 + (y_indices - x) ** 2 <= R0 ** 2
+        
+            #collect intensities
+            #summed_mx = np.sum(max_projection_1[mask])
+            summed_mx = np.sum(dif_st_02[mask])
+            summed_st = np.sum(std_projection_1[mask])
+            results.append((x, y, summed_mx, summed_st))
             
-
-            #get all action:
-            mx_tres, mx_BW, treshold_mx = guv_tools.treshold_it(max_projection)
-            
-            #get all prolonged action:
-            st_tres, st_BW, treshold_st = guv_tools.treshold_it(std_projection)
-            
-
-            action_peaks=find_local_maxima_2d(st_tres, sigma=1.0, min_distance=1)
-
-            
-            results = []
-            R0=5
-            for x, y in action_peaks:
-                
-                # Create a circular mask for summing intensity within radius R0
-                y_indices, x_indices = np.ogrid[:mx_tres.shape[0], :mx_tres.shape[1]]
-                mask = (x_indices - y) ** 2 + (y_indices - x) ** 2 <= R0 ** 2
-            
-                #collect intensities
-                summed_mx = np.sum(max_projection[mask])
-                summed_st = np.sum(std_projection[mask])
-                results.append((x, y, summed_mx, summed_st))
-
-                #collect_example_traces?
-            
-            
-            results_ar = np.array(results)
-
-
-            fig,ax=plt.subplots(2,2)
-            ax[0,0].imshow(last_im)
-            ax[0,0].set_title('last image')
-            ax[0,1].plot(results_ar[:,2], results_ar[:,3],'o', markersize=2)
-            ax[0,1].set_xlabel('max (n.u)')
-            ax[0,1].set_ylabel('std (n.u.)')
-            ax[0,1].set_title('plt')
-            ax[1,0].imshow(mx_tres)
-            ax[1,0].set_title('MAX')
-            ax[1,1].imshow(st_tres)
-            ax[1,1].plot(action_peaks[:,1],action_peaks[:,0], 'wx', markersize=2)
-            ax[1,1].set_title('STD')
-            fig.show()
+            #collect_example_traces?
 
         #shift the slots as 2-3-1, load next in last:
         next_slot_pointer=counter+2
@@ -196,5 +181,26 @@ for mv_pth, movie_filename in zip(df['Location on drive'], df['filename']):
         counter=counter+1
         print(counter)
         dum=1
+        
+    results_ar = np.array(results)
+
+    fig,ax=plt.subplots(2,3)
+    ax[0,0].imshow(std_projection_0)
+    ax[0,0].set_title('ST0')
+    ax[0,1].imshow(std_projection_1)
+    ax[0,1].set_title('ST1')
+    ax[0,2].imshow(std_projection_2)
+    ax[0,2].set_title('ST2')
+    ax[1,0].imshow(dif_st_02)
+    ax[1,0].set_title('dif02')
+    ax[1,2].plot(results_ar[:,2], results_ar[:,3],'o', markersize=2)
+    ax[1,2].set_xlabel('dif_st13 (n.u)')
+    ax[1,2].set_ylabel('std (n.u.)')
+    ax[1,2].set_title('plt')
+    
+    fig.show()
+    dum=1
+
+        
 
 
