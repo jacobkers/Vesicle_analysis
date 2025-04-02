@@ -98,7 +98,7 @@ df = df[df['use_it'] == 1]
 movie_filename = '25_01_14_sample1_1_000.nd2'
 movie_path =  moviepath/ movie_filename """
 
-max_frames=1000
+max_frames=80
 channel_index = 1
 counter=0
 for mv_pth, movie_filename in zip(df['Location on drive'], df['filename']):
@@ -116,68 +116,85 @@ for mv_pth, movie_filename in zip(df['Location on drive'], df['filename']):
     print(slotnames)
   
     N = len(slotnames) # Number of slots
-    for slot_i, slotname in enumerate(slotnames):
-        slot=(load_tiff_movie_as_array(slotname))
-        first_im=slot[0]
-        last_im=slot[-1]
-        slot=slot-np.min(slot)
+    
+    slot_triplet=[]
+    
+    for i in range(3):
+        slot_triplet.append(load_tiff_movie_as_array(slotnames[i]))
+    counter=1 #we start at second slot
+    while counter < N-2:
+        slot=slot_triplet[1]
+        if 0:
+            first_im=slot[0]
+            last_im=slot[-1]
+            slot=slot-np.min(slot)
 
-        mean_projection = np.mean(slot, axis=0)
-        max_projection = np.max(slot, axis=0)
-        std_projection = np.std(slot, axis=0)
-        
-        #normalize:
-        #background:
-        #mean_projection=mean_projection-np.min(mean_projection)
-        #std_projection=std_projection-np.min(std_projection)
-
-        #mean_projection=mean_projection/np.median(mean_projection)
-        #max_projection=max_projection/np.median(max_projection)
-        #std_projection=std_projection/np.median(std_projection)
-
-        
-
-        #get all action:
-        mx_tres, mx_BW, treshold_mx = guv_tools.treshold_it(max_projection)
-        
-        #get all prolonged action:
-        st_tres, st_BW, treshold_st = guv_tools.treshold_it(std_projection)
-        
-
-        action_peaks=find_local_maxima_2d(st_tres, sigma=1.0, min_distance=1)
-
-        
-        results = []
-        R0=5
-        for x, y in action_peaks:
+            mean_projection = np.mean(slot, axis=0)
+            max_projection = np.max(slot, axis=0)
+            std_projection = np.std(slot, axis=0)
             
-            # Create a circular mask for summing intensity within radius R0
-            y_indices, x_indices = np.ogrid[:mx_tres.shape[0], :mx_tres.shape[1]]
-            mask = (x_indices - y) ** 2 + (y_indices - x) ** 2 <= R0 ** 2
-        
-            #collect intensities
-            summed_mx = np.sum(max_projection[mask])
-            summed_st = np.sum(std_projection[mask])
-            results.append((x, y, summed_mx, summed_st))
 
-            #collect_example_traces?
-        
-        
-        results_ar = np.array(results)
+            #normalize:
+            #background:
+            #mean_projection=mean_projection-np.min(mean_projection)
+            #std_projection=std_projection-np.min(std_projection)
 
-        fig,ax=plt.subplots(2,2)
-        ax[0,0].imshow(last_im)
-        ax[0,0].set_title('last image')
-        ax[0,1].plot(results_ar[:,2], results_ar[:,3],'o', markersize=2)
-        ax[0,1].set_xlabel('max (n.u)')
-        ax[0,1].set_ylabel('std (n.u.)')
-        ax[0,1].set_title('plt')
-        ax[1,0].imshow(mx_tres)
-        ax[1,0].set_title('MAX')
-        ax[1,1].imshow(st_tres)
-        ax[1,1].plot(action_peaks[:,1],action_peaks[:,0], 'wx', markersize=2)
-        ax[1,1].set_title('STD')
-        fig.show()
+            #mean_projection=mean_projection/np.median(mean_projection)
+            #max_projection=max_projection/np.median(max_projection)
+            #std_projection=std_projection/np.median(std_projection)
+            
+
+            #get all action:
+            mx_tres, mx_BW, treshold_mx = guv_tools.treshold_it(max_projection)
+            
+            #get all prolonged action:
+            st_tres, st_BW, treshold_st = guv_tools.treshold_it(std_projection)
+            
+
+            action_peaks=find_local_maxima_2d(st_tres, sigma=1.0, min_distance=1)
+
+            
+            results = []
+            R0=5
+            for x, y in action_peaks:
+                
+                # Create a circular mask for summing intensity within radius R0
+                y_indices, x_indices = np.ogrid[:mx_tres.shape[0], :mx_tres.shape[1]]
+                mask = (x_indices - y) ** 2 + (y_indices - x) ** 2 <= R0 ** 2
+            
+                #collect intensities
+                summed_mx = np.sum(max_projection[mask])
+                summed_st = np.sum(std_projection[mask])
+                results.append((x, y, summed_mx, summed_st))
+
+                #collect_example_traces?
+            
+            
+            results_ar = np.array(results)
+
+
+            fig,ax=plt.subplots(2,2)
+            ax[0,0].imshow(last_im)
+            ax[0,0].set_title('last image')
+            ax[0,1].plot(results_ar[:,2], results_ar[:,3],'o', markersize=2)
+            ax[0,1].set_xlabel('max (n.u)')
+            ax[0,1].set_ylabel('std (n.u.)')
+            ax[0,1].set_title('plt')
+            ax[1,0].imshow(mx_tres)
+            ax[1,0].set_title('MAX')
+            ax[1,1].imshow(st_tres)
+            ax[1,1].plot(action_peaks[:,1],action_peaks[:,0], 'wx', markersize=2)
+            ax[1,1].set_title('STD')
+            fig.show()
+
+        #shift the slots as 2-3-1, load next in last:
+        next_slot_pointer=counter+2
+
+        slot_triplet=slot_triplet[1:]
+        slot_next=(load_tiff_movie_as_array(slotnames[next_slot_pointer]))
+        slot_triplet.append(slot_next)
+        counter=counter+1
+        print(counter)
         dum=1
 
 
