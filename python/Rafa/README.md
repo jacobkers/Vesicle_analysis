@@ -1,4 +1,4 @@
-# GUV analysis with Rafael de Lira 
+# GUV analysis with Rafael de Lira ('A' series)
 2023 onwards
 
 
@@ -32,3 +32,16 @@
 
 ### notes
 to see binaryzation performance when tuning in a new dataset: A20 set frames to 1, binary-ops showit=1, run in debug mode 
+
+# fusion analysis with Rafael de Lira ('B' series)
+## Step by step:
+### ImageJ: build particle image
+Typcally, a STD projection works best (consider smoothing)
+
+### Python
+programs run via  mains_Rafa
+* B00_init sets up a new experiment
+* B00_membrane_fusion_event_detector: detects local spots in the 'particle image'
+* B10_membrane_fusion_kymograph_generator: builds a time trace for every spot
+* B20_membrane_fusion_analyzer: builds on the kymograps, exports timings and diffusion constants
+* B30_membrane_fusion_analyzer_user_additions: allows click actions of the user to identify double releases etc.

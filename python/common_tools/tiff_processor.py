@@ -113,7 +113,7 @@ for mv_pth, movie_filename in zip(df['Location on drive'], df['filename']):
     #get (list of) movie:
 
     slotnames = [f for f in tiff_path.iterdir() if movie_filename[:-4] in f.name and ".tif" in f.name]
-    print(slotnames)
+    #print(slotnames)
   
     N = len(slotnames) # Number of slots
     
@@ -155,7 +155,7 @@ for mv_pth, movie_filename in zip(df['Location on drive'], df['filename']):
         #get all prolonged action:
         st_tres, st_BW, treshold_st = guv_tools.treshold_it(std_projection_1)
         
-        action_peaks=find_local_maxima_2d(st_tres, sigma=1.0, min_distance=1)
+        action_peaks=find_local_maxima_2d(st_tres/mx_tres, sigma=1.0, min_distance=2)
  
         R0=5
         for x, y in action_peaks:
