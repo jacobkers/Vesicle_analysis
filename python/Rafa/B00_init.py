@@ -5,7 +5,7 @@
 configuration of fusion experiments.
 experiment run indices 
 """
-
+import pandas as pd
 import numpy as np
 from pathlib import Path
 
@@ -14,51 +14,43 @@ class Fusion_experiment:
     sets paths, names
     """
     def __init__(self): 
-        self.label='2_TIRF_488_001_PCPG_Chol_small_short'
-        self.moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
-        self.savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
-        self.movie_filename = '2_TIRF_488_001_PCPG_Chol_small_short.tif'
-        self.filename ='STD_2_TIRF_488_001_PCPG_Chol_small_short.tif'
-        self.xls_classification_file  =  "kymographs_2_TIRF_488_001_PCPG_Chol_long_events_classification_jacob.xlsx"  
+        self.label=''
+        self.moviepath=Path('')
+        self.savepath=Path('')
+        self.movie_filename = ''
+        self.filename =''
+        self.xls_classification_file  =  ""  
         
 
-# overview of experiments:
-def get_exps(exp_idx):  
+# overview of experiments; each entry is a single movie
+def get_exps():  
+    overviewfile_path=Path("M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/membrane fusion")
+    overviewfile_name =str("fusion_data_overview.xlsx")
+
+    # Read as DataFrame:
+    #uniqie_index unique_label	notes	exp_id	movie_id	sub_movie_id		use_it	
+    #pathname	(sub)moviename	spot_image	event_classification
+
+    df = pd.read_excel(overviewfile_path  / overviewfile_name)
     all_fusion_exps=[]
-
-    #set up various experiment configurations:    
-    Exp0 = Fusion_experiment()   
-    Exp0.label='2_TIRF_488_001_PCPG_Chol_small_short'
-    Exp0.moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
-    Exp0.savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
-    Exp0.movie_filename = '2_TIRF_488_001_PCPG_Chol_small_short.tif'
-    Exp0.filename ='STD_2_TIRF_488_001_PCPG_Chol_small_short.tif'
-    Exp0.xls_classification_file  =  "kymographs_2_TIRF_488_001_PCPG_Chol_small_short_events_classification_jacob.xlsx"  
-    Exp0.suffix='.tif'
-    all_fusion_exps.append(Exp0)
-
-    Exp1 = Fusion_experiment() 
-    Exp1.label='2_TIRF_488_001_PCPG_Chol_long'
-    Exp1.moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/2024_10_02 membrane fusion')
-    Exp1.savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
-    Exp1.movie_filename = '2_TIRF_488_001_PCPG_Chol.tif'
-    Exp1.filename ='STD_2_TIRF_488_001_PCPG_Chol.tif'
-    Exp1.xls_classification_file  =  "kymographs_2_TIRF_488_001_PCPG_Chol_long_events_classification_jacob.xlsx"  
-    Exp1.suffix=Exp1.movie_filename[-4:] #of movie
-    all_fusion_exps.append(Exp1)
-
-    Exp2 = Fusion_experiment() 
-    Exp2.label='Bert_nd2_test'
-    Exp2.moviepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2024_Bert')
-    Exp2.savepath=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2024_Bert')
-    Exp2.movie_filename = '50dotap_001_c1_GS2_BCK50.tif'
-    Exp2.filename =       '50dotap_001_c1_GS2_BCK50_STD.tif'
-    Exp2.suffix=Exp2.movie_filename[-4:] #of movie
-    Exp2.dyechannel=1
-    all_fusion_exps.append(Exp2)
-
-    all_fusion_exps
-
-    Experiment = all_fusion_exps[exp_idx]
-
-    return Experiment
+    df_to_use=df[df['use_it'] == 1]
+    for ix, guvrow in enumerate(df_to_use["unique_index"]):
+        movie_entry = Fusion_experiment()  
+        movie_entry.global_index=df_to_use.iloc[ix]["unique_index"]
+        movie_entry.unique_label=df_to_use.iloc[ix]["unique_label"]
+        movie_entry.notes = df_to_use.iloc[ix]["notes"]
+        movie_entry.exp_id = df_to_use.iloc[ix]["exp_id"]
+        movie_entry.movie_id = df_to_use.iloc[ix]["movie_id"]
+        movie_entry.sub_movie_id = df_to_use.iloc[ix]["sub_movie_id"]
+        movie_entry.use_it=df_to_use.iloc[ix]["use_it"]
+        movie_entry.moviepath=df_to_use.iloc[ix]["pathname"]      
+        movie_entry.moviename = df_to_use.iloc[ix]["(sub)moviename"]
+        movie_entry.spot_image = df_to_use.iloc[ix]["spot_image"]
+        movie_entry.xls_classification_file = df_to_use.iloc[ix]["xls_classification_file"]   
+        movie_entry.suffix=movie_entry.moviename[-4:] #of movie
+        print(movie_entry.global_index)
+        all_fusion_exps.append(movie_entry)
+        #extra:
+        savepathname='M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/membrane fusion/' + movie_entry.unique_label
+        movie_entry.savepath=Path(savepathname)
+    return all_fusion_exps

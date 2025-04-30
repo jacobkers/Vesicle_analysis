@@ -24,14 +24,18 @@
 
 ### Python
 * A00 sets up a new experiment
-* A10 cuts the movie to standardized tiffs per guv
+* A10 
+	- cuts the movie to standardized tiffs per guv
+	- if provided, allows for drift correction
 * A20a gets the geometry numbers
 * A20b works on intensities
+* A30 bundles results for ROIs
 
 
 
 ### notes
-to see binaryzation performance when tuning in a new dataset: A20 set frames to 1, binary-ops showit=1, run in debug mode 
+* to see binaryzation performance when tuning in a new dataset: A20 set frames to 1, binary-ops showit=1, run in debug mode 
+* check the write-up:
 
 # fusion analysis with Rafael de Lira ('B' series)
 ## Step by step:

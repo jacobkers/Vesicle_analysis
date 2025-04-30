@@ -15,7 +15,6 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 import matplotlib.pyplot as plt
-from openpyxl import load_workbook
 import numpy as np
 from skimage import io
 from skimage import measure
@@ -50,9 +49,6 @@ plt.rcParams['figure.figsize'] = [7, 5]
 # Our basic 'info unit' is a single GUV, we note it as ROI (region-of-interest).  We keep track of where it came from via a simple excel table, easily readable for both user and Python. The 'GUV' class closely follows the header in the Excel table. Here, we index per movie, then per ROI. For a single GUV or ROI, we define a 'GUV object'.
 # 
 
-# In[7]:
-
-
 class GUV:
     def __init__(self):
         self.pathname = 0
@@ -70,13 +66,10 @@ class GUV:
 
 outdir_test='M:/tnw/bn/cd/Shared/Jacob/TESTdata_out/2024_Bert/2025_04_23 vesicle_tests/'
 
-# Example usages
-if 1: 
-    excelpath=Path("M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/005_analysis")
-    excelname =str("Bert_data_overview_test.xlsx")
-    targetname=str("Bert_data_results.xlsx")
-wb = load_workbook(excelpath /  excelname)
-sheet_files = wb['guvs']
+# Example usages 
+excelpath=Path("M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/005_analysis")
+excelname =str("Bert_data_overview_test.xlsx")
+targetname=str("Bert_data_results.xlsx")
 
 # Read as DataFrame:
 df = pd.read_excel(excelpath  / excelname)
@@ -84,11 +77,6 @@ df = pd.read_excel(excelpath  / excelname)
 # Display the data read from the Excel file
 #print("Original Data:")
 #print(df)
-
-# Create a dictionary of column names:
-Header = {COL[0].value: idx for idx, COL in enumerate(sheet_files.iter_cols(1, sheet_files.max_column))}
-#pick one particular experiment (or more):
-exp_id=1
 
 #build a list of 'GUV' objects:
 #pathname	experiment_label	filename	exp_id	movie_id	guv_id	use_it	index
@@ -115,7 +103,7 @@ all_max_value=[]
 all_mean_value =[]
 all_radius_mean =[]
 
-for guvno, Guv in enumerate(Guv_list):
+for Guv in Guv_list:
     print(Guv.global_index)
     image_path = Guv.pathname + '\\' + Guv.filename
     roi = np.array(io.imread(image_path))
@@ -131,14 +119,16 @@ for guvno, Guv in enumerate(Guv_list):
         else:
                 roi_work=+ chan - np.min(chan)
                 roi_main = chan  #to be used later
-        axs[color_i].imshow(chan) 
+        axs[color_i].imshow(chan)
+        axs[color_i].set_title('channel'+str(color_i)) 
 
     #plot 
     axs[color_i+1].imshow(roi_work)
+    axs[color_i+1].set_title('work image') 
     fig.tight_layout()
     #plt.show()
     #save
-    fig.savefig(outdir_test + 'Guv' + str(guvno).zfill(3) +'_separate_channels.png')
+    fig.savefig(outdir_test + 'Guv' + str(Guv.global_index).zfill(3) +'_1_separate_channels.png')
     plt.close('all')
              
     #Isolate a GUV
@@ -147,7 +137,7 @@ for guvno, Guv in enumerate(Guv_list):
 
     if np.max(np.array(roi_work))>0:
         roi_work=guv_tools.soft_mask_it(roi_work)
-        roi_work=guv_tools.smooth_it(roi_work,labda=2)
+        roi_work=guv_tools.smooth_it(roi_work,labda=4)
         roi_work= roi_work.astype(int)
         
         #transfer to binary operations to gat masks and robust coordinates
@@ -161,32 +151,34 @@ for guvno, Guv in enumerate(Guv_list):
         #get some basic shape properties:
         labels, n_labels = measure.label(mask_5, return_num = True)
         regprops = measure.regionprops(labels)
+        #show:
+        fig, axs = plt.subplots(2, 4)
+        axs[0,0].imshow(roi_work)
+        axs[0,1].imshow(mask_0)
+        axs[0,2].imshow(mask_1)
+        axs[0,3].imshow(mask_2)
+        axs[1,0].imshow(mask_3)
+        axs[1,1].imshow(mask_4)
+        axs[1,2].imshow(mask_5)
+        #if succesful, plot COM:
         if len(regprops)>0:
             xm,ym = regprops[0].centroid
             rmin=regprops[0].axis_minor_length/2
             rmaj=regprops[0].axis_major_length/2
             area=regprops[0].area
-            perimeter= regprops[0].perimeter
-            
-            #show:
-            fig, axs = plt.subplots(2, 4)
-            axs[0,0].imshow(roi_work)
-            axs[0,1].imshow(mask_0)
-            axs[0,2].imshow(mask_1)
-            axs[0,3].imshow(mask_2)
-            axs[1,0].imshow(mask_3)
-            axs[1,1].imshow(mask_4)
-            axs[1,2].imshow(mask_5)
+            perimeter= regprops[0].perimeter      
+
             axs[1,2].plot(ym,xm, 'ro', markersize=5)
             axs[1,3].imshow(roi_work*mask_5)
             axs[1,3].plot(ym,xm, 'ro', markersize=5)
-            fig.tight_layout()
-            #plt.show()
-            #save this figure
-            target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/misc/output_figs/Guv_no' + str(guvno).zfill(3) +'_separate_channels.png'
-            fig.savefig(target)
-            plt.close('all')
-
+        fig.tight_layout()
+        #plt.show()
+        #save this figure
+        target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_2_masking.png'
+        fig.savefig(target)
+        plt.close('all')
+        
+        if len(regprops)>0:
             # build inner and outer masks
             inner_mask = guv_binary_ops.binary_erosion(mask_5, guv_binary_ops.disk(disk_sz), iterations = 3)                 
             outer_mask = 1-guv_binary_ops.binary_dilation(mask_5, guv_binary_ops.disk(disk_sz), iterations = 1)
@@ -200,7 +192,7 @@ for guvno, Guv in enumerate(Guv_list):
             fig.tight_layout()
             #plt.show()
             #save this figure
-            target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/misc/output_figs/Guv_no' + str(guvno).zfill(3) +'_masks.png'
+            target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_3_inner_outer_masks.png'
             fig.savefig(target)
             plt.close('all')
 
@@ -226,7 +218,7 @@ for guvno, Guv in enumerate(Guv_list):
             axs.plot(Ysamplinggrid[::skips,::skips], Xsamplinggrid[::skips,::skips], '-')
             fig.tight_layout()
             #save this figure
-            target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/misc/output_figs/Guv_no' + str(guvno).zfill(3) +'_radial_sampling.png'
+            target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_4_radial_sampling.png'
             fig.savefig(target)
             plt.close('all')
             #plt.show()
@@ -247,7 +239,7 @@ for guvno, Guv in enumerate(Guv_list):
             fig.tight_layout()
             #plt.show()
             #save this figure
-            target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/misc/output_figs/Guv_no' + str(guvno).zfill(3) +'_radial_maps.png'
+            target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_5_radial_maps.png'
             fig.savefig(target)
             plt.close('all')
 
@@ -289,14 +281,19 @@ for guvno, Guv in enumerate(Guv_list):
             fig.tight_layout()
             #plt.show()
             #save this figure
-            target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/misc/output_figs/Guv_no' + str(guvno).zfill(3) +'_edge_fit.png'
+            target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_6_edge_fit.png'
             fig.savefig(target)
             plt.close('all')
+        else:
+            all_max_value.append(-1) 
+            all_mean_value.append(-1) 
+            all_radius_mean.append(-1) 
+
 
 #add new data:
 df_to_use['edge maximum'] = all_max_value  
 df_to_use['edge mean'] = all_mean_value 
-df_to_use['edge mean pos'] = all_radius_max  
+df_to_use['edge mean pos'] = all_radius_mean  
 
 df_to_use.to_excel(excelpath  / targetname, index=False)
 print(f"\nUpdated data has been written to target")

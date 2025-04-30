@@ -109,7 +109,7 @@ def travel_from_start(pre_trace, t_rise, bck, direction):
 
 
 
-def fusion(expi):
+def fusion(exps):
     # Example usage
     modus='short'
     if modus == 'short':
@@ -117,13 +117,6 @@ def fusion(expi):
         data_source_path=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
         xls_source  = data_source_path / "kymographs_2_TIRF_488_001_PCPG_Chol_small_short/B20_event_times.xlsx" 
         xls_target  = data_source_path / "kymographs_2_TIRF_488_001_PCPG_Chol_small_short/B30_TEST.xlsx"  
-    else:
-        label='2_TIRF_488_001_PCPG_Chol_long'
-        data_source_path=Path('M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/2024_10_02 membrane fusion')
-        xls_source  = data_source_path / "kymographs_2_TIRF_488_001_PCPG_Chol_long/B20_event_times_edits.xlsx" 
-        xls_target  = data_source_path / "kymographs_2_TIRF_488_001_PCPG_Chol_long/B30_TEST.xlsx"  
-    
-    
     
     pix2um=0.1254
     frame_to_ms=50

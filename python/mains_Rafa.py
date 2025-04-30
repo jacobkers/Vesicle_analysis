@@ -13,24 +13,20 @@ sys.path.insert(0, current_directory)
 #import Rafa's
 #from Rafa import B00_membrane_fusion_event_detector
 if 1:
+    from Rafa import B00_init
     from Rafa import B00_membrane_fusion_event_detector
     from Rafa import B10_membrane_fusion_kymograph_generator
     from Rafa import B20_membrane_fusion_analyzer
     from Rafa import B30_membrane_fusion_analyzer_user_additions
 
-#labels and indices:
-exps_labels = {
-    "2_TIRF_488_001_PCPG_Chol_small_short": 0,
-    "2_TIRF_488_001_PCPG_Chol_long": 1,
-    "Bert_nd2_test": 2,
-    }
 
-expi=exps_labels["2_TIRF_488_001_PCPG_Chol_long"]
-expi=exps_labels["2_TIRF_488_001_PCPG_Chol_small_short"]
+
 
 if __name__ == "__main__":
     print("Running from vesicles directory:")
-    if 0: B00_membrane_fusion_event_detector.detect(expi)
-    if 0: B10_membrane_fusion_kymograph_generator.kymo(expi)
-    if 0: B20_membrane_fusion_analyzer.fusion(expi)
-    if 0: B30_membrane_fusion_analyzer_user_additions.fusion(expi)
+    if 1: exps=B00_init.get_exps()
+    if 1: B00_membrane_fusion_event_detector.detect(exps)
+    if 0: B10_membrane_fusion_kymograph_generator.kymo(exps)
+    #for the following, events should be as yet manually classified
+    if 0: B20_membrane_fusion_analyzer.fusion(exps)
+    if 0: B30_membrane_fusion_analyzer_user_additions.fusion(exps)
