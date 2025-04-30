@@ -41,12 +41,11 @@ def kymo(exps):
         label=initval.unique_label
         moviepath=initval.moviepath
         savepath=initval.savepath
-        movie_filename = initval.movie_filename
+        movie_filename = initval.moviename
         filename =initval.spot_image    
         
-        image_path =  moviepath/ filename
-        movie_path =  moviepath/ movie_filename
-
+        image_path =  moviepath + '/' + filename
+        movie_path =  moviepath + '/' + movie_filename
 
         #load movie:
         if initval.suffix=='.tif':
