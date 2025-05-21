@@ -38,14 +38,26 @@
 * check the write-up:
 
 # fusion analysis with Rafael de Lira ('B' series)
-## Step by step:
-### ImageJ: build particle image
-Typcally, a STD projection works best (consider smoothing)
 
-### Python
+## overview
+
 programs run via  mains_Rafa
 * B00_init sets up a new experiment
 * B00_membrane_fusion_event_detector: detects local spots in the 'particle image'
 * B10_membrane_fusion_kymograph_generator: builds a time trace for every spot
 * B20_membrane_fusion_analyzer: builds on the kymograps, exports timings and diffusion constants
 * B30_membrane_fusion_analyzer_user_additions: allows click actions of the user to identify double releases etc.
+
+## Step by step:
+
+### ImageJ and Excel prpearation: 
+* split stacks in max ~1000 images (image-stack-tools-split)
+* for each stack, save 'STD' projection image (image-stack-Z_project - option standard deviation). This wil highlight prolonged landing events.
+* open excel: M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2023_Rafa\membrane fusion, fusion_data_overview.xlsx. Inpect the column names and existing entries and add the new entries accordingly.
+
+
+
+### Python
+
+
+###Step by step

@@ -68,9 +68,9 @@ def kymo(exps):
         event_data = np.loadtxt(csv_events, delimiter=';')
 
         #define a zoomed, and a full kymograph:
-        rws=[0,1]
-        DT_list=[100, 20000]
-        pre_shift_list=[10,200000]
+        rws=initval.rws
+        DT_list=initval.DT_list
+        pre_shift_list=initval.pre_shift_list
         
         DX=70 
         DY=70
@@ -144,14 +144,14 @@ def kymo(exps):
                     ax[2].imshow(used_proj.T, aspect='auto', extent=[t_min,t_max,pos_min,pos_max])
                     ax[2].set_ylabel("pos, pixels")
                     ax[2].set_xlabel("Time,frames")              
-                    ax[3].plot(ringdata_intensity, '-')
+                    ax[3].plot(ringdata_intensity, 'o', markersize=2)
                     ax[3].set_ylabel("sum intensity, a.u.")
                     ax[3].autoscale(enable=True, axis='x', tight=True)
                     ax[3].get_xaxis().set_visible(False)
                     t_start=t_min
                     t_stop=t_max
                 if rw == 1: #overview
-                    ax[0].plot(ringdata_intensity, '-')
+                    ax[0].plot(ringdata_intensity, 'o', markersize=2)
                     ax[0].legend(["center","ring"])
                     ax[0].set_ylabel("sum intensity, a.u.")
                     ax[0].autoscale(enable=True, axis='x', tight=True)

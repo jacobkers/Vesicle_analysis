@@ -19,12 +19,9 @@ if 1:
     from Rafa import B20_membrane_fusion_analyzer
     from Rafa import B30_membrane_fusion_analyzer_user_additions
 
-
-
-
 if __name__ == "__main__":
     print("Running from vesicles directory:")
-    if 1: exps=B00_init.get_exps()
+    exps=B00_init.get_exps()
     if 0: B00_membrane_fusion_event_detector.detect(exps)
     if 1: B10_membrane_fusion_kymograph_generator.kymo(exps)
     #for the following, events should be as yet manually classified
