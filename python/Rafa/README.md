@@ -50,14 +50,26 @@ programs run via  mains_Rafa
 
 ## Step by step:
 
-### ImageJ and Excel prpearation: 
+### movie preparation: ImageJ and Excel 
 * split stacks in max ~1000 images (image-stack-tools-split)
 * for each stack, save 'STD' projection image (image-stack-Z_project - option standard deviation). This wil highlight prolonged landing events.
 * open excel: M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2023_Rafa\membrane fusion, fusion_data_overview.xlsx. Inpect the column names and existing entries and add the new entries accordingly.
 
+###  kymograph run (B00/10): 
+* Now open mains_Rafa.py. set ('if 1') B00 and B10. Code will process al movies that were flagged 'use_it=1' in above excel. And overview list of events (unique index, location plus start times) is generated, as well as XT, YT (=kymographs) and XY movies & jpg plots. These will be used for classification. Processing is of order 1 event per minute, run it background or overnnight.
 
+### user classification
+events will be classified by hand. See the file 'TEMPLATE_classification.xlsx' for how this looks
+* open the appropiate 'events.csv' (look in the save-path). Save it as xlsx with proper name, for example just add 'classification'
+* add a column with index (DO NOT CHANGE ORDER BEFORE) [1]
+* add headers from template file [1]: [event	t0	x	y	slope_t0	type	docking	umbrella count	undocking?	residu?	use_it	remarks]
+* evaluate the events and fill out the classification; use the kymograph jpeg plots for this
+[1] note: add this to code, preferably excel for combination w/pandas
 
-### Python
+### process-by-type (B20/30)
+* B20 performs an elaborate ring-analysis, so that we can measure passage time of dyes into the membrane and get diffusion out of it. It loads the classification table for starters [2]
+* B30 allows user-selection of multiple peaks (thus, it makes sense to do this only for thase events that have....). After user-assisted peak indication, program performs sub-peak time-analysis (if possible)
 
+[2] note: this should change; user-actions should be postponed as long as possible
 
 ###Step by step

@@ -162,7 +162,6 @@ def fusion(exps):
         csv_path_in = Path(csv_events)
         pre_event_data = np.loadtxt(csv_events, delimiter=';')
 
-
         #OR load classification file of events (contains t0,x,y,type)
         xls_source = initval.savepath / xls_classification 
         wb = load_workbook(filename = xls_classification)

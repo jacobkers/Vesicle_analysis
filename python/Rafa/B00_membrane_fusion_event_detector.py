@@ -117,7 +117,7 @@ def detect(exps):
             slope=int(dif_trace[t0])
             x0=int(speck_centers[ti][0])
             y0=int(speck_centers[ti][1])
-            event_data[ti]=(t0,x0,y0, slope)
+            event_data[ti]=(ti, t0,x0,y0, slope)
 
         #save centers plus start time
         event_data_name=label +'_events' + str(".csv")
