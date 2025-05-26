@@ -23,7 +23,7 @@ if __name__ == "__main__":
     print("Running from vesicles directory:")
     exps=B00_init.get_exps()
     if 0: B00_membrane_fusion_event_detector.detect(exps)
-    if 1: B10_membrane_fusion_kymograph_generator.kymo(exps)
+    if 0: B10_membrane_fusion_kymograph_generator.kymo(exps)
     #for the following, events should be as yet manually classified
-    if 0: B20_membrane_fusion_analyzer.fusion(exps)
+    if 1: B20_membrane_fusion_analyzer.fusion(exps)
     if 0: B30_membrane_fusion_analyzer_user_additions.fusion(exps)

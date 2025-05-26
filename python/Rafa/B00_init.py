@@ -54,7 +54,6 @@ def get_exps():
         savepathname='M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/membrane fusion/' + movie_entry.unique_label
         movie_entry.savepath=Path(savepathname)
 
-     
         #define a zoomed, and a full kymograph:
         movie_entry.rws=[0,1]
         movie_entry.DT_list=[200, 20000]  #duration

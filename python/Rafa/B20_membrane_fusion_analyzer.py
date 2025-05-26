@@ -152,24 +152,22 @@ def fusion(exps):
 
         #load pre-traces
         #
-        trace_data_name=label +"_traces" +  str(".csv")
+        trace_data_name="B00_"+ label +"_traces" +  str(".csv")
         csv_traces=initval.savepath /  trace_data_name
         csv_path_in = Path(csv_traces)
         print(csv_traces.stem)
         pre_trace_data = np.loadtxt(csv_traces, delimiter=';')
 
         #load pre events (x,y,start) (from B10)
-        events_data_name=label +"_events" +  str(".csv")
+        events_data_name="B00_"+ label +"_events" +  str(".csv")
         csv_events=initval.savepath /  events_data_name
         csv_path_in = Path(csv_events)
         pre_event_data = np.loadtxt(csv_events, delimiter=';')
         # Define custom column names
-        column_names = ['t0', 'x0', 'y0', 'I_t0_jump']
+        column_names = ['index', 't0', 'x0', 'y0', 'I_t0_jump']
         # Create a DataFrame with custom column names
         events_df = pd.DataFrame(data=pre_event_data, columns=column_names)
-        print(events_df.head)
-
-
+  
         #OR load classification file of events (contains t0,x,y,type)
         xls_source = initval.savepath / xls_classification 
         wb = load_workbook(filename = xls_classification)
@@ -186,13 +184,10 @@ def fusion(exps):
         frs,N_events=np.shape(pre_trace_data)
         all_ring_peak_t=[]
         save_data=[]
-        evi=0
-        for event,pre_trace in zip(events_df,pre_trace_data.T):
+        for evi,pre_trace in enumerate(pre_trace_data.T):
             print("B20_event:" + str(evi))
-            evi=evi+1
-
             #collect ring traces of this event
-            trace_data_name='kymographs_' + label +'/csv/' + 'event' + str(event.index).zfill(4) +  str("_ring_traces_intensity.csv")
+            trace_data_name='B10_kymographs_' + label +'/csv/' + 'event' + str(evi).zfill(4) +  str("_ring_traces_intensity.csv")
             csv_ring_traces=initval.savepath /  trace_data_name
             ring_traces = np.loadtxt(csv_ring_traces, delimiter=';')
 
@@ -207,7 +202,7 @@ def fusion(exps):
                     ring_trace_sum=ring_trace_sum+ring_trace
 
                 #tr=relative time, ta=absolute 
-                ta_maxrise=int(event.t0)  # start of rise, initial detection:
+                ta_maxrise=int(events_df.iloc[evi]["t0"])  # start of rise, initial detection:
                 lo=np.min([ta_maxrise, 60])
                 hi=np.min([len(ring_trace)-ta_maxrise, 60])
                 tr_maxrise=lo
@@ -239,14 +234,6 @@ def fusion(exps):
                 spx=guv_tools.subpix_step(ring_trace_r[tr_pk-1:tr_pk+2])   #subpixel step
                 tr_pk_spx=tr_pk+spx
                 
-                #IF there is more than one user classified peak, find the first one AFTER the steepest drop
-                if event.umbrella_count>1:
-                    tr_pk2=find_peak_from(ring_trace_r,tr_maxdrop, direction=1, max_or_min=1)
-                    spx2=guv_tools.subpix_step(ring_trace_r[tr_pk-1:tr_pk+2])   #subpixel step
-                    tr_pk2_spx=tr_pk2+spx2
-                else:
-                    tr_pk2_spx=np.nan #no result
-
 
                 #collect some values:
                 ring_peak_t.append(tr_pk_spx)
@@ -257,21 +244,14 @@ def fusion(exps):
                 if ring_i==0:
                     ta_maxdrop_ring0=ta_maxdrop #to be used later on
                     this_event_savedata= [
-                        event.index,                                   #transfer info:
-                        event.x0,
-                        event.y0,
-                        event.t0,
-                        event.type,
-                        event.docking,
-                        event.umbrella_count,
-                        event.undocking,
-                        event.use_it,
+                        events_df.iloc[evi]["index"],                                   #transfer info:
+                        events_df.iloc[evi]["x0"],
+                        events_df.iloc[evi]["y0"],
+                        events_df.iloc[evi]["t0"],
                         np.round((t_begin_r-tr_maxrise2)*frame_to_ms),      # "r0_first appearance"
                         0,                                                  # "r0_rise (=zero per definition)"
                         np.round((tr_pk_spx-tr_maxrise2)*frame_to_ms),      # "r0_mainpeak"
                         np.round((tr_maxdrop -tr_maxrise2)*frame_to_ms),    # "r0_maindrop"
-                        np.round((tr_pk2_spx-tr_maxrise2)*frame_to_ms),     # "r0_2ndpeak"
-                        np.round((tr_pk_spx-tr_maxrise2)*frame_to_ms)       # "r0_mainpeak (repeat)"
                     ]
 
                     ax[0].plot((t_begin_r-lo)*frame_to_ms,ring_trace_r[t_begin_r], 'bo-', markersize=8)
@@ -281,11 +261,7 @@ def fusion(exps):
                     this_event_savedata.append(
                         np.round((tr_pk_spx-tr_maxrise2)*frame_to_ms))      #"r1(2,3,4)_mainpeak"
                 ax[0].plot((tr_pk_spx-lo)*frame_to_ms,ring_trace_r[tr_pk], 'go-', markersize=4) #ring peaks  
-                ax[0].plot((tr_maxdrop-lo)*frame_to_ms,ring_trace_r[tr_maxdrop], 'kx-', markersize=8)
-                if event.umbrella_count>1 and ring_i==0:  
-                    ax[0].plot((tr_pk2_spx-lo)*frame_to_ms,ring_trace_r[tr_pk2], 'g*-', markersize=4)
-                #ax[0].plot(tr_pk,ring_trace_r[tr_pk], 'go-', markersize=8)
-                #ring_trace 
+                ax[0].plot((tr_maxdrop-lo)*frame_to_ms,ring_trace_r[tr_maxdrop], 'kx-', markersize=8)  
                 ax[0].plot(zoomax, ring_trace_r, 'o-', markersize=2)
             
             #----------------------------------------------------------------------------
@@ -342,11 +318,8 @@ def fusion(exps):
             this_event_savedata.append(np.round(zero_crossing_best,2))  # goodness of fit
             this_event_savedata.append(usedcode)                    # "use_4diff"
 
-            ax[0].set_title('trace' + str(event.index).zfill(4))
-            if event.umbrella_count>1 and ring_i==0:  
-                ax[0].legend(['begin', 'max_rise_subpix','peak_subpix', 'maxdrop', 'peak2_subpix'],loc='upper right')
-            if event.umbrella_count<=1 and ring_i==0: 
-                ax[0].legend(['begin', 'max_rise_subpix','peak_subpix','maxdrop'],loc='upper right')
+            ax[0].set_title('trace' + str(evi).zfill(4))
+            ax[0].legend(['begin', 'max_rise_subpix','peak_subpix','maxdrop'],loc='upper right')
             ax[0].set_xlabel('relative time, ms')
             ax[0].set_ylabel('ring sum, a.u')
             all_ring_peak_t.append(ring_peak_t)
@@ -366,15 +339,13 @@ def fusion(exps):
             #savings:
             save_data.append(this_event_savedata)
 
-            plot_path = initval.savepath / str('kymographs_' + label +'/' + tp +'/')
+            plot_path = initval.savepath / str('B20_peak_analysis_' + label +'/')
             if not plot_path.is_dir():
                 plot_path.mkdir()
 
-            plot_name='kymographs_' + label +'/'  + tp +'/' + 'event' + str(event.index).zfill(4) +  str("_release_analysis.png")
+            plot_name=str('B20_peak_analysis_') + label +'/' + 'event' + str(evi).zfill(4) +  str("_release_analysis.png")
             plot_target=initval.savepath /  plot_name
             fig.savefig(plot_target)
-            if event.index>=50:
-                dum=1     
             plt.close('all')
 
             #save collected data
@@ -386,17 +357,10 @@ def fusion(exps):
         "x0",
         "y0",	
         "t0",
-        "type(user)",
-        "docking",
-        "umbrella count",
-        "undocking?",
-        "residu?",
         "t_r0_first appearance", 
         "t_r0_rise" ,
         "t_r0_mainpeak",  
         "t_r0_maindrop",
-        "t_r0_2ndpeak",
-        "t_r0_mainpeak",
         "t_r1_mainpeak",
         "t_r2_mainpeak",
         "t_r3_mainpeak",
@@ -411,7 +375,7 @@ def fusion(exps):
         "fit_use_it_4diff",
         ]
 
-        event_data_name='kymographs_' + label +'/' + 'B20_event_times.csv'
+        event_data_name='B20_peak_analysis_' + label +'/' + 'B20_event_times.csv'
         csv_target=initval.savepath /  event_data_name
         with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
             # create the csv writer
