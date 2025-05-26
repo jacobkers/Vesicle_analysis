@@ -62,7 +62,7 @@ def kymo(exps):
         frames_array=np.array(frames_array)
 
         #load events (start time and position of event)
-        event_data_name=label +"_events" +  str(".csv")
+        event_data_name='B00_' + label +"_events" +  str(".csv")
         csv_events=savepath /  event_data_name
         csv_path_in = Path(csv_events)
         event_data = np.loadtxt(csv_events, delimiter=';')
@@ -90,9 +90,9 @@ def kymo(exps):
             fig, ax=plt.subplots(4,1)   
             #run twice: one time as full movie, one time as zoom
             for rw, DT, pre_shift in zip(rws, DT_list, pre_shift_list):   
-                x0=int(event[1])
-                y0=int(event[2])
-                t0=np.max([0, int(event[0])+int(DT/2)-pre_shift])
+                x0=int(event[2])
+                y0=int(event[3])
+                t0=np.max([0, int(event[1])+int(DT/2)-pre_shift])
                 subarray, t_min, t_max, x_min, x_max, y_min, y_max=guv_tools.extract_subarray(frames_array, t0, x0, y0, DT, DX, DY)
                 ringdata_intensity=[]
                 ringdata_mn=[]
@@ -165,9 +165,9 @@ def kymo(exps):
                 fig.tight_layout()
 
                 #final savings 
-                kymopath =savepath / str('kymographs_' + label +'/')
-                kymosubpath =savepath / str('kymographs_' + label +'/kymos/')
-                csvpath = savepath / str('kymographs_' + label +'/csv/')
+                kymopath =savepath / str('B10_kymographs_' + label +'/')
+                kymosubpath =savepath / str('B10_kymographs_' + label +'/kymos/')
+                csvpath = savepath / str('B10_kymographs_' + label +'/csv/')
                 if not kymopath.is_dir():
                     kymopath.mkdir()
                 if not csvpath.is_dir():
@@ -177,7 +177,7 @@ def kymo(exps):
                 #overview png:
                 if rw==1:
                     #jpeg overview:
-                    kymo_overview_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_kymo.png")
+                    kymo_overview_name = 'B10_kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_kymo.png")
                     kymo_path= savepath/  kymo_overview_name
                     fig.savefig(kymo_path)
                 
@@ -186,7 +186,7 @@ def kymo(exps):
                     savelabels=[str("_intensity"), str("_mean"),str("_std")]
                     savedata=[ringdata_intensity, ringdata_mn, ringdata_std]
                     for _savelabel, _ringdata in zip(savelabels,savedata):
-                        trace_data_name='kymographs_' + label +'/csv/' + 'event' + str(event_no).zfill(4) +  str("_ring_traces") + _savelabel + str(".csv")
+                        trace_data_name='B10_kymographs_' + label +'/csv/' + 'event' + str(event_no).zfill(4) +  str("_ring_traces") + _savelabel + str(".csv")
                         csv_target=savepath /  trace_data_name
                         with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
                             # create the csv writer
@@ -198,29 +198,29 @@ def kymo(exps):
                 #tiffs:
                 if rw==0:
                     #tiff files zoom section:
-                    ROI_movie_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_MV_zoom.tif")
+                    ROI_movie_name = 'B10_kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_MV_zoom.tif")
                     io.imsave(savepath / f"{ROI_movie_name}", subarray, check_contrast=False)
                     
-                    kymo0_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_XY_zoom.tif")
+                    kymo0_name = 'B10_kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_XY_zoom.tif")
                     io.imsave(savepath / f"{kymo0_name}", sumprojection_0, check_contrast=False)
 
-                    kymo1_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_XT_zoom.tif")
+                    kymo1_name = 'B10_kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_XT_zoom.tif")
                     io.imsave(savepath / f"{kymo1_name}", sumprojection_1, check_contrast=False)
 
-                    kymo2_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_YT_zoom.tif")
+                    kymo2_name = 'B10_kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_YT_zoom.tif")
                     io.imsave(savepath / f"{kymo2_name}", sumprojection_2, check_contrast=False)
                 if rw==1:
                     #tiff files full section:
-                    ROI_movie_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_MV_full.tif")
+                    ROI_movie_name = 'B10_kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_MV_full.tif")
                     io.imsave(savepath / f"{ROI_movie_name}", subarray, check_contrast=False)
 
-                    kymo0_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_XY_full.tif")
+                    kymo0_name = 'B10_kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_XY_full.tif")
                     io.imsave(savepath / f"{kymo0_name}", sumprojection_0, check_contrast=False)
 
-                    kymo1_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_XT_full.tif")
+                    kymo1_name = 'B10_kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_XT_full.tif")
                     io.imsave(savepath / f"{kymo1_name}", sumprojection_1, check_contrast=False)
 
-                    kymo2_name = 'kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_YT_full.tif")
+                    kymo2_name = 'B10_kymographs_' + label +'/kymos/' + 'event' + str(event_no).zfill(4) +  str("_YT_full.tif")
                     io.imsave(savepath / f"{kymo2_name}", sumprojection_2, check_contrast=False)
                 
             plt.close('All')    

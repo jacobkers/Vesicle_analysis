@@ -72,15 +72,16 @@ def detect(exps):
                 if 0 <= coord[x1] < projection_image_array.shape[y1] and 0 <= coord[y1] < projection_image_array.shape[x1]:
                     vals.append(projection_image_array[coord[x1], coord[y1]])  # Collect value
                     projection_image_array[coord[x1], coord[y1]] += 0.1*maxim  # Increment pixel value
-        fig, ax=plt.subplots(1,2)
-        ax[0].imshow(projection_image_array, cmap='gray')
-        ax[0].set_title('Image with Circular Areas Around Specks')
+        if 0:
+            fig, ax=plt.subplots(1,2)
+            ax[0].imshow(projection_image_array, cmap='gray')
+            ax[0].set_title('Image with Circular Areas Around Specks')
 
-        for center in speck_centers:
-            ax[0].plot(center[x1], center[y1], 'o', color='r')
+            for center in speck_centers:
+                ax[0].plot(center[x1], center[y1], 'o', color='r')
 
-        plt.show()
-
+            plt.show()
+            plt.close('all')
         # Load movie
         # Load the frames
         #frame_number = 10  # Load the 11th frame (frame 10 is the 11th in zero-indexing)
@@ -110,7 +111,7 @@ def detect(exps):
         #find start points events:
         frs,N_events=np.shape(trace_data)
         fig, ax=plt.subplots(2,2)
-        event_data=np.zeros((N_events,4),dtype='int')
+        event_data=np.zeros((N_events,5),dtype='int')
         for ti, trace in enumerate(trace_data.T):
             dif_trace=np.diff(trace)
             t0=np.argmax(dif_trace)
@@ -120,7 +121,7 @@ def detect(exps):
             event_data[ti]=(ti, t0,x0,y0, slope)
 
         #save centers plus start time
-        event_data_name=label +'_events' + str(".csv")
+        event_data_name='B00_' + label +'_events' + str(".csv")
         csv_target_c=savepath /  event_data_name
         if not savepath.is_dir():
             savepath.mkdir()
@@ -136,7 +137,7 @@ def detect(exps):
                 writer.writerow(data_row) 
 
         #save traces
-        trace_data_name=label +"_traces" +  str(".csv")
+        trace_data_name='B00_' + label +"_traces" +  str(".csv")
 
         csv_target=savepath /  trace_data_name
         
