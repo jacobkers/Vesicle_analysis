@@ -168,16 +168,18 @@ def fusion(exps):
         # Create a DataFrame with custom column names
         events_df = pd.DataFrame(data=pre_event_data, columns=column_names)
   
-        #OR load classification file of events (contains t0,x,y,type)
-        xls_source = initval.savepath / xls_classification 
-        wb = load_workbook(filename = xls_classification)
-        sheet_events = wb['events']
-        ColNames = {}
-        Current  = 0
+        if 0:
+            #OR load classification file of events (contains t0,x,y,type)
+            xls_source = initval.savepath / xls_classification 
+            wb = load_workbook(filename = xls_classification)
+            sheet_events = wb['events']
+            ColNames = {}
+            Current  = 0
+        
 
-        for COL in sheet_events.iter_cols(1, sheet_events.max_column):
-            ColNames[COL[0].value] = Current
-            Current += 1
+            for COL in sheet_events.iter_cols(1, sheet_events.max_column):
+                [COL[0].value] = Current
+                Current += 1
         
         # plot traces and start_time
         xls_source = initval.savepath / xls_source 
