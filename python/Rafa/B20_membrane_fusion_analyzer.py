@@ -181,8 +181,9 @@ def fusion(exps):
                 [COL[0].value] = Current
                 Current += 1
         
-        # plot traces and start_time
-        xls_source = initval.savepath / xls_source 
+            # plot traces and start_time
+            xls_source = initval.savepath / xls_source
+
         frs,N_events=np.shape(pre_trace_data)
         all_ring_peak_t=[]
         save_data=[]
@@ -220,10 +221,14 @@ def fusion(exps):
                 if ring_i==0: #find precise starting time
                     tr_maxrise2_discrete=  np.argmax((diff_ring))   #relative, we favor big jumps early  
                     #subpixel step for diff
-                    spx2=guv_tools.subpix_step(diff_ring[tr_maxrise2_discrete-1:tr_maxrise2_discrete+2])
-                    tr_maxrise2=tr_maxrise2_discrete+spx2+1
+                    peakpart=diff_ring[tr_maxrise2_discrete-1:tr_maxrise2_discrete+2]                    
+                    if len(peakpart)>0:
+                        spx2=guv_tools.subpix_step(peakpart)
+                        tr_maxrise2=tr_maxrise2_discrete+spx2+1
+                    else:
+                        tr_maxrise2=tr_maxrise2_discrete+1
 
-                    inliers, outliers, flags=guv_tools.outlier_flag(data=ring_trace_r[0:tr_maxrise], tolerance=3, sig_change=0.7, how=1, sho=0, demo=0)
+                        inliers, outliers, flags=guv_tools.outlier_flag(data=ring_trace_r[0:tr_maxrise], tolerance=3, sig_change=0.7, how=1, sho=0, demo=0)
                     I_tresh=np.min(ring_trace_r)+0.05*(np.max(ring_trace_r)-np.min(ring_trace_r))
 
                     #first detection:
@@ -335,7 +340,7 @@ def fusion(exps):
             ax[1].set_ylabel('(ring R^2, mu^2')
             #ax[1].set_ylim(55,70)
             fig.tight_layout()
-            fig.show()
+            #fig.show()
             
 
             #savings:
@@ -352,6 +357,9 @@ def fusion(exps):
 
             #save collected data
             # 
+
+
+            
         #now: ["index","type","first appearance", "rise" ,"peak", "drop","use_it"]
         #to add, all in ms:
         hdr=[
