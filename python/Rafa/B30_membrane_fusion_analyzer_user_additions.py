@@ -126,7 +126,7 @@ def click_them(exps):
     fig_width = 0.8 * screen_width / dpi
     fig_height = 0.5 * screen_height / dpi
 
-    zoomsection=[-50,100]  #for clicking
+    zoomsection=[-200,600]  #for clicking
 
     for initval in exps:
         label=initval.unique_label
@@ -192,6 +192,7 @@ def click_them(exps):
                 fig, ax = plt.subplots(figsize=(fig_width, fig_height), dpi=dpi)
                 ax.imshow(np.log10(kymo.T),aspect='auto')
                 ax.plot(plot_ring_traces)
+                ax.plot(plot_ring_traces[:,0], 'w-')
                 ax.plot(0*sumtrace+cc/2, 'w--')
                 ax.plot(t0, plot_ring_traces[t0,0],'ro')
                 ax.autoscale(enable=True, axis='x', tight=True)
@@ -251,7 +252,10 @@ def click_them(exps):
                     residutime=50 #in frames
                     residu_time=min([len(sumtrace), t_pk1_pix+residutime])
                     vesiclesum=sumtrace[t_pk1_pix]
-                    residusum=sumtrace[residu_time]
+                    if residu_time<len(sumtrace):
+                        residusum=sumtrace[residu_time]
+                    else:
+                        residusum=-1
                 else:
                     vesiclesum=-1
                     residusum=-1
