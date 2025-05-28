@@ -50,6 +50,7 @@ def collect_them(exps):
         man_disappear=[]
         man_vesiclesum=[]
         man_residusum=[]
+        man_type=[]
 
         for ix, umbra in enumerate(events_df['t0']):
             event_index=events_df.iloc[ix]["event"]
@@ -69,6 +70,7 @@ def collect_them(exps):
                 man_disappear.append(event_df["t_disapp_ms"][0])
                 man_vesiclesum.append(event_df["vesiclesum"][0])
                 man_residusum.append(event_df["residusum"][0])
+                man_type.append(event_df["type"][0])
             else:  #not measured
                 man_appear.append(0)
                 man_peak1.append(0)
@@ -76,6 +78,7 @@ def collect_them(exps):
                 man_disappear.append(0)
                 man_vesiclesum.append(-2)
                 man_residusum.append(-2)
+                man_type.append('n/a')
        
         events_df['user_appearance(rel. to rise)'] = man_appear  # Example values
         events_df['user_man_peak1(rel. to rise)'] = man_peak1 # Example values
@@ -83,6 +86,7 @@ def collect_them(exps):
         events_df['user_disappear'] = man_disappear # Example values
         events_df['user_man_vesiclepeaksum'] = man_vesiclesum # Example values
         events_df['user_man_residusum'] = man_residusum # Example values
+        events_df['user_type'] = man_type # Example values
 
         # Display the updated data
         #print("\nUpdated Data with New Columns:")

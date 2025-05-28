@@ -39,7 +39,7 @@ def on_click(fig,event, selected_points, ax, cid, cids):
         data_coords = inv.transform(display_coords)
         xdata, ydata = data_coords
 
-        print(f"Estimated data coords (even outside axes): x={xdata:.2f}, y={ydata:.2f}")
+        #print(f"Estimated data coords (even outside axes): x={xdata:.2f}, y={ydata:.2f}")
         selected_points.append((xdata, ydata))
 
         # Mark point only if inside axes (for visibility)
@@ -124,7 +124,9 @@ def click_them(exps):
 
     # Calculate figure size in inches (0.8× screen size)
     fig_width = 0.8 * screen_width / dpi
-    fig_height = 0.8 * screen_height / dpi
+    fig_height = 0.5 * screen_height / dpi
+
+    zoomsection=[-50,100]  #for clicking
 
     for initval in exps:
         label=initval.unique_label
@@ -184,6 +186,7 @@ def click_them(exps):
                 sumtrace=np.sum(ring_traces, axis=1)
                 centertrace=ring_traces[:,0]
                 rr,cc=np.shape(kymo)
+
                 plot_ring_traces = 0.9*cc-ring_traces/np.max(ring_traces)*0.8*cc
                 #fig, ax=plt.subplots(1,1)
                 fig, ax = plt.subplots(figsize=(fig_width, fig_height), dpi=dpi)
@@ -194,6 +197,7 @@ def click_them(exps):
                 ax.autoscale(enable=True, axis='x', tight=True)
                 ax.set_title('event:'+ str(event_index))
                 ax.set_ylim([1.1*cc,-0.1*cc])
+                ax.set_xlim([zoomsection[0]+t0,zoomsection[1]+t0])
                 ax.set_title(str(int(event_index))+"Left:select, Right:next, <0: =nan")
                 fig.show()
 
@@ -204,41 +208,43 @@ def click_them(exps):
                 cids.append(cid)
                 plt.show()
 
+                t0=float(t0)
+
                 #reject_checks:
                 if selpo[0][1]<cc: 
                     t_appear_pix=int(selpo[0][0]) 
                     t_appear_ms=(t_appear_pix-t0)*frame_to_ms      
                 else: 
-                    t_appear_pix=-1
-                    t_appear_ms=0
+                    t_appear_pix=-10E6
+                    t_appear_ms=-10E6
                 if selpo[1][1]<cc: 
                     t_pk1_pix=int(selpo[1][0])
                     spx1=guv_tools.subpix_step(centertrace[t_pk1_pix-1:t_pk1_pix+2])
                     t_pk1_spx=t_pk1_pix+spx1 
                     t_pk1_ms=(t_pk1_spx-t0)*frame_to_ms      
                 else: 
-                    t_pk1_pix=-1
-                    t_pk1_spx=-1
-                    t_pk1_ms=0
+                    t_pk1_pix=-10E6
+                    t_pk1_spx=-10E6
+                    t_pk1_ms=-10E6
                 if selpo[2][1]<cc and selpo[2][1]>0:  #second release
                     t_pk2_pix=int(selpo[2][0])
                     spx2=guv_tools.subpix_step(centertrace[t_pk2_pix-1:t_pk2_pix+2])
                     t_pk2_spx=t_pk2_pix+spx2
                     t_pk2_ms=(t_pk2_spx-t0)*frame_to_ms 
                 if selpo[2][1]>cc:  #no second release
-                    t_pk2_pix=0
-                    t_pk2_spx=0
-                    t_pk2_ms=0      
+                    t_pk2_pix=-10E6
+                    t_pk2_spx=-10E6
+                    t_pk2_ms=-10E6      
                 if selpo[2][1]<0:  #multiple/other
-                    t_pk2_pix=-2
-                    t_pk2_spx=-2
-                    t_pk2_ms=-2
+                    t_pk2_pix=-20E6
+                    t_pk2_spx=-20E6
+                    t_pk2_ms=-20E6
                 if selpo[3][1]<cc: 
                     t_disapp_pix=int(selpo[3][0])
                     t_disapp_ms=(t_disapp_pix-t0)*frame_to_ms
                 else: 
-                    t_disapp_pix=-1
-                    t_disapp_ms=0
+                    t_disapp_pix=-10E6
+                    t_disapp_ms=-10E6
 
                 
                 if t_pk1_pix>0:
@@ -249,16 +255,19 @@ def click_them(exps):
                 else:
                     vesiclesum=-1
                     residusum=-1
-
+                
+                
                 #types
                 type='unclassified'
-                if t_appear_ms ==0 and t_pk1_ms == 0 and t_pk2_ms== 0 : type = "rejected"
-                if t_pk1_ms==0 and t_pk1_ms ==0: type = "dock only"
-                if t_pk1_ms> 0 and t_pk2_ms> 0 : type = "double_release"
-                if t_pk1_ms > 0 and t_pk2_ms== 0 : type = "single_release"
-                if t_pk2_ms==-2 : type = "multiple/other"
+                if t_appear_ms ==-10E6 and t_pk1_ms == -10E6 and t_pk2_ms == -10E6 : type = "rejected"
+                if t_appear_ms > -10E6 and t_pk1_ms==-10E6 and t_pk2_ms ==-10E6 and t_disapp_ms > 0 : type = "dock & go"
+                if t_appear_ms > -10E6 and t_pk1_ms==-10E6 and t_pk2_ms ==-10E6 and t_disapp_ms == -10E6: type = "dock & stay"
+                if t_pk1_ms > -10E6 and t_pk2_ms== -10E6 : type = "single_release"
+                if t_pk1_ms> -10E6 and t_pk2_ms> -10E6 : type = "double_release"
+                if t_pk2_ms < -10E6 : type = "multiple/other"
                 
-                
+                print('ms: ', t_appear_ms, t_pk1_ms, t_pk2_ms, t_disapp_ms , ': ', type)
+
 
                 #allocate:
                 #this would better go to a json file for each curve to avoid starting all over again....
