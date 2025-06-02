@@ -115,8 +115,8 @@ def fusion(exps):
         data_source_path=initval.moviepath
         xls_classification = initval.savepath / initval.xls_classification_file
 
-        pix2um=0.1254
-        frame_to_ms=50
+        pix2um=initval.pix2um
+        frame_to_ms=initval.frame2ms
         
         """ 
         Ring sizes are calculated such that each covers the same area as the central disk (with radius R0)
@@ -167,22 +167,6 @@ def fusion(exps):
         column_names = ['index', 't0', 'x0', 'y0', 'I_t0_jump']
         # Create a DataFrame with custom column names
         events_df = pd.DataFrame(data=pre_event_data, columns=column_names)
-  
-        if 0:
-            #OR load classification file of events (contains t0,x,y,type)
-            xls_source = initval.savepath / xls_classification 
-            wb = load_workbook(filename = xls_classification)
-            sheet_events = wb['events']
-            ColNames = {}
-            Current  = 0
-        
-
-            for COL in sheet_events.iter_cols(1, sheet_events.max_column):
-                [COL[0].value] = Current
-                Current += 1
-        
-            # plot traces and start_time
-            xls_source = initval.savepath / xls_source
 
         frs,N_events=np.shape(pre_trace_data)
         all_ring_peak_t=[]
@@ -255,18 +239,20 @@ def fusion(exps):
                         events_df.iloc[evi]["x0"],
                         events_df.iloc[evi]["y0"],
                         events_df.iloc[evi]["t0"],
-                        np.round((t_begin_r-tr_maxrise2)*frame_to_ms),      # "r0_first appearance"
+                        events_df.iloc[evi]["I_t0_jump"],
+                        np.round((t_begin_r-tr_maxrise2)),      # "r0_first appearance"
                         0,                                                  # "r0_rise (=zero per definition)"
-                        np.round((tr_pk_spx-tr_maxrise2)*frame_to_ms),      # "r0_mainpeak"
-                        np.round((tr_maxdrop -tr_maxrise2)*frame_to_ms),    # "r0_maindrop"
+                        np.round((tr_pk_spx-tr_maxrise2)),      # "r0_mainpeak"
+                        np.round((tr_maxdrop -tr_maxrise2)),    # "r0_maindrop"
                     ]
-
+                    #note that we save frames, but plot in ms
                     ax[0].plot((t_begin_r-lo)*frame_to_ms,ring_trace_r[t_begin_r], 'bo-', markersize=8)
                     ax[0].plot((tr_maxrise2-lo)*frame_to_ms,ring_trace_r[tr_maxrise+1], 'rx-', markersize=8)
                     
                 if ring_i>0: 
                     this_event_savedata.append(
-                        np.round((tr_pk_spx-tr_maxrise2)*frame_to_ms))      #"r1(2,3,4)_mainpeak"
+                        np.round((tr_pk_spx-tr_maxrise2)))      #"r1(2,3,4)_mainpeak"
+                #note that we save frames, but plot in ms
                 ax[0].plot((tr_pk_spx-lo)*frame_to_ms,ring_trace_r[tr_pk], 'go-', markersize=4) #ring peaks  
                 ax[0].plot((tr_maxdrop-lo)*frame_to_ms,ring_trace_r[tr_maxdrop], 'kx-', markersize=8)  
                 ax[0].plot(zoomax, ring_trace_r, 'o-', markersize=2)
@@ -367,6 +353,7 @@ def fusion(exps):
         "x0",
         "y0",	
         "t0",
+        "I0_jump",
         "t_r0_first appearance", 
         "t_r0_rise" ,
         "t_r0_mainpeak",  

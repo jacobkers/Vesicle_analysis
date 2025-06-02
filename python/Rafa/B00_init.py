@@ -46,7 +46,8 @@ def get_exps():
         movie_entry.moviepath=df_to_use.iloc[ix]["pathname"]      
         movie_entry.moviename = df_to_use.iloc[ix]["(sub)moviename"]
         movie_entry.spot_image = df_to_use.iloc[ix]["spot_image"]
-        movie_entry.xls_classification_file = df_to_use.iloc[ix]["xls_classification_file"]   
+        movie_entry.pix2um = df_to_use.iloc[ix]["pix2um"] 
+        movie_entry.frame2ms = df_to_use.iloc[ix]["frame2ms"]
         movie_entry.suffix=movie_entry.moviename[-4:] #of movie
         print(movie_entry.global_index)
         all_fusion_exps.append(movie_entry)

@@ -126,7 +126,7 @@ def click_them(exps):
     fig_width = 0.8 * screen_width / dpi
     fig_height = 0.5 * screen_height / dpi
 
-    zoomsection=[-200,600]  #for clicking
+    
 
     for initval in exps:
         label=initval.unique_label
@@ -140,27 +140,23 @@ def click_them(exps):
         out_path = initval.savepath / str('B30_user_classification_' + label +'/')
         if not out_path.is_dir():
             out_path.mkdir()
-        xls_target=out_path / 'B30_event_times.csv'
-        pix2um=0.1254
-        frame_to_ms=50       
+        frame_to_ms=initval.frame2ms       
+
+        
+
+        zoomsection=[-int(2000/initval.frame2ms),int(6000/initval.frame2ms)]  #for clicking, in frames (50 ms)
+
 
         #load pre-traces
         trace_data_name=str("B00_"+ label +"_traces" +  str(".csv"))
         csv_traces=initval.savepath  /   trace_data_name
-        csv_path_in = Path(csv_traces)
-        pre_trace_data = np.loadtxt(csv_traces, delimiter=';')
-
 
         # Read the existing csv file
         events_df =pd.read_csv(csv_source,delimiter=';')
 
-
-        # Apply a filter to include only rows where the 'length' column equals 1
-
         # Display the filtered data
         #print("\nFiltered Data (length == 1):")
         #print(events_df)
-
 
         for ix, umbra in enumerate(events_df['t0']):
             event_index=events_df.iloc[ix]["event"]
@@ -174,8 +170,7 @@ def click_them(exps):
             if full_path.exists():
                 print(json_name + ':exists')
             else:
-                #collect ring traces of this event
-            
+                #collect ring traces of this event           
                 trace_data_name='B10_kymographs_' + label +'/csv/' + 'event' + str(int(event_index)).zfill(4) +  str("_ring_traces_intensity.csv")
                 csv_ring_traces=savepath /  trace_data_name
                 ring_traces = np.loadtxt(csv_ring_traces, delimiter=';')
@@ -218,8 +213,9 @@ def click_them(exps):
                 else: 
                     t_appear_pix=-10E6
                     t_appear_ms=-10E6
-                if selpo[1][1]<cc: 
-                    t_pk1_pix=int(selpo[1][0])
+                if selpo[1][1]<cc: #good one, refine
+                    t_clicked=int(selpo[1][0])
+                    t_pk1_pix = t_clicked + np.argmax(centertrace[max(t_clicked-3,0):t_clicked+4])
                     spx1=guv_tools.subpix_step(centertrace[t_pk1_pix-1:t_pk1_pix+2])
                     t_pk1_spx=t_pk1_pix+spx1 
                     t_pk1_ms=(t_pk1_spx-t0)*frame_to_ms      
@@ -227,8 +223,9 @@ def click_them(exps):
                     t_pk1_pix=-10E6
                     t_pk1_spx=-10E6
                     t_pk1_ms=-10E6
-                if selpo[2][1]<cc and selpo[2][1]>0:  #second release
-                    t_pk2_pix=int(selpo[2][0])
+                if selpo[2][1]<cc and selpo[2][1]>0:  #second release, refine
+                    t_clicked=int(selpo[2][0])
+                    t_pk2_pix= t_clicked + np.argmax(centertrace[max(t_clicked-3,0):t_clicked+4])
                     spx2=guv_tools.subpix_step(centertrace[t_pk2_pix-1:t_pk2_pix+2])
                     t_pk2_spx=t_pk2_pix+spx2
                     t_pk2_ms=(t_pk2_spx-t0)*frame_to_ms 
@@ -251,12 +248,14 @@ def click_them(exps):
                 if t_pk1_pix>0:
                     residutime=50 #in frames
                     residu_time=min([len(sumtrace), t_pk1_pix+residutime])
+                    vesiclecenter=centertrace[t_pk1_pix]
                     vesiclesum=sumtrace[t_pk1_pix]
                     if residu_time<len(sumtrace):
                         residusum=sumtrace[residu_time]
                     else:
                         residusum=-1
                 else:
+                    vesiclecenter=-1
                     vesiclesum=-1
                     residusum=-1
                 
@@ -272,7 +271,7 @@ def click_them(exps):
                 
                 print('ms: ', t_appear_ms, t_pk1_ms, t_pk2_ms, t_disapp_ms , ': ', type)
 
-
+                
                 #allocate:
                 #this would better go to a json file for each curve to avoid starting all over again....
                 json_dict = [{
@@ -280,7 +279,8 @@ def click_them(exps):
                     "t_pk1_ms": t_pk1_ms,
                     "t_pk2_ms": t_pk2_ms, 
                     "t_disapp_ms": t_disapp_ms, 
-                    "vesiclesum": vesiclesum, 
+                    "I_tpeak_center_ring": vesiclecenter, 
+                    "I_tpeak_allrings": vesiclesum, 
                     "residusum": residusum, 
                     "type": type, 
                     } ]

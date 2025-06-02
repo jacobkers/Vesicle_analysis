@@ -48,6 +48,7 @@ def collect_them(exps):
         man_peak1=[]
         man_peak2=[]
         man_disappear=[]
+        man_centersum=[]
         man_vesiclesum=[]
         man_residusum=[]
         man_type=[]
@@ -64,18 +65,24 @@ def collect_them(exps):
             if full_path.exists():
                 print(json_name + ':exists')
                 event_df = pd.read_json(str(full_path))
+                event_df.replace(-10E6, np.nan, inplace=True)
+                event_df.replace(-20E6, np.nan, inplace=True)
+
+
                 man_appear.append(event_df["t_appear_ms"][0])
                 man_peak1.append(event_df["t_pk1_ms"][0])
                 man_peak2.append(event_df["t_pk2_ms"][0])
                 man_disappear.append(event_df["t_disapp_ms"][0])
-                man_vesiclesum.append(event_df["vesiclesum"][0])
+                man_centersum.append(event_df["I_tpeak_center_ring"][0])
+                man_vesiclesum.append(event_df["I_tpeak_allrings"][0])
                 man_residusum.append(event_df["residusum"][0])
                 man_type.append(event_df["type"][0])
             else:  #not measured
-                man_appear.append(0)
-                man_peak1.append(0)
-                man_peak2.append(0)
-                man_disappear.append(0)
+                man_appear.append(float("nan"))
+                man_peak1.append(float("nan"))
+                man_peak2.append(float("nan"))
+                man_disappear.append(float("nan"))
+                man_centersum.append(-2)
                 man_vesiclesum.append(-2)
                 man_residusum.append(-2)
                 man_type.append('n/a')
@@ -84,6 +91,7 @@ def collect_them(exps):
         events_df['user_man_peak1(rel. to rise)'] = man_peak1 # Example values
         events_df['user_man_peak2(rel. to rise)'] = man_peak2 # Example values
         events_df['user_disappear'] = man_disappear # Example values
+        events_df['user_man_centerpeaksum'] = man_centersum # Example values
         events_df['user_man_vesiclepeaksum'] = man_vesiclesum # Example values
         events_df['user_man_residusum'] = man_residusum # Example values
         events_df['user_type'] = man_type # Example values
