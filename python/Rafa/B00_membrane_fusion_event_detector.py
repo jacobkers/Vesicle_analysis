@@ -47,6 +47,10 @@ def detect(exps):
         projection_image_path =  moviepath + '/' + filename
         movie_path =  moviepath + '/' + movie_filename
 
+        #check status of events: this is done best on the xyt, if existing 
+        #1. is target cv present? --> 
+
+
         with Image.open(projection_image_path) as img:
             projection_image_array = np.array(img)
 
@@ -71,8 +75,8 @@ def detect(exps):
             for coord in coords:
                 if 0 <= coord[x1] < projection_image_array.shape[y1] and 0 <= coord[y1] < projection_image_array.shape[x1]:
                     vals.append(projection_image_array[coord[x1], coord[y1]])  # Collect value
-                    projection_image_array[coord[x1], coord[y1]] += 0.1*maxim  # Increment pixel value
-        if 0:
+                    #projection_image_array[coord[x1], coord[y1]] += 0.1*maxim  # Increment pixel value
+        if 1:
             fig, ax=plt.subplots(1,2)
             ax[0].imshow(projection_image_array, cmap='gray')
             ax[0].set_title('Image with Circular Areas Around Specks')
@@ -125,6 +129,7 @@ def detect(exps):
         csv_target_c=savepath /  event_data_name
         if not savepath.is_dir():
             savepath.mkdir()
+        
         with open(csv_target_c, "w",newline='') as csv_c:  # will overwrite existing
             # create the csv writer
             writer = csv.writer(csv_c, delimiter=";")
@@ -135,7 +140,7 @@ def detect(exps):
                 writer = csv.writer(csv_c, delimiter=";")
                 #f = open("test.csv", "a")
                 writer.writerow(data_row) 
-
+        
         #save traces
         trace_data_name='B00_' + label +"_traces" +  str(".csv")
 

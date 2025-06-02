@@ -19,6 +19,7 @@ if 1:
     from Rafa import B20_membrane_fusion_analyzer
     from Rafa import B30_membrane_fusion_analyzer_user_additions
     from Rafa import B35_collect_all_and_user_additions
+    from Rafa import B40_load_and_plot
 
 if __name__ == "__main__":
     print("Running from vesicles directory:")
@@ -27,5 +28,6 @@ if __name__ == "__main__":
     if 0: B10_membrane_fusion_kymograph_generator.kymo(exps)
     #for the following, events should be as yet manually classified
     if 0: B20_membrane_fusion_analyzer.fusion(exps)
-    if 1: B30_membrane_fusion_analyzer_user_additions.click_them(exps)
-    if 1: B35_collect_all_and_user_additions.collect_them(exps)
+    if 0: B30_membrane_fusion_analyzer_user_additions.click_them(exps)
+    if 0: B35_collect_all_and_user_additions.collect_them(exps)
+    if 1: B40_load_and_plot.collect_them(exps)
