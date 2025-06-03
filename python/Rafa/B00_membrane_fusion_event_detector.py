@@ -76,7 +76,7 @@ def detect(exps):
                 if 0 <= coord[x1] < projection_image_array.shape[y1] and 0 <= coord[y1] < projection_image_array.shape[x1]:
                     vals.append(projection_image_array[coord[x1], coord[y1]])  # Collect value
                     #projection_image_array[coord[x1], coord[y1]] += 0.1*maxim  # Increment pixel value
-        if 1:
+        if 0:
             fig, ax=plt.subplots(1,2)
             ax[0].imshow(projection_image_array, cmap='gray')
             ax[0].set_title('Image with Circular Areas Around Specks')
@@ -112,13 +112,14 @@ def detect(exps):
                         img_array[coord[x1], coord[y1]] += 0.1*maxim  # Increment pixel value
                 trace_data[fri,si]=np.sum(vals)
                 
-        #find start points events:
+        #find start points events: the maximum jump we can find
         frs,N_events=np.shape(trace_data)
         fig, ax=plt.subplots(2,2)
         event_data=np.zeros((N_events,5),dtype='int')
         for ti, trace in enumerate(trace_data.T):
+            trace = np.concatenate(([0], trace))
             dif_trace=np.diff(trace)
-            t0=np.argmax(dif_trace)
+            t0=np.argmax(dif_trace)-1
             slope=int(dif_trace[t0])
             x0=int(speck_centers[ti][0])
             y0=int(speck_centers[ti][1])
