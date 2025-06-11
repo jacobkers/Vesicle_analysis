@@ -304,7 +304,13 @@ def fusion(exps):
                     r_squared_best=r_squared
                     usedcode=99
                     for ix in indices:
-                        usedcode=10*usedcode+ix   
+                        usedcode=10*usedcode+ix 
+                else:
+                    slope_best=float("nan")
+                    zero_crossing_best=float("nan")
+                    r_squared_best=float("nan")
+                    usedcode=float("nan")
+
             #add to event data:
             this_event_savedata.append(np.round(slope_best/4,2))  # diffusion constant
             this_event_savedata.append(np.round(r_squared_best,2))  # goodness of fit

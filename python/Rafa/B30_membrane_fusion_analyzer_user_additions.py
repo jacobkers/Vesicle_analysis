@@ -39,7 +39,7 @@ def on_click(fig,event, selected_points, ax, cid, cids):
         data_coords = inv.transform(display_coords)
         xdata, ydata = data_coords
 
-        #print(f"Estimated data coords (even outside axes): x={xdata:.2f}, y={ydata:.2f}")
+        print(f"Estimated data coords (even outside axes): x={xdata:.2f}, y={ydata:.2f}")
         selected_points.append((xdata, ydata))
 
         # Mark point only if inside axes (for visibility)
@@ -203,9 +203,8 @@ def click_them(exps):
                                             lambda event: on_click(fig,event, selpo, ax, cid, cids))
                 cids.append(cid)
                 plt.show()
-
                 t0=float(t0)
-
+                
                 #reject_checks:
                 if selpo[0][1]<cc: 
                     t_appear_pix=int(selpo[0][0]) 
@@ -259,7 +258,8 @@ def click_them(exps):
                     vesiclesum=-1
                     residusum=-1
                 
-                
+                plt.close('all')
+
                 #types
                 type='unclassified'
                 if t_appear_ms ==-10E6 and t_pk1_ms == -10E6 and t_pk2_ms == -10E6 : type = "rejected"
@@ -287,4 +287,4 @@ def click_them(exps):
                 with open(out_path / json_name, "w") as f:
                     json.dump( json_dict, f, indent=2)
 
-                plt.close('all')
+                

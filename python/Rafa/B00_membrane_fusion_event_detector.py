@@ -117,9 +117,8 @@ def detect(exps):
         fig, ax=plt.subplots(2,2)
         event_data=np.zeros((N_events,5),dtype='int')
         for ti, trace in enumerate(trace_data.T):
-            trace = np.concatenate(([0], trace))
             dif_trace=np.diff(trace)
-            t0=np.argmax(dif_trace)-1
+            t0=np.argmax(dif_trace)
             slope=int(dif_trace[t0])
             x0=int(speck_centers[ti][0])
             y0=int(speck_centers[ti][1])
