@@ -1,0 +1,26 @@
+estimated object size: 5 pixels
+quality treshold: 0
+link max distance: 10 pixels
+gap-closing distance: 10 pixels
+gap-closing max frame gap: 4
+
+
+try: proper tracking for 1000 frames:
+file: stk_0003_PC_PG2_1ms_2_TIRF_488_001:
+qty treshold: 80 finds 8 spots in first frame (=preview)
+subpixel on;
+median filter on
+
+yields 10k spots in track (ave 10/frame)
+set max dist at 10 pixels
+gap close distance also 10
+gap close: 4 frames
+
+button 'tracks'
+
+save to csv
+
+try:
+PC_PG_PEG20%_50ms_TIRF_488_001 (300frames) --> works
+
+
