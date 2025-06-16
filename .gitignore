@@ -10,6 +10,7 @@
 *.jpg
 *.bmp
 *.png
+*.csv
 
 # Executables
 *.swf
@@ -18,8 +19,9 @@
 *.apk
 *.asv
 
-*.XXtif
-*.XXtiff
+*.tif
+*.tiff
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

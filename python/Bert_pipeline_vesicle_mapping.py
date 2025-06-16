@@ -93,18 +93,32 @@ for ix, guvrow in enumerate(df_to_use["index"]):
     Guv.guv_id = df_to_use.iloc[ix]["guv_id"]
     Guv.use_it=df_to_use.iloc[ix]["use_it"]
     Guv.notes = df_to_use.iloc[ix]["notes"]
-    print(Guv.global_index)
+    print('fetched: ', Guv.global_index, ':',Guv.exp_label)
     Guv_list.append(Guv)
     
 
+#set up parameters we are interested in:
+#intensity:
+I_edge_max_all=[]    #maximum intensity value of the sinusoid fitting of radial-mapped the edge intensity (excluding buds)
+I_edge_mean_all =[]  # same, mean value
+I_inner_mean_all = []  #analog for inner area (based on the cartesian masks)         
+I_inner_median_all =[]
+I_outer_mean_all = []           
+I_outer_median_all =[]
+
+#geometry:
+all_radius_mean =[] # mean radius of object (via radial maps)
+all_radius_minor =[] # minor axis of object (via cartesian mask)
+all_radius_major =[] # major axis of object (via cartesian mask)
+all_area =[] #area of object
+all_perimeter = [] # perimeter of object
+
+
+
 #Main:
 # pick a GUV and show its color channels and the 'work image', which is just the sum of these channels:
-all_max_value=[]  
-all_mean_value =[]
-all_radius_mean =[]
-
 for Guv in Guv_list:
-    print(Guv.global_index)
+    print('working: ', Guv.global_index, ':',Guv.exp_label)
     image_path = Guv.pathname + '\\' + Guv.filename
     roi = np.array(io.imread(image_path))
     # extract other basic metadata
@@ -163,8 +177,10 @@ for Guv in Guv_list:
         #if succesful, plot COM:
         if len(regprops)>0:
             xm,ym = regprops[0].centroid
-            rmin=regprops[0].axis_minor_length/2
-            rmaj=regprops[0].axis_major_length/2
+            #because later we obtain a more precise measure of the avarge radius, here we revert to relative values for minor and major ax-radii
+            r_eq=regprops[0].equivalent_diameter/2
+            rmin_rel=regprops[0].axis_minor_length/2/r_eq
+            rmaj_rel=regprops[0].axis_major_length/2/r_eq
             area=regprops[0].area
             perimeter= regprops[0].perimeter      
 
@@ -179,28 +195,27 @@ for Guv in Guv_list:
         plt.close('all')
         
         if len(regprops)>0:
-            # build inner and outer masks
+            # build inner and outer masks (in cartesian coordiantes)
             inner_mask = guv_binary_ops.binary_erosion(mask_5, guv_binary_ops.disk(disk_sz), iterations = 3)                 
             outer_mask = 1-guv_binary_ops.binary_dilation(mask_5, guv_binary_ops.disk(disk_sz), iterations = 1)
             edge_mask=mask_5.astype(float) -inner_mask
-            #show:
-            fig, axs = plt.subplots(1, 4)
-            axs[0].imshow(mask_5)
-            axs[1].imshow(inner_mask)
-            axs[2].imshow(outer_mask)
-            axs[3].imshow(edge_mask)
-            fig.tight_layout()
-            #plt.show()
-            #save this figure
-            target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_3_inner_outer_masks.png'
-            fig.savefig(target)
-            plt.close('all')
+            
+            #get values from the inner - and outer area. By buffering into an area, we can apply outlier detection on a later stage
+            inner_pixels = roi_main[inner_mask.astype(bool)]
+            I_inner_mean=np.mean(inner_pixels)
+            I_inner_median=np.median(inner_pixels)  
+            outer_pixels=roi_main[outer_mask.astype(bool)]
+            I_outer_mean=np.mean(outer_pixels)
+            I_outer_median=np.median(outer_pixels)
+            
+            #allocate:
+            I_inner_mean_all.append(I_inner_mean)       
+            I_inner_median_all.append(I_inner_median)
+            I_outer_mean_all.append(I_outer_mean)       
+            I_outer_median_all.append(I_outer_median)
 
             # # Radial mapping
             # Now we have the center-of mass, we resample the pattern on a radial mesh
-
-
-
             r_max=int(0.5*np.shape(roi_work)[0])
             presets={#
             'angularoversampling' : 0.7, 
@@ -211,7 +226,22 @@ for Guv in Guv_list:
             edge_map,QI, Xsamplinggrid, Ysamplinggrid=guv_tools.QI_map(edge_mask*roi_main, presets, xm, ym,demo=1)
             inner_map=guv_tools.QI_map(inner_mask*roi_main, presets, xm, ym)
             outer_map=guv_tools.QI_map(outer_mask*roi_main, presets, xm, ym)
-            #show:
+            
+            #show and save:
+            fig, axs = plt.subplots(1, 4)
+            axs[0].imshow(mask_5)
+            axs[1].imshow(inner_mask)
+            axs[2].imshow(outer_mask)
+            axs[3].imshow(edge_mask)
+            fig.tight_layout()
+            
+            #plt.show()
+            #save this figure
+            target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_3_inner_outer_masks.png'
+            fig.savefig(target)
+            plt.close('all')
+            
+            #show and save:
             skips=5
             fig, axs = plt.subplots(1, 1)
             axs.imshow(roi_main)
@@ -249,6 +279,12 @@ for Guv in Guv_list:
             profile=np.nanmax(edge_map, axis=0)
             profile_max=np.argmax(edge_map, axis=0)
             radius_mean=np.nanmean(profile_max)/2  #corrects for oversampling
+            #here we re-scale the earlier major and minor axis values:
+            all_radius_minor.append(rmin_rel*radius_mean)
+            all_radius_major.append(rmaj_rel*radius_mean)
+            all_area.append(area)
+            all_perimeter.append(perimeter)
+
 
             # for a clean fit, we should remove the mean and remove the outliers ('buds')
             x=np.arange(len(profile))
@@ -265,8 +301,8 @@ for Guv in Guv_list:
             mean_value=np.mean(y_fit)
 
             # this edge value compares to that of an IamgeJ cross-section profile
-            all_max_value.append(max_value) 
-            all_mean_value.append(mean_value) 
+            I_edge_max_all.append(max_value) 
+            I_edge_mean_all.append(mean_value) 
             all_radius_mean.append(radius_mean) 
 
             
@@ -284,16 +320,38 @@ for Guv in Guv_list:
             target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_6_edge_fit.png'
             fig.savefig(target)
             plt.close('all')
-        else:
-            all_max_value.append(-1) 
-            all_mean_value.append(-1) 
-            all_radius_mean.append(-1) 
+        else: #if nothing worked .....           
+            all_radius_mean.append(float('nan')) 
+            all_radius_minor.append(float('nan')) 
+            all_radius_major.append(float('nan')) 
+            all_area.append(float('nan')) 
+            all_perimeter.append(float('nan')) 
+            
+            I_edge_max_all.append(float('nan')) 
+            I_edge_mean_all.append(float('nan')) 
+            I_inner_mean_all.append(float('nan'))       
+            I_inner_median_all.append(float('nan'))
+            I_outer_mean_all.append(float('nan'))       
+            I_outer_median_all.append(float('nan'))
 
 
 #add new data:
-df_to_use['edge maximum'] = all_max_value  
-df_to_use['edge mean'] = all_mean_value 
-df_to_use['edge mean pos'] = all_radius_mean  
+#intensity:
+df_to_use['edge maximum'] = I_edge_max_all  
+df_to_use['edge mean'] = I_edge_mean_all 
+df_to_use['inside mean'] = I_inner_mean_all
+df_to_use['inside median'] = I_inner_median_all
+df_to_use['outside mean'] = I_outer_mean_all
+df_to_use['outside median'] = I_outer_median_all
+
+#geometry:
+df_to_use['edge radius minor'] = all_radius_minor
+df_to_use['edge radius mean'] = all_radius_mean  
+df_to_use['edge radius major'] = all_radius_major
+df_to_use['area'] = all_area
+df_to_use['perimeter'] = all_perimeter
+
+
 
 df_to_use.to_excel(excelpath  / targetname, index=False)
 print(f"\nUpdated data has been written to target")
