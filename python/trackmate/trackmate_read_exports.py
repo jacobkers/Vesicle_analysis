@@ -113,11 +113,12 @@ def calculate_diffusion_constant_xy(x, y, dt, max_lag=None):
 # plt.show()
 
 
-plot_per_file=0
+plot_per_file=1
 #read trackmate exports:
 files=[
 'PC_PG_PEG20%_50ms_TIRF_488_001_trackmate_export_3000frs',
 'PC_PG1_2ms_TIRF_488_001_trackmate_export_3000frs',
+'2_TIRF_488_001_PCPG_Chol_export',
 ]
 if ~ plot_per_file: fig, ax=plt.subplots(1,2)
 All_labels=[]
