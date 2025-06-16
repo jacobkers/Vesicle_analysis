@@ -113,7 +113,7 @@ def calculate_diffusion_constant_xy(x, y, dt, max_lag=None):
 # plt.show()
 
 
-plot_per_file=1
+plot_per_file=0
 #read trackmate exports:
 files=[
 'PC_PG_PEG20%_50ms_TIRF_488_001_trackmate_export_3000frs',
@@ -151,7 +151,7 @@ for filname in files:
                 X = np.array(X_str, dtype=float)
                 Y=  np.array(Y_str, dtype=float)
                 I=  np.array(I_str, dtype=float)
-                if len(T)>6:
+                if len(T)>4:
                         counter=counter+1
                         if plot_per_file:
                                 ax[0,0].plot(T-T[0],X-X[0])
@@ -201,7 +201,6 @@ for filname in files:
                 ax[1].set_xlabel('D, pix^2/fr')
                 ax[1].set_xscale('log')
                 ax[1].set_ylabel('peak brightness, a.u.')
-                ax[1].legend(All_labels)
                 #fig.tight_layout()
                 fig.show()
                 plt.savefig('all_data' + '_motility_vs__release.png')  # You can also use .pdf, .svg, .jpg, etc.
