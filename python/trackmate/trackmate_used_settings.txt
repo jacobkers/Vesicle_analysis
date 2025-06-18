@@ -26,4 +26,5 @@ PC_PG_PEG20%_50ms_TIRF_488_001 (300frames) --> works
 try:
 2_TIRF_488_001_PCPG_Chol (2238 frs) (clean tirf)
 
+NOTE: for proper export, set imagage properties: calibrations to 1
 

@@ -57,6 +57,25 @@ def fit_exponential_decay(y, n):
         # Return the decay constant tau
     return tau
 
+def fit_line(y, n=4):
+    # Create x as index
+    
+       
+    # Ensure there are enough points
+    if  n >= len(y):
+        kappa=float('nan')
+        b=float('nan')
+        t0=float('nan')
+    else:   
+
+    # Fit: y = kappa*x + b
+        y_slot=y[0:n]
+        x_slot = np.arange(len(y_slot))
+        kappa, b = np.polyfit(x_slot, y_slot, deg=1)
+        t0=-b/kappa
+
+    return kappa, b, t0
+
 
 
 def calculate_diffusion_constant_xy(x, y, dt, max_lag=None):
@@ -113,14 +132,25 @@ def calculate_diffusion_constant_xy(x, y, dt, max_lag=None):
 # plt.show()
 
 
-plot_per_file=0
+plot_per_file=1
 #read trackmate exports:
 files=[
+'Bert_image_Pos0_gs1_submin_export',
 'PC_PG_PEG20%_50ms_TIRF_488_001_trackmate_export_3000frs',
 'PC_PG1_2ms_TIRF_488_001_trackmate_export_3000frs',
 '2_TIRF_488_001_PCPG_Chol_export',
 ]
-if ~ plot_per_file: fig, ax=plt.subplots(1,2)
+
+
+legenda=[
+      'Bert_DNA',
+      'Rafa_Peg20',
+      'Rafa_patches',
+      'Rafa_hiQTirf',
+]
+
+
+if ~ plot_per_file: fig, ax=plt.subplots(2,2)
 All_labels=[]
 for filname in files:
         traces_df =pd.read_csv((filname +'.csv'),delimiter=',')
@@ -134,7 +164,8 @@ for filname in files:
         All_Max_brightness=[]
         All_decays=[]
         All_intensity_peaks=[]
-
+        All_time_to_max=[]
+        All_flush_times=[]
 
         for trace_ID in trace_IDs:    
                 Tu=traces_df["POSITION_T"][startrow:][traces_df['TRACK_ID'][startrow:]==trace_ID]
@@ -151,7 +182,7 @@ for filname in files:
                 X = np.array(X_str, dtype=float)
                 Y=  np.array(Y_str, dtype=float)
                 I=  np.array(I_str, dtype=float)
-                if len(T)>4:
+                if len(T)>2:
                         counter=counter+1
                         if plot_per_file:
                                 ax[0,0].plot(T-T[0],X-X[0])
@@ -162,18 +193,25 @@ for filname in files:
                                 ax[0,1].plot(T-T[0],I)
                                 ax[0,1].set_xlabel('time, frames')
                                 ax[0,1].set_ylabel('intensity, a.u')
-
-                        
-                        D, msd, times=calculate_diffusion_constant_xy(X, Y, 1, max_lag=4)
+                        #diffusion:
+                        if len(T)>5:
+                              D, msd, times=calculate_diffusion_constant_xy(X, Y, 1, max_lag=5)
+                        else:
+                              D= float('nan')
                         All_Diffusions.append(D)
+                        #peak behavior:
                         Max_brighness=np.max(I)
+                        t_max=np.argmax(I)
+                        All_time_to_max.append(t_max)
                         All_Max_brightness.append(Max_brighness)
                         intensity_drop=(Max_brighness-np.mean(I[-3:-1]))/Max_brighness*100
                         intensity_peak=(Max_brighness-I[0])/Max_brighness*100
+                        kappa, b, t0 = fit_line(I[t_max:], n=8)
+                        
                         All_intensity_drops.append(intensity_drop)
-                        All_intensity_peaks.append(intensity_peak)
-                        #tau_fit = fit_exponential_decay(I, 6)
-                        #All_decays.append(tau_fit)
+                        All_intensity_peaks.append(intensity_peak)                       
+                        All_decays.append(-kappa)
+                        All_flush_times.append(t0)
 
         if plot_per_file:
                 ax[1,0].hist(All_Diffusions, bins=20, color='skyblue', edgecolor='k')
@@ -191,20 +229,34 @@ for filname in files:
                 plt.close('all')
 
         if plot_per_file ==0:
-                ax[0].plot(All_Diffusions, All_intensity_drops, 'o')
-                ax[0].set_xlabel('D, pix^2/fr')
-                ax[0].set_xscale('log')
-                ax[0].set_ylabel('Intensity drop, %')
-                ax[0].legend(All_labels)
+                ax[0,0].plot(All_Diffusions, All_intensity_drops, 'o', markersize=3)
+                ax[0,0].set_xlabel('D, pix^2/fr')
+                ax[0,0].set_xscale('log')
+                ax[0,0].set_ylabel('Intensity drop, %')
+                ax[0,0].legend(legenda)
+
+                ax[0,1].plot(All_Diffusions, All_flush_times, 'o', markersize=3)
+                ax[0,1].set_xlabel('D, pix^2/fr')
+                ax[0,1].set_xscale('log')
+                ax[0,1].set_yscale('log')
+                ax[0,1].set_ylabel('flush time, frs')
+                #ax[0,0].legend(All_labels)
                 
-                ax[1].plot(All_Diffusions, All_Max_brightness, 'o')
-                ax[1].set_xlabel('D, pix^2/fr')
-                ax[1].set_xscale('log')
-                ax[1].set_ylabel('peak brightness, a.u.')
+                ax[1,0].plot(All_Diffusions, All_Max_brightness, 'o', markersize=3)
+                ax[1,0].set_xlabel('D, pix^2/fr')
+                ax[1,0].set_xscale('log')
+                ax[1,0].set_yscale('log')
+                ax[1,0].set_ylabel('peak brightness, a.u.')
+
+                ax[1,1].plot(All_Diffusions, All_time_to_max, 'o', markersize=3)
+                ax[1,1].set_xlabel('D, pix^2/fr')
+                ax[1,1].set_xscale('log')
+                ax[1,1].set_yscale('log')
+                ax[1,1].set_ylabel('time_to_max, frams')
+                fig.tight_layout()
                 #fig.tight_layout()
                 fig.show()
                 plt.savefig('all_data' + '_motility_vs__release.png')  # You can also use .pdf, .svg, .jpg, etc.
                 
-
                 #plt.close('all')
                 dum=1
