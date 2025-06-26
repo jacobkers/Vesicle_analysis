@@ -101,6 +101,7 @@ def collect_them(exps):
         #print(events_df)
 
         # Write the updated data to a new Excel file
+        xls_target=in_path / 'B30_event_times.xlsx'
         events_df.to_excel(xls_target, index=False)
 
         print(f"\nUpdated data has been written to target")

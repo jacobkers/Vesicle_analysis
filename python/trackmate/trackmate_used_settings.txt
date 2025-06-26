@@ -1,3 +1,5 @@
+
+# Trackmate, Step-by-step 
 estimated object size: 5 pixels
 quality treshold: 0
 link max distance: 10 pixels
@@ -5,7 +7,7 @@ gap-closing distance: 10 pixels
 gap-closing max frame gap: 4
 
 
-try: proper tracking for 1000 frames:
+example: proper tracking for 1000 frames:
 file: stk_0003_PC_PG2_1ms_2_TIRF_488_001:
 qty treshold: 80 finds 8 spots in first frame (=preview)
 subpixel on;
@@ -18,13 +20,43 @@ gap close: 4 frames
 
 button 'tracks'
 
-save to csv
+save to csv with filename
 
 try:
 PC_PG_PEG20%_50ms_TIRF_488_001 (300frames) --> works
-
-try:
 2_TIRF_488_001_PCPG_Chol (2238 frs) (clean tirf)
 
 NOTE: for proper export, set imagage properties: calibrations to 1
 
+Step-by-step data analysis:
+path: M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2023_Rafa\membrane fusion\240524_SVF_PEG fractions
+blur 1 pixel
+
+1. well 1: PEG_0.5%_TIRF_488_001_30ms exposure well 1 - blur 1 pixel, QTY treshold 60 (preview ~8 spots) -detect, select all 5k
+2. well 1: PEG_1%_50msExpos_TIRF_488_001 QTY 80
+3.well 1 movie 1: PEG_2%_50msExpos_TIRF_488_001 QTY 60
+4. PEG_5%_50msExpos_TIRF_488_001 well 1 video 1 QTY 102 
+
+expand to 0('long') and 20% files (got these) 
+
+2_TIRF_488_001_PCPG_Chol_B30_event_times: diffusion by rings
+
+ring size:
+
+
+diffusion column = fit_D_mu^2/s plus R2 value in clumn after
+example: event 18: individual curves in:
+M:\tnw\bn\cd\Shared\Jacob\TESTdata_out\2023_Rafa\membrane fusion\2_TIRF_488_001_PCPG_Chol_long\B20_peak_analysis_2_TIRF_488_001_PCPG_Chol_long
+
+
+
+Jacob:
+diffusion:
+check units!
+make drawing with column definitions
+analysis (column) description
+try: diffusion constant on patchy data
+where to find what processed data
+
+trackmate: decribe columns:
+try to get D for non-stuck particles (remove stuck w/o action)
