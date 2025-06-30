@@ -1,3 +1,4 @@
+Trackmate was used as follows: 
 
 # Trackmate, Step-by-step 
 estimated object size: 5 pixels
@@ -39,12 +40,24 @@ blur 1 pixel
 
 expand to 0('long') and 20% files (got these) 
 
-2_TIRF_488_001_PCPG_Chol_B30_event_times: diffusion by rings
-
-ring size:
 
 
-diffusion column = fit_D_mu^2/s plus R2 value in clumn after
+# Ring diffusion measurements: 
+1. eventen detection
+First, events are efficiently detected via a movie projection of standard deviation.
+
+
+3. Ring diffusion:
+Around each detected event, we define a number of ring areas from which to obtain summed intensity. Ring sizes are calculated such that each covers the same area as the central disk (with radius R0): we used the following edges for each ring (in pixels):  0, 5,12.07,15.73,18.66,21.18. Thus, ring 1 starts at radius 5 and stops at radius 12.07, and so on. The summed intnesity per ring shows the passing diffusion front. Then, the peak intnesity of each ring should be proportional to the D^2, where D is the diffusion coefficient.
+
+4. user-guided classification
+
+
+## Data:
+2_TIRF_488_001_PCPG_Chol_B30_event_times and others
+
+## description of final output:
+diffusion column = fit_D_mu^2/s plus R2 value in column after
 example: event 18: individual curves in:
 M:\tnw\bn\cd\Shared\Jacob\TESTdata_out\2023_Rafa\membrane fusion\2_TIRF_488_001_PCPG_Chol_long\B20_peak_analysis_2_TIRF_488_001_PCPG_Chol_long
 

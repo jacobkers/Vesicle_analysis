@@ -117,6 +117,9 @@ def fusion(exps):
 
         pix2um=initval.pix2um
         frame_to_ms=initval.frame2ms
+        zoom_lo=initval.zoom_lo
+        zoom_hi=initval.zoom_hi
+        trace_smooth=initval.trace_smooth
         
         """ 
         Ring sizes are calculated such that each covers the same area as the central disk (with radius R0)
@@ -182,6 +185,8 @@ def fusion(exps):
             ring_peak_t=[]
             ring_squ_rad_mu=[]
             for ring_i, ring_trace in enumerate(ring_traces.T):
+                if initval.trace_smooth>1:              
+                    ring_trace = np.convolve(ring_trace, np.ones(initval.trace_smooth)/initval.trace_smooth, mode='same')
                 if ring_i==0:
                     ring_trace_sum=ring_trace
                     ring_trace_center=ring_trace
@@ -190,8 +195,8 @@ def fusion(exps):
 
                 #tr=relative time, ta=absolute 
                 ta_maxrise=int(events_df.iloc[evi]["t0"])  # start of rise, initial detection:
-                lo=np.min([ta_maxrise, 60])
-                hi=np.min([len(ring_trace)-ta_maxrise, 60])
+                lo=np.min([ta_maxrise, zoom_lo])
+                hi=np.min([len(ring_trace)-ta_maxrise, zoom_hi])
                 tr_maxrise=lo
 
                 #we only look in a range around the event:

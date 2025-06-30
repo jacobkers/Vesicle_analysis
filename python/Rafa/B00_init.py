@@ -48,6 +48,9 @@ def get_exps():
         movie_entry.spot_image = df_to_use.iloc[ix]["spot_image"]
         movie_entry.pix2um = df_to_use.iloc[ix]["pix2um"] 
         movie_entry.frame2ms = df_to_use.iloc[ix]["frame2ms"]
+        movie_entry.zoom_lo = df_to_use.iloc[ix]["zoom_lo_frs"]
+        movie_entry.zoom_hi = df_to_use.iloc[ix]["zoom_hi_frs"]
+        movie_entry.trace_smooth = df_to_use.iloc[ix]["smoothwindow_frs"]
         movie_entry.suffix=movie_entry.moviename[-4:] #of movie
         print(movie_entry.global_index)
         all_fusion_exps.append(movie_entry)

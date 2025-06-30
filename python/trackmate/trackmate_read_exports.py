@@ -132,7 +132,7 @@ def calculate_diffusion_constant_xy(x, y, dt, max_lag=None):
 # plt.show()
 
 
-plot_per_file=0
+plot_per_file=1
 #read trackmate exports:
 datapath='M:/tnw/bn/cd/Shared/Jacob/TESTdata_out/2023_Rafa/2025_06_26_trackmate/'
 if 0:
@@ -161,10 +161,12 @@ else:
         '2% PEG',
         '5% PEG',
     ]
+    fr2ms_all=[50,54, 68, 68, 68]
+    pix2um=0.125
 
 if ~ plot_per_file: fig, ax=plt.subplots(2,2)
 All_labels=[]
-for filname in files:
+for filname, fr2ms in zip(files,fr2ms_all):
     source=datapath + filname +'.csv'
     traces_df =pd.read_csv((source),delimiter=',')
     trace_IDs=np.unique(traces_df['TRACK_ID'][4:])
@@ -174,13 +176,14 @@ for filname in files:
     counter=0
     All_trace_IDs=[]
     All_trace_lengths=[]
+    All_trace_duration_ms=[]
     All_Diffusions=[]
     All_intensity_drops=[]
     All_Max_brightness=[]
-    All_decays=[]
     All_intensity_peaks=[]
     All_time_to_max=[]
     All_flush_times=[]
+    All_intensity_vars=[]
 
     for trace_ID in trace_IDs:    
             Tu=traces_df["POSITION_T"][startrow:][traces_df['TRACK_ID'][startrow:]==trace_ID]
@@ -203,8 +206,6 @@ for filname in files:
                             ax[0,0].plot(T-T[0],X-X[0])
                             ax[0,0].set_xlabel('time, frames')
                             ax[0,0].set_ylabel('x-position, pixels')
-                            
-                            
                             ax[0,1].plot(T-T[0],I)
                             ax[0,1].set_xlabel('time, frames')
                             ax[0,1].set_ylabel('intensity, a.u')
@@ -213,31 +214,34 @@ for filname in files:
                             D, msd, times=calculate_diffusion_constant_xy(X, Y, 1, max_lag=4)
                     else:
                             D= float('nan')
-                    All_Diffusions.append(D)
+                    All_Diffusions.append(D*(pix2um**2)/(fr2ms/1000))  #in mu^2/s
                     #peak behavior:
                     Max_brighness=np.max(I)
                     t_max=np.argmax(I)
-                    All_time_to_max.append(t_max)
+                    
+                    All_time_to_max.append(t_max*fr2ms)
                     All_Max_brightness.append(Max_brighness)
                     intensity_drop=(Max_brighness-np.mean(I[-3:-1]))/Max_brighness*100
                     intensity_peak=(Max_brighness-I[0])/Max_brighness*100
+                    intensity_var=np.std(I)/np.mean(I)*100
                     kappa, b, t0 = fit_line(I[t_max:], n=8)
                     
                     All_trace_lengths.append(len(T))
+                    All_trace_duration_ms.append(len(T)*fr2ms)
                     All_trace_IDs.append(trace_ID)
                     All_intensity_drops.append(intensity_drop)
-                    All_intensity_peaks.append(intensity_peak)                       
-                    All_decays.append(-kappa)
-                    All_flush_times.append(t0)
+                    All_intensity_peaks.append(intensity_peak)        
+                    All_intensity_vars.append(intensity_var)                         
+                    All_flush_times.append(t0*fr2ms)
                     
 
     if plot_per_file:
             ax[1,0].hist(All_Diffusions, bins=20, color='skyblue', edgecolor='k')
-            ax[1,0].set_xlabel('D, pix^2/fr')
+            ax[1,0].set_xlabel('D, mu^2/s')
             ax[1,0].set_ylabel('counts')
 
-            ax[1,1].hist(All_intensity_drops, bins=20, color='red', edgecolor='k')
-            ax[1,1].set_xlabel('intensity drop,%')
+            ax[1,1].hist(All_intensity_vars, bins=20, color='red', edgecolor='k')
+            ax[1,1].set_xlabel('intensity variation,%')
             ax[1,1].set_ylabel('counts')  
     
             dum=1
@@ -247,31 +251,31 @@ for filname in files:
             plt.close('all')
 
     if plot_per_file ==0:
-            ax[0,0].plot(All_Diffusions, All_trace_lengths, 'o', markersize=2)
-            ax[0,0].set_xlabel('D, pix^2/fr')
+            ax[0,0].plot(All_Diffusions, All_trace_duration_ms, 'o', markersize=2)
+            ax[0,0].set_xlabel('D, mu^2/s')
             ax[0,0].set_xscale('log')
             ax[0,0].set_yscale('log')
-            ax[0,0].set_ylabel('lengths, frs')
+            ax[0,0].set_ylabel('duration, ms')
             ax[0,0].legend(legenda)
 
             ax[0,1].plot(All_Diffusions, All_flush_times, 'o', markersize=2)
-            ax[0,1].set_xlabel('D, pix^2/fr')
+            ax[0,1].set_xlabel('D, mu^2/s')
             ax[0,1].set_xscale('log')
             ax[0,1].set_yscale('log')
-            ax[0,1].set_ylabel('flush time, frs')
+            ax[0,1].set_ylabel('flush time, ms')
             #ax[0,0].legend(All_labels)
             
-            ax[1,0].plot(All_Diffusions, All_Max_brightness, 'o', markersize=2)
-            ax[1,0].set_xlabel('D, pix^2/fr')
+            ax[1,0].plot(All_Diffusions, All_intensity_vars, 'o', markersize=2)
+            ax[1,0].set_xlabel('D, mu^2/s')
             ax[1,0].set_xscale('log')
             ax[1,0].set_yscale('log')
-            ax[1,0].set_ylabel('peak brightness, a.u.')
+            ax[1,0].set_ylabel('I_variation, %')
 
-            ax[1,1].plot(All_Diffusions, All_time_to_max, 'o', markersize=2)
-            ax[1,1].set_xlabel('D, pix^2/fr')
+            ax[1,1].plot(All_trace_duration_ms, All_intensity_vars, 'o', markersize=2)
+            ax[1,1].set_xlabel('duration, ms')
             ax[1,1].set_xscale('log')
             ax[1,1].set_yscale('log')
-            ax[1,1].set_ylabel('time_to_max, frams')
+            ax[1,1].set_ylabel('I_variation, %')
             fig.tight_layout()
             #fig.tight_layout()
             fig.show()
@@ -281,15 +285,17 @@ for filname in files:
     dum=1
     #make an export data frame:
     events_df = pd.DataFrame()
-    events_df['trace_ID'] = All_trace_IDs  # Example values
-    events_df['trace_length,frs'] = All_trace_lengths # Example values
-    events_df['Diffusion, pix2/fr'] = All_Diffusions # Example values
-    events_df['Max_brightness'] = All_Max_brightness # Example values
+    events_df['trace_ID'] = All_trace_IDs  
+    events_df['trace_length,frs'] = All_trace_lengths 
+    events_df['trace_duration, ms'] = All_trace_duration_ms 
+    events_df['time_to_max, ms'] = All_time_to_max # Example values
+    events_df['flush_time, ms'] = All_flush_times # Example values
+    events_df['Diffusion, mu^2/s'] = All_Diffusions 
+    events_df['Max_brightness'] = All_Max_brightness 
     events_df['intensity_peaks%'] = All_intensity_peaks # Example values
     events_df['intensity_drop%'] = All_intensity_drops # Example values
-    events_df['decay_1storder'] =All_decays # Example values
-    events_df['time_to_max, frs'] = All_time_to_max # Example values
-    events_df['flush_time, frs'] = All_flush_times # Example values
+    events_df['intensity_var%'] = All_intensity_vars # Example values
+
     
     xls_target=(datapath + filname +'_proc.xlsx')
 
