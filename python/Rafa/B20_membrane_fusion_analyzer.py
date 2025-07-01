@@ -226,9 +226,14 @@ def fusion(exps):
                 ta_maxdrop=   tr_maxdrop - lo + ta_maxrise                   #absolute
 
                 #find the first maximum before the steepest drop:
-                tr_pk=find_peak_from(ring_trace_r,tr_maxdrop, direction=-1, max_or_min=1)
-                spx=guv_tools.subpix_step(ring_trace_r[tr_pk-1:tr_pk+2])   #subpixel step
-                tr_pk_spx=tr_pk+spx
+                if 0:
+                    tr_pk=find_peak_from(ring_trace_r,tr_maxdrop, direction=-1, max_or_min=1)
+                    # OR: find the maximum:
+                else:
+                    tr_pk=np.argmax(ring_trace_r)
+                if tr_pk>0 and tr_pk<len(ring_trace):
+                    spx=guv_tools.subpix_step(ring_trace_r[tr_pk-1:tr_pk+2])   #subpixel step if possible
+                    tr_pk_spx=tr_pk+spx
                 
 
                 #collect some values:
@@ -258,8 +263,8 @@ def fusion(exps):
                     this_event_savedata.append(
                         np.round((tr_pk_spx-tr_maxrise2)))      #"r1(2,3,4)_mainpeak"
                 #note that we save frames, but plot in ms
-                ax[0].plot((tr_pk_spx-lo)*frame_to_ms,ring_trace_r[tr_pk], 'go-', markersize=4) #ring peaks  
-                ax[0].plot((tr_maxdrop-lo)*frame_to_ms,ring_trace_r[tr_maxdrop], 'kx-', markersize=8)  
+                ax[0].plot((tr_pk_spx-lo)*frame_to_ms,ring_trace_r[tr_pk], 'ro-', markersize=6) #ring peaks  
+                #ax[0].plot((tr_maxdrop-lo)*frame_to_ms,ring_trace_r[tr_maxdrop], 'kx-', markersize=8)  
                 ax[0].plot(zoomax, ring_trace_r, 'o-', markersize=2)
             
             #----------------------------------------------------------------------------
@@ -300,22 +305,27 @@ def fusion(exps):
             for indices in all_picks_idxes:
                 try_t=[diff_peak_t_s[i] for i in indices]
                 try_pk=[ring_squ_rad_mu[i] for i in indices]
-                slope, intercept, r_value, p_value, std_err = linregress(try_t, try_pk)
-                r_squared = r_value**2 # Calculate R² value
-                zero_crossing = -intercept / slope # Calculate zero-crossing (x-intercept)
-                if r_value>r_value_best:
-                    slope_best=slope
-                    zero_crossing_best=zero_crossing
-                    r_squared_best=r_squared
-                    usedcode=99
-                    for ix in indices:
-                        usedcode=10*usedcode+ix 
+                if np.amax(try_t) > np.amin(try_t):
+                    slope, intercept, r_value, p_value, std_err = linregress(try_t, try_pk)
+                    r_squared = r_value**2 # Calculate R² value
+                    zero_crossing = -intercept / slope # Calculate zero-crossing (x-intercept)
+                    if r_value>r_value_best:
+                        slope_best=slope
+                        zero_crossing_best=zero_crossing
+                        r_squared_best=r_squared
+                        usedcode=99
+                        for ix in indices:
+                            usedcode=10*usedcode+ix 
+                    else:
+                        slope_best=float("nan")
+                        zero_crossing_best=float("nan")
+                        r_squared_best=float("nan")
+                        usedcode=float("nan")
                 else:
                     slope_best=float("nan")
                     zero_crossing_best=float("nan")
                     r_squared_best=float("nan")
                     usedcode=float("nan")
-
             #add to event data:
             this_event_savedata.append(np.round(slope_best/4,2))  # diffusion constant
             this_event_savedata.append(np.round(r_squared_best,2))  # goodness of fit
@@ -323,7 +333,7 @@ def fusion(exps):
             this_event_savedata.append(usedcode)                    # "use_4diff"
 
             ax[0].set_title('trace' + str(evi).zfill(4))
-            ax[0].legend(['begin', 'max_rise_subpix','peak_subpix','maxdrop'],loc='upper right')
+            ax[0].legend(['begin', 'max_rise_subpix','peak_subpix'],loc='upper right')
             ax[0].set_xlabel('relative time, ms')
             ax[0].set_ylabel('ring sum, a.u')
             all_ring_peak_t.append(ring_peak_t)

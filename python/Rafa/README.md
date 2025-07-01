@@ -1,6 +1,9 @@
-# GUV analysis with Rafael de Lira ('A' series)
-2023 onwards
+This code analyzes movies of vesicles - 2023 onwards
+Contents:
+- description code A-series: GUV analysis
+- description code B-series: analysis of fusion events on a flat membrane
 
+# code 'A' series: GUV analysis with Rafael de Lira 
 
 
 ## Step by step:
@@ -12,7 +15,6 @@
 * Follow it at regular intervals with CTRL-M
 * with FOV jumps, make sure you measure before-and after jump
 
-
 ### ImageJ area selection
 * Open imageJ
 * Open BF or Phase
@@ -23,6 +25,7 @@
 * for convenience, you might just save the screenshots with overlays
 
 ### Python
+The code is divided in separate blocks that run one after another.
 * A00 sets up a new experiment
 * A10 
 	- cuts the movie to standardized tiffs per guv
@@ -32,12 +35,12 @@
 * A30 bundles results for ROIs
 
 
-
 ### notes
-* to see binaryzation performance when tuning in a new dataset: A20 set frames to 1, binary-ops showit=1, run in debug mode 
+* to see binarization performance when tuning in a new dataset: A20 set frames to 1, binary-ops showit=1, run in debug mode 
 * check the write-up:
 
-# fusion analysis with Rafael de Lira ('B' series)
+# code 'B' series: fusion analysis
+Description: we detect the position and onset time of fusion events. It is assumed that the xy position does not change during the event. For each event, we crop a sub-stack and its various projections: XY, XT, YT where the latter two serve as intnensity kymographs.
 
 ## overview
 
@@ -47,6 +50,7 @@ programs run via  mains_Rafa
 * B10_membrane_fusion_kymograph_generator: builds a time trace for every spot
 * B20_membrane_fusion_analyzer: builds on the kymograps, exports timings and diffusion constants
 * B30_membrane_fusion_analyzer_user_additions: allows click actions of the user to identify double releases etc.
+* B35: collects all data and sorts it in one concise table.
 
 ## Step by step:
 

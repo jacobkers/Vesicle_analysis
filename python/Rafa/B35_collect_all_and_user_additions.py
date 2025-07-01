@@ -35,9 +35,6 @@ def collect_them(exps):
         csv_source=initval.savepath /  str('B20_peak_analysis_' + label +'/' + 'B20_event_times.csv')
         
         in_path = initval.savepath / str('B30_user_classification_' + label +'/')
-        xls_target=in_path / 'B30_event_times.xlsx'
-        pix2um=0.1254
-        frame_to_ms=50
         
 
         # Read the existing csv file with data
@@ -73,10 +70,26 @@ def collect_them(exps):
                 man_peak1.append(event_df["t_pk1_ms"][0])
                 man_peak2.append(event_df["t_pk2_ms"][0])
                 man_disappear.append(event_df["t_disapp_ms"][0])
-                man_centersum.append(event_df["I_tpeak_center_ring"][0])
-                man_vesiclesum.append(event_df["I_tpeak_allrings"][0])
+                #rename by interest:
+                store_type="unclassified"
+                typz=event_df["type"][0]
+                if event_df["type"][0] == "single_release" : store_type="1.single_release"
+                if event_df["type"][0] == "double_release" : store_type="2.double_release"
+                if event_df["type"][0] == "dock & go" : store_type="3.dock & go"
+                if event_df["type"][0] == "dock & stay" : store_type="4.dock & stay"
+                if event_df["type"][0] == "multiple/other" : store_type="5.multiple/other"
+                if event_df["type"][0] == "rejected" : store_type="6.rejected"
+                
+                man_type.append(store_type)
                 man_residusum.append(event_df["residusum"][0])
-                man_type.append(event_df["type"][0])
+                #new format:
+                if 'I_tpeak_center_ring' in event_df.columns:
+                    man_centersum.append(event_df["I_tpeak_center_ring"][0])
+                    man_vesiclesum.append(event_df["I_tpeak_allrings"][0])   
+                else:
+                #old format:
+                    man_centersum.append(float("nan"))
+                    man_vesiclesum.append(event_df["vesiclesum"][0])            
             else:  #not measured
                 man_appear.append(float("nan"))
                 man_peak1.append(float("nan"))
@@ -85,7 +98,7 @@ def collect_them(exps):
                 man_centersum.append(-2)
                 man_vesiclesum.append(-2)
                 man_residusum.append(-2)
-                man_type.append('n/a')
+                man_type.append('7.n/a')
        
         events_df['user_appearance(rel. to rise)'] = man_appear  # Example values
         events_df['user_man_peak1(rel. to rise)'] = man_peak1 # Example values
@@ -96,12 +109,15 @@ def collect_them(exps):
         events_df['user_man_residusum'] = man_residusum # Example values
         events_df['user_type'] = man_type # Example values
 
+        sorted_df=events_df.sort_values(by=['user_type', 'fit_R2_value'], ascending=[True, False])
+
         # Display the updated data
         #print("\nUpdated Data with New Columns:")
         #print(events_df)
 
         # Write the updated data to a new Excel file
-        xls_target=in_path / 'B30_event_times.xlsx'
-        events_df.to_excel(xls_target, index=False)
+        nme='B35_' + label + '_event_times.xlsx'
+        xls_target=in_path / nme
+        sorted_df.to_excel(xls_target, index=False)
 
         print(f"\nUpdated data has been written to target")

@@ -26,8 +26,8 @@ if __name__ == "__main__":
     exps=B00_init.get_exps()
     if 0: B00_membrane_fusion_event_detector.detect(exps)
     if 0: B10_membrane_fusion_kymograph_generator.kymo(exps)
-    if 1: B20_membrane_fusion_analyzer.fusion(exps)
+    if 0: B20_membrane_fusion_analyzer.fusion(exps)
     #following requires classification by user:
-    if 0: B30_membrane_fusion_analyzer_user_additions.click_them(exps)
-    if 0: B35_collect_all_and_user_additions.collect_them(exps)
+    if 1: B30_membrane_fusion_analyzer_user_additions.click_them(exps)
+    if 1: B35_collect_all_and_user_additions.collect_them(exps)
     if 0: B40_load_and_plot.collect_them(exps)
