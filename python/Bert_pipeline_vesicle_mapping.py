@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from skimage import io
 from skimage import measure
-
+from datetime import datetime
 
 
 #set up local and import common tools
@@ -69,7 +69,10 @@ outdir_test='M:/tnw/bn/cd/Shared/Jacob/TESTdata_out/2024_Bert/2025_04_23 vesicle
 # Example usages 
 excelpath=Path("M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/005_analysis")
 excelname =str("Bert_data_overview_test.xlsx")
-targetname=str("Bert_data_results.xlsx")
+now = datetime.now()
+datecode = now.strftime("%Y%m%d")  # Bijvoorbeeld '20250702'
+
+targetname=str("Bert_data_results_" + datecode + ".xlsx" )
 
 # Read as DataFrame:
 df = pd.read_excel(excelpath  / excelname)
@@ -242,8 +245,8 @@ for Guv in Guv_list:
                 'maxradius' : r_max
                 }
                 edge_map,QI, Xsamplinggrid, Ysamplinggrid=guv_tools.QI_map(edge_mask*chan, presets, xm, ym,demo=1)
-                inner_map=guv_tools.QI_map(inner_mask**chan, presets, xm, ym)
-                outer_map=guv_tools.QI_map(outer_mask**chan, presets, xm, ym)
+                inner_map=guv_tools.QI_map(inner_mask*chan, presets, xm, ym)
+                outer_map=guv_tools.QI_map(outer_mask*chan, presets, xm, ym)
             
 
                    
@@ -300,6 +303,41 @@ for Guv in Guv_list:
                     fig.savefig(target)
                     plt.close('all')
                     #plt.show()
+
+                    #plot and save: radial mapping:
+                    fig, axs = plt.subplots(1, 3)
+                    axs[0].imshow(inner_map,extent=[0,360,r_max,0], aspect='auto')
+                    axs[0].set_title('inner')
+                    axs[0].set_xlabel('angle')
+                    axs[1].imshow(outer_map,extent=[0,360,r_max,0], aspect='auto')
+                    axs[1].set_title('outer')
+                    axs[1].set_xlabel('angle')
+                    axs[2].imshow(edge_map,extent=[0,360,r_max,0], aspect='auto')
+                    axs[2].set_title('edge')
+                    axs[2].set_xlabel('angle')
+
+                    fig.tight_layout()
+                    #plt.show()
+                    #save this figure
+                    target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/004_misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_5_radial_maps.png'
+                    fig.savefig(target)
+                    plt.close('all')
+
+                    # plot and save: sine wave:
+                    fig, axs = plt.subplots(1,1)
+                    axs.plot(x, profile, 'b-')
+                    axs.plot(cln_x, cln_profile, 'k-')
+                    axs.plot(cln_x, 0*cln_profile+max_value[color_i], 'r--')
+                    axs.plot(cln_x, 0*cln_profile+mean_value[color_i], '--')
+                    axs.plot(y_fit)
+                    fig.tight_layout()
+                    #save this figure
+                    target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/004_misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_6_edge_fit.png'
+                    fig.savefig(target)
+                    plt.close('all')
+
+
+
             if N_colors<3: #pad channels 
                 for ii in range(3-N_colors):
                     #allocate (multi-chan lists):
@@ -328,39 +366,7 @@ for Guv in Guv_list:
             all_area.append(area)
             all_perimeter.append(perimeter)
             all_radius_mean.append(radius_mean) 
-
-            if color_i== Guv.channel_of_interest:
-                #plot and save: radial mapping:
-                fig, axs = plt.subplots(1, 3)
-                axs[0].imshow(inner_map,extent=[0,360,r_max,0], aspect='auto')
-                axs[0].set_title('inner')
-                axs[0].set_xlabel('angle')
-                axs[1].imshow(outer_map,extent=[0,360,r_max,0], aspect='auto')
-                axs[1].set_title('outer')
-                axs[1].set_xlabel('angle')
-                axs[2].imshow(edge_map,extent=[0,360,r_max,0], aspect='auto')
-                axs[2].set_title('edge')
-                axs[2].set_xlabel('angle')
-
-                fig.tight_layout()
-                #plt.show()
-                #save this figure
-                target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/004_misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_5_radial_maps.png'
-                fig.savefig(target)
-                plt.close('all')
-
-                # plot and save: sine wave:
-                fig, axs = plt.subplots(1,1)
-                axs.plot(x, profile, 'b-')
-                axs.plot(cln_x, cln_profile, 'k-')
-                axs.plot(cln_x, 0*cln_profile+max_value[color_i], 'r--')
-                axs.plot(cln_x, 0*cln_profile+mean_value[color_i], '--')
-                axs.plot(y_fit)
-                fig.tight_layout()
-                #save this figure
-                target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/004_misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_6_edge_fit.png'
-                fig.savefig(target)
-                plt.close('all')
+   
 
         else: #if nothing worked .....  
                
