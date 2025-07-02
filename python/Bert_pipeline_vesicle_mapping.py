@@ -202,7 +202,7 @@ for Guv in Guv_list:
         fig.tight_layout()
         #plt.show()
         #save this figure
-        target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_2_masking.png'
+        target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/004_misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_2_masking.png'
         fig.savefig(target)
         plt.close('all')
         
@@ -285,7 +285,7 @@ for Guv in Guv_list:
                     
                     #plt.show()
                     #save this figure
-                    target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_3_inner_outer_masks.png'
+                    target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/004_misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_3_inner_outer_masks.png'
                     fig.savefig(target)
                     plt.close('all')
                     
@@ -296,7 +296,7 @@ for Guv in Guv_list:
                     axs.plot(Ysamplinggrid[::skips,::skips], Xsamplinggrid[::skips,::skips], '-')
                     fig.tight_layout()
                     #save this figure
-                    target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_4_radial_sampling.png'
+                    target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/004_misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_4_radial_sampling.png'
                     fig.savefig(target)
                     plt.close('all')
                     #plt.show()
@@ -345,7 +345,7 @@ for Guv in Guv_list:
                 fig.tight_layout()
                 #plt.show()
                 #save this figure
-                target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_5_radial_maps.png'
+                target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/004_misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_5_radial_maps.png'
                 fig.savefig(target)
                 plt.close('all')
 
@@ -358,7 +358,7 @@ for Guv in Guv_list:
                 axs.plot(y_fit)
                 fig.tight_layout()
                 #save this figure
-                target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_6_edge_fit.png'
+                target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/004_misc/output_figs/Guv_no' + str(Guv.global_index).zfill(3) +'_6_edge_fit.png'
                 fig.savefig(target)
                 plt.close('all')
 

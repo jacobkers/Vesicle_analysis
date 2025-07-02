@@ -385,7 +385,7 @@ def highlight_roi(image,x0,y0,r0):
 def smooth_it(roi,labda=3):
     #gaussian smooth
     roi = roi.astype(float)
-    k_size=np.int(np.ceil(labda))
+    k_size=int(np.ceil(labda))
     x, y = np.linspace(-k_size, k_size, 2*k_size), np.linspace(-k_size, k_size, 2*k_size)
     KX, KY = np.meshgrid(x, y)
     radii = np.hypot(KX, KY)
