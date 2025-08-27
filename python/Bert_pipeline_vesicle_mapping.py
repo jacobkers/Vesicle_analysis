@@ -70,7 +70,7 @@ outdir_test='M:/tnw/bn/cd/Shared/Jacob/TESTdata_out/2024_Bert/2025_04_23 vesicle
 excelpath=Path("M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/005_analysis")
 excelname =str("Bert_data_overview_test.xlsx")
 now = datetime.now()
-datecode = now.strftime("%Y%m%d")  # Bijvoorbeeld '20250702'
+datecode = now.strftime("%Y%m%d%h")  # Bijvoorbeeld '20250702'
 
 targetname=str("Bert_data_results_" + datecode + ".xlsx" )
 

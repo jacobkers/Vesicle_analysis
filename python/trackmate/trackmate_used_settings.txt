@@ -1,6 +1,7 @@
 Trackmate was used as follows: 
 
 # Trackmate, Step-by-step 
+window 1:
 estimated object size: 5 pixels
 quality treshold: 0
 link max distance: 10 pixels
