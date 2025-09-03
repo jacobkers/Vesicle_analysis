@@ -212,8 +212,9 @@ for Guv in Guv_list:
 
         if len(regprops)>0:
             # build inner and outer masks (in cartesian coordiantes)
-            inner_mask = guv_binary_ops.binary_erosion(mask_5, guv_binary_ops.disk(disk_sz), iterations = 3)                 
-            outer_mask = 1-guv_binary_ops.binary_dilation(mask_5, guv_binary_ops.disk(disk_sz), iterations = 1)
+            ring_band=2*disk_sz
+            inner_mask = guv_binary_ops.binary_erosion(mask_5, guv_binary_ops.disk(ring_band), iterations = 3)                 
+            outer_mask = 1-guv_binary_ops.binary_dilation(mask_5, guv_binary_ops.disk(ring_band), iterations = 1)
             edge_mask=mask_5.astype(float) -inner_mask
             
 
@@ -229,9 +230,13 @@ for Guv in Guv_list:
             for color_i, chan in enumerate(roi):
                 #get values from the inner - and outer area. By buffering into an area, we can apply outlier detection on a later stage
                 inner_pixels = chan[inner_mask.astype(bool)]
+                inner_pixels, outliers, flags = guv_tools.outlier_flag(inner_pixels, tolerance=3, sig_change=0.7, how=1, sho=0, demo=0)
+                 
                 I_inner_mean.append(np.mean(inner_pixels))
                 I_inner_median.append(np.median(inner_pixels))  
                 outer_pixels=chan[outer_mask.astype(bool)]
+                outer_pixels, outliers, flags = guv_tools.outlier_flag(outer_pixels, tolerance=3, sig_change=0.7, how=1, sho=0, demo=0)
+               
                 I_outer_mean.append(np.mean(outer_pixels))
                 I_outer_median.append(np.median(outer_pixels))        
 
