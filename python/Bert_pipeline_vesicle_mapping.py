@@ -391,6 +391,7 @@ for Guv in Guv_list:
 
 #add new data:
 #add geometry:
+df_to_use = df_to_use.copy()
 df_to_use['edge radius minor'] = all_radius_minor
 df_to_use['edge radius mean'] = all_radius_mean  
 df_to_use['edge radius major'] = all_radius_major
