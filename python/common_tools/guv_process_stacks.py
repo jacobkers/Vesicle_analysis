@@ -7,9 +7,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 from skimage import io
-import guv_tools
-import guv_binary_ops
-import guv_io
+from common_tools import guv_tools
+from common_tools import guv_binary_ops
+from common_tools import guv_io
 import cv2
 import csv
 from scipy.ndimage import binary_opening, binary_closing, binary_fill_holes, binary_dilation, binary_erosion

@@ -3,18 +3,16 @@
 Work guv imagery
 @author: jkerssemakers
 """
-import guv_process_stacks
-import guv_io
+from common_tools import guv_process_stacks
+from common_tools import guv_io
+
 from A00_init import get_exps
 
 """ 
 experiment indices (int = laptop, add: 0.1 for office local, 0.2 to run on CD:K:):
-0: .nd testfiles
-1: .lif testfiles
-2: .tif testfiles (only laptop)
-3: .tif test (office-PC) less_challenging ones
+
 """
-expi = 5.2   #2: flexibles; 3:less_challenging ones 4: single-image tiffs
+expi = 0.0   
 initval = get_exps(expi)
 
 for im_ori_name in initval.movienames:

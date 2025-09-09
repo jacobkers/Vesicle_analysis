@@ -52,10 +52,10 @@ def get_exps(exp_idx):
     Exp0.subdir = str("20082025_CS_test/")
     Exp0.movienames = ["20082025_CS_For Jacob.lif - R 4 - C=1"]  # the ones that have ROIs measured in ImageJ
     Exp0.suffix='.tif'
-    Exp0.tracking_key=0
+    Exp0.tracking_key=[0]  #write as list!
     Exp0.N_colors=1
     Exp0.sequence='time_trace'
-    Exp0.tracking_key=0
+
     #1: use hand-set drift
     #2: use x, y from prior run A20
 
