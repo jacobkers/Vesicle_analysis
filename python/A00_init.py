@@ -50,7 +50,9 @@ def get_exps(exp_idx):
     Exp0.mainpath_in=in_root+ str("pilots/")
     Exp0.mainpath_out =out_root + str("pilots/")   
     Exp0.subdir = str("20082025_CS_test/")
-    Exp0.movienames = ["20082025_CS_For Jacob.lif - R 4 - C=1"]  # the ones that have ROIs measured in ImageJ
+    #Exp0.movienames = ["20082025_CS_For Jacob.lif - R 4 - C=1"]  # the ones that have ROIs measured in ImageJ
+    Exp0.movienames = ["20082025_CS_For Jacob.lif - R 4_Merged - C=1"]  # the ones that have ROIs measured in ImageJ
+    
     Exp0.suffix='.tif'
     Exp0.tracking_key=[0]  #write as list!
     Exp0.N_colors=1

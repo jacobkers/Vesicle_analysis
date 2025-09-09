@@ -139,14 +139,15 @@ if initval.suffix =='.tif'and initval.sequence=='time_trace':
             c1_std_sum_rel=[]
             ratio1=[]
             for fri, row in enumerate(data):
-                c1_signal_check=(float(row['c1_edge_mx']))
-                okay_point=float(row['roundness'])>0 and float(row['R_minor'])>0 and c1_signal_check>400 and fri< this_guv.crop_it
+                c0_signal_check=(float(row['c0_edge_mx']))
+                okay_point=float(row['roundness'])>0 and float(row['R_minor'])>0 and c0_signal_check>400 and fri< this_guv.crop_it
+                axlabel="n/a"
                 if okay_point:
                     #fetch work parameters:
                     axis_major=float(row['R_major'])
                     axis_minor=float(row['R_minor'])
-                    c1_mean_peaks=(float(row['c1_edge_mx']))
-                    #c0_mean_peaks=(float(row['c0_edge_mx']))
+                    #c1_mean_peaks=(float(row['c0_edge_mx']))
+                    c0_mean_peaks=(float(row['c0_edge_mx']))
                     #build plots in calibrated units
                     #choose axis and build:
                     if 0:
@@ -159,7 +160,7 @@ if initval.suffix =='.tif'and initval.sequence=='time_trace':
                     area.append((initval.pix2mu)**2*float(row['area']))
                     roundness.append(float(row['roundness']))
                     major_minor.append(axis_major/axis_minor)
-                    c1_edge_mx.append(initval.counts2perc*c1_mean_peaks)
+                    c0_edge_mx.append(initval.counts2perc*c0_mean_peaks)
          
             simbol_color=movie_simbol_list[movie_use_index]
             sz=2
