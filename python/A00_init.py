@@ -37,25 +37,25 @@ def get_exps(exp_idx):
     exp_idx_base=int(np.round(exp_idx))
     exp_idx_dec=int(10*(exp_idx-np.round(exp_idx))) 
     if exp_idx_dec==0: #laptop
-        in_root=str("C:/Users/jkerssemakers/OneDrive - Delft University of Technology/CD_Data_in/CD25_Charu//")
-        out_root=str("C:/Users/jkerssemakers/OneDrive - Delft University of Technology/CD_Data_out/CD25_Charu/")
+        in_root=str("C:/Users/jkerssemakers/OneDrive - Delft University of Technology/CD_Data_in/2025_Charu//")
+        out_root=str("C:/Users/jkerssemakers/OneDrive - Delft University of Technology/CD_Data_out/2025_Charu/")
     if exp_idx_dec==1:
-        in_root=str("C:/Users/jkerssemakers/OneDrive - Delft University of Technology/CD_Data_in/CD25_Charu//")
-        out_root=str("C:/Users/jkerssemakers/OneDrive - Delft University of Technology/CD_Data_out/CD25_Charu/")
+        in_root=str("C:/Users/jkerssemakers/OneDrive - Delft University of Technology/CD_Data_in/2025_Charu//")
+        out_root=str("C:/Users/jkerssemakers/OneDrive - Delft University of Technology/CD_Data_out/2025_Charu/")
     if exp_idx_dec==2: #remote
         in_root=str("M:/tnw/bn/cd/Shared/Jacob/TESTdata_in/2025_Charu/")
         out_root=str("M:/tnw/bn/cd/Shared/Jacob/TESTdata_out/2025_Charu/")
     #set up various experiment configurations:    
     Exp0 = Guv_experiment()   
-    Exp0.mainpath_in=in_root+ str("pilot/")
-    Exp0.mainpath_out =out_root + str("pilot/")   
+    Exp0.mainpath_in=in_root+ str("pilots/")
+    Exp0.mainpath_out =out_root + str("pilots/")   
     Exp0.subdir = str("20082025_CS_test/")
     Exp0.movienames = ["20082025_CS_For Jacob.lif - R 4 - C=1"]  # the ones that have ROIs measured in ImageJ
     Exp0.suffix='.tif'
-    Exp3.tracking_key=0
+    Exp0.tracking_key=0
     Exp0.N_colors=1
     Exp0.sequence='time_trace'
-    Exp3.tracking_key=0
+    Exp0.tracking_key=0
     #1: use hand-set drift
     #2: use x, y from prior run A20
 

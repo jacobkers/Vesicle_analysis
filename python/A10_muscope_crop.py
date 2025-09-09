@@ -4,7 +4,7 @@ Work guv imagery, saves to standardized tiffs per guv
 @author: jkerssemakers
 """
 from common_tools import guv_tools 
-import guv_io
+from common_tools import guv_io
 from A00_init import get_exps
 
 """ 
@@ -12,7 +12,7 @@ experiment indices (add 0.1 to run on K:):
 0: .nd testfiles
 1: .lif testfiles 
 """
-expi = 5.2
+expi = 0.0
 initval = get_exps(expi)
 
 for im_ori_name in initval.movienames:

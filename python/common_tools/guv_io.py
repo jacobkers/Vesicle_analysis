@@ -347,9 +347,11 @@ def cut_tif_to_roi_tiffs_hardwired(im_ori_name,guv_xyr,initval):
     st = io.imread(source)
     idx=np.argmin(np.shape(st))
     st=np.moveaxis(st,idx,0)  #CTXY for easy color split
-    nc,ff,dx,dy=np.shape(st)
+    tt=np.shape(st)
+    if len(tt)==3:
+        st = st[np.newaxis, ...]
 
-    
+    nc,ff,dx,dy=np.shape(st)
 
     #work each GUV and its center coordinates:
     fig, axs = plt.subplots(1,1)
