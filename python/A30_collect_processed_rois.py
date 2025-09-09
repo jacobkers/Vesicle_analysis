@@ -37,7 +37,7 @@ class GUV:
 
 def get_data_selections(run_id):
     #use a local copy:
-    wb = load_workbook(filename =  "data_overview.xlsx")
+    wb = load_workbook(filename =  "data_overview_Charu.xlsx")
     sheet_files = wb['guvs']
     #Create a dictionary of column names
     
@@ -62,9 +62,10 @@ def get_data_selections(run_id):
     return Guv_list
  
 
-expi = 5.2   #2: flexibles; 3:less_challenging ones 4: single-image tiffs
-movie_to_use_list=[462, 463,465,466]
-movie_simbol_list=[str('r'), str('k'), str('m'),str('b')]
+expi = 0.0   #2: flexibles; 3:less_challenging ones 4: single-image tiffs
+
+movie_to_use_list=[4]
+movie_simbol_list=[str('r')]
 
 initval = get_exps(expi)
 

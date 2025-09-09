@@ -375,15 +375,24 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                     #process the work image
                 titl = str("file_")+ im_ori_name  + str("_roi")+str(roi_i) +  str("c") + str(color_i)
                 if  fri==0:
-                    #show track example: 
-                    axs1[0,color_i].imshow(edge_map)
-                    axs1[0,color_i].set_title(str("color") + str(color_i)) 
+                    #show track example:
+                    if initval.N_colors>1:
+                        axs1[0,color_i].imshow(edge_map)
+                        axs1[0,color_i].set_title(str("color") + str(color_i)) 
+                    else:
+                        axs1[0].imshow(edge_map)
+                        axs1[0].set_title(str("color") + str(color_i)) 
                     print("a20b:" + titl + str("frame") + str(fri))
             #end results:
-            
-            axs1[1,color_i].legend(['edge'],loc='best', fontsize='xx-small')
-            axs1[1,color_i].plot(all_edge_I_mx,'ro', markersize=2)
-            axs1[1,color_i].set_xlabel("frames")
+            if initval.N_colors>1:
+                axs1[1,color_i].legend(['edge'],loc='best', fontsize='xx-small')
+                axs1[1,color_i].plot(all_edge_I_mx,'ro', markersize=2)
+                axs1[1,color_i].set_xlabel("frames")
+            else:
+                axs1[1].legend(['edge'],loc='best', fontsize='xx-small')
+                axs1[1].plot(all_edge_I_mx,'ro', markersize=2)
+                axs1[1].set_xlabel("frames")
+
             color_data=np.vstack((all_inside_I, 
                                   all_edge_I_mx,
                                   all_edge_I_sum_pol,
