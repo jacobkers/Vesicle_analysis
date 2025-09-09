@@ -19,6 +19,7 @@ import numpy as np
 from skimage import io
 from skimage import measure
 from datetime import datetime
+import tifffile
 
 
 #set up local and import common tools
@@ -117,7 +118,7 @@ all_radius_minor =[] # minor axis of object (via cartesian mask)
 all_radius_major =[] # major axis of object (via cartesian mask)
 all_area =[] #area of object
 all_perimeter = [] # perimeter of object
-
+all_resolution=[]  #resolution (pix per um)
 
 
 #Main:
@@ -132,9 +133,24 @@ for Guv in Guv_list:
         guvpth=Path(Guv.pathname)
         for channelpath in guvpth.glob("**/*"+ Guv.filename):  # find all channel files in inpath
             roi.append(np.array(io.imread(channelpath)))
+            # To get info:
+            with tifffile.TiffFile(channelpath) as tif:
+                xres = tif.pages[0].tags["XResolution"].value
+                # xres is a tuple (numerator, denominator)
+                x_calibration = xres[0] / xres[1]
+                #print("resolution:", 100/x_calibration)
+
     else: #load from single file: 
         roi = np.array(io.imread(image_path))
+        # To get info:
+        with tifffile.TiffFile(image_path) as tif:
+            xres = tif.pages[0].tags["XResolution"].value
+            # xres is a tuple (numerator, denominator)
+            x_calibration = xres[0] / xres[1]
+            #print("resolution:", 100/x_calibration)
     
+    
+
     # extract other basic metadata
     clrs, rr,cc,=np.shape(roi)
 
@@ -196,8 +212,8 @@ for Guv in Guv_list:
             r_eq=regprops[0].equivalent_diameter/2
             rmin_rel=regprops[0].axis_minor_length/2/r_eq
             rmaj_rel=regprops[0].axis_major_length/2/r_eq
-            area=regprops[0].area
-            perimeter= regprops[0].perimeter      
+            area_rel=regprops[0].area/(r_eq**2)
+            perimeter_rel= regprops[0].perimeter/r_eq      
 
             axs[1,2].plot(ym,xm, 'ro', markersize=5)
             axs[1,3].imshow(roi_work*mask_5)
@@ -230,13 +246,12 @@ for Guv in Guv_list:
             for color_i, chan in enumerate(roi):
                 #get values from the inner - and outer area. By buffering into an area, we can apply outlier detection on a later stage
                 inner_pixels = chan[inner_mask.astype(bool)]
-                inner_pixels, outliers, flags = guv_tools.outlier_flag(inner_pixels, tolerance=3, sig_change=0.7, how=1, sho=0, demo=0)
-                 
+                inner_pixels, outliers, flags = guv_tools.outlier_flag(inner_pixels, tolerance=3, sig_change=0.7, how=1, sho=0, demo=0)   
                 I_inner_mean.append(np.mean(inner_pixels))
                 I_inner_median.append(np.median(inner_pixels))  
+                
                 outer_pixels=chan[outer_mask.astype(bool)]
                 outer_pixels, outliers, flags = guv_tools.outlier_flag(outer_pixels, tolerance=3, sig_change=0.7, how=1, sho=0, demo=0)
-               
                 I_outer_mean.append(np.mean(outer_pixels))
                 I_outer_median.append(np.median(outer_pixels))        
 
@@ -264,6 +279,7 @@ for Guv in Guv_list:
                 profile=np.nanmax(edge_map, axis=0)
                 profile_max=np.argmax(edge_map, axis=0)
                 if color_i== Guv.channel_of_interest:
+                    resolution=(x_calibration)
                     radius_mean=(np.nanmean(profile_max)/2)  #corrects for oversampling
                 
 
@@ -364,17 +380,19 @@ for Guv in Guv_list:
             I_edge_max_all.append(max_value) 
             I_edge_mean_all.append(mean_value) 
           
-            #only for main channel: geometry: (here we re-scale the earlier major and minor axis values):
+            #only for main channel: geometry: (here we re-scale the earlier values from the binary mask:
+            # to the more precise edge analysis result.):
+            all_resolution.append(resolution)
             all_radius_minor.append(rmin_rel*radius_mean)
             all_radius_major.append(rmaj_rel*radius_mean)
             
-            all_area.append(area)
-            all_perimeter.append(perimeter)
+            all_area.append(area_rel*(radius_mean**2))
+            all_perimeter.append(perimeter_rel*radius_mean)
             all_radius_mean.append(radius_mean) 
    
 
         else: #if nothing worked .....  
-               
+            all_resolution.append(resolution)   
             all_radius_mean.append(float('nan')) 
             all_radius_minor.append(float('nan')) 
             all_radius_major.append(float('nan')) 
@@ -392,11 +410,12 @@ for Guv in Guv_list:
 #add new data:
 #add geometry:
 df_to_use = df_to_use.copy()
-df_to_use['edge radius minor'] = all_radius_minor
-df_to_use['edge radius mean'] = all_radius_mean  
-df_to_use['edge radius major'] = all_radius_major
-df_to_use['area'] = all_area
-df_to_use['perimeter'] = all_perimeter
+df_to_use['edge radius minor,pixels'] = all_radius_minor
+df_to_use['edge radius mean,pixels'] = all_radius_mean  
+df_to_use['edge radius major,pixels'] = all_radius_major
+df_to_use['area,pixels^2'] = all_area
+df_to_use['perimeter,pixels'] = all_perimeter
+df_to_use['pix_per_um'] = all_resolution
 #intensity per channel:
 for chan_i in range(N_colors):
     ch_str='Ch'+str(chan_i)+'_'
@@ -406,10 +425,7 @@ for chan_i in range(N_colors):
     df_to_use[ch_str+'inside median'] = [item[chan_i] for item in I_inner_median_all]
     df_to_use[ch_str+'outside mean'] = [item[chan_i] for item in I_outer_mean_all]
     df_to_use[ch_str+'outside median'] = [item[chan_i] for item in I_outer_median_all]
-
     
-
-
 df_to_use.to_excel(excelpath  / targetname, index=False)
 print(f"\nUpdated data has been written to target")
 
