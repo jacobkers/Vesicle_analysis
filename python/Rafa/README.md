@@ -3,7 +3,7 @@ Contents:
 - description code A-series: GUV analysis
 - description code B-series: analysis of fusion events on a flat membrane
 
-# code 'A' series: GUV analysis with Rafael de Lira 
+# code 'A' series: GUV analysis with Rafa / Charu
 
 
 ## Step by step:
