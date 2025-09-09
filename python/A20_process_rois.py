@@ -12,7 +12,7 @@ from A00_init import get_exps
 experiment indices (int = laptop, add: 0.1 for office local, 0.2 to run on CD:K:):
 
 """
-expi = 0.0   
+expi = 0.2   
 initval = get_exps(expi)
 
 for im_ori_name in initval.movienames:
