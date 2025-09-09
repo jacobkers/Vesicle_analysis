@@ -16,10 +16,10 @@ class Guv_experiment:
     """
     def __init__(self):
         self.mainpath_in = str(
-            "M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/Rafa/Test Rafa_Nikon microscope/DOPC.DOPS/"
+            "M:/tnw/bn/cd/Shared/Jacob/TESTdata_in/Rafa/Test Rafa_Nikon microscope/DOPC.DOPS/"
         )
         self.mainpath_out = str(
-            "M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/Rafa/Test Rafa_Nikon microscope/DOPC.DOPS/"
+            "M:/tnw/bn/cd/Shared/Jacob/TESTdata_out/Rafa/Test Rafa_Nikon microscope/DOPC.DOPS/"
         )
         self.subdir = str()
         self.movienames = []
@@ -37,74 +37,30 @@ def get_exps(exp_idx):
     exp_idx_base=int(np.round(exp_idx))
     exp_idx_dec=int(10*(exp_idx-np.round(exp_idx))) 
     if exp_idx_dec==0: #laptop
-        in_root=str("C:/Users/jkerssemakers/CD_Data_in/2023_Rafa//")
-        out_root=str("C:/Users/jkerssemakers/Dropbox/CD_Data_out/2023_Rafa/")
+        in_root=str("C:/Users/jkerssemakers/OneDrive - Delft University of Technology/CD_Data_in/CD25_Charu//")
+        out_root=str("C:/Users/jkerssemakers/OneDrive - Delft University of Technology/CD_Data_out/CD25_Charu/")
     if exp_idx_dec==1:
-        in_root=str("D:/jkerssemakers/CD_Data_in/2023_Rafa/")
-        out_root=str("D:/jkerssemakers/CD_Data_out/2023_Rafa/")
+        in_root=str("C:/Users/jkerssemakers/OneDrive - Delft University of Technology/CD_Data_in/CD25_Charu//")
+        out_root=str("C:/Users/jkerssemakers/OneDrive - Delft University of Technology/CD_Data_out/CD25_Charu/")
     if exp_idx_dec==2: #remote
-        in_root=str("M:/tnw/bn/cd/Shared/Jacob/TESTdata_in/2023_Rafa/")
-        out_root=str("M:/tnw/bn/cd/Shared/Jacob/TESTdata_out/2023_Rafa/")
+        in_root=str("M:/tnw/bn/cd/Shared/Jacob/TESTdata_in/2025_Charu/")
+        out_root=str("M:/tnw/bn/cd/Shared/Jacob/TESTdata_out/2025_Charu/")
     #set up various experiment configurations:    
     Exp0 = Guv_experiment()   
-    Exp0.mainpath_in=in_root+ str("Test_subdir_nd/")
-    Exp0.mainpath_out =out_root + str("Test_subdir_nd/")   
-    Exp0.subdir = str("60 uM_1h incubation/")
-    Exp0.movienames = ["1", "2", "3", "16", "9"]  # the ones that have ROIs measured in ImageJ
-    Exp0.suffix='.nd2'
-    
-
-    Exp1 = Guv_experiment()
-    Exp1.mainpath_in=in_root+ str("Test_subdir_lif/")
-    Exp1.mainpath_out=out_root+ str("Test_subdir_lif/")
-    Exp1.subdir = str("40mMLUVs_WITHCerC6/")
-    Exp1.movienames = ["40mMLUVs_WITHCerC6"]  # the ones that have ROIs measured in ImageJ
-    Exp1.suffix='.lif'
-
-    Exp2 = Guv_experiment()
-    Exp2.mainpath_in=in_root+ str("Test_subdir_tif/")
-    Exp2.mainpath_out=out_root+ str("Test_subdir_tif/")
-    Exp2.subdir = str("40 uM LUVsWITHCerC6/")
-    Exp2.movienames = ["40 uM LUVsWITHCerC6_RealTime_Series002_t000_crp"]  # the ones that have ROIs measured in ImageJ
-    Exp2.suffix='.tif'
-    Exp2.N_colors=2
-
-    Exp3 = Guv_experiment()
-    Exp3.mainpath_in=in_root+ str("Test_subdir_tif/")
-    Exp3.mainpath_out=out_root+ str("Test_subdir_tif/")
-    Exp3.subdir = str("Less challenging GUV/")
-    Exp3.movienames = ["30 uM LUVs_WITHCerC6 real time_Series011_t00_overlay" , "30 uM LUVs_WITHCerC6 real time_Series011 - Copy"]  # the ones that have ROIs measured in ImageJ
-    Exp3.suffix='.tif'
-    Exp3.tracking_key=1
-    Exp3.N_colors=3
-    Exp3.sequence='time_trace'
-
-    Exp4 = Guv_experiment()
-    Exp4.mainpath_in=str("M:/tnw/bn/cd/Shared/Rafael Lira/Nikon confocal microscope/Ewa/231128_Permeability experiments/DOPC.DOPS/")
-    Exp4.mainpath_out=out_root+ str("Test_subdir_tif/")
-    Exp4.subdir = str("40 uM_Over 1h incubation/")
-    Exp4.movienames = ["1_tiff","2_tiff","3_tiff","4_tiff","5_tiff","6_tiff","7_tiff","8_tiff","9_tiff","10_tiff", "11_tiff","12_tiff","13_tiff","14_tiff","15_tiff"]  # the ones that have ROIs measured in ImageJ
-    Exp4.suffix='.tif'
-    Exp4.tracking_key=0
-    Exp4.N_colors=4
-    Exp4.sequence='single_frame'
-
-    Exp5 = Guv_experiment()
-    Exp5.mainpath_in=in_root+ str("Test_subdir_tif/")
-    Exp5.mainpath_out=out_root+ str("Test_subdir_tif/")
-    Exp5.subdir = str("Real time fusion and morphology/")
-    Exp5.movienames = ["nd462", "nd463" ,"nd465", "nd466"]
-    #Exp5.movienames = ["nd462"]
-    #Exp5.movienames = ["nd463" ,"nd465", "nd466"]
-    Exp5.suffix='.tif'
-    Exp5.sequence='time_trace'
-    Exp5.N_colors=2
-    Exp5.tracking_key=[0, 1]  #which channels to add
-    Exp5.apply_drift_correction=1
+    Exp0.mainpath_in=in_root+ str("pilot/")
+    Exp0.mainpath_out =out_root + str("pilot/")   
+    Exp0.subdir = str("20082025_CS_test/")
+    Exp0.movienames = ["20082025_CS_For Jacob.lif - R 4 - C=1"]  # the ones that have ROIs measured in ImageJ
+    Exp0.suffix='.tif'
+    Exp3.tracking_key=0
+    Exp0.N_colors=1
+    Exp0.sequence='time_trace'
+    Exp3.tracking_key=0
     #1: use hand-set drift
     #2: use x, y from prior run A20
 
-    all_Experiments = [Exp0, Exp1, Exp2, Exp3, Exp4, Exp5]
+    
+    all_Experiments = [Exp0]
 
     Experiment = all_Experiments[exp_idx_base]
 
