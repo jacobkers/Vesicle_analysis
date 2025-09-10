@@ -1,0 +1,21 @@
+README.md
+setup.py
+vesicles/A00_init.py
+vesicles/A10_muscope_crop.py
+vesicles/A20_process_rois.py
+vesicles/A30_collect_processed_rois.py
+vesicles/__init__.py
+vesicles/mains_Rafa.py
+vesicles.egg-info/PKG-INFO
+vesicles.egg-info/SOURCES.txt
+vesicles.egg-info/dependency_links.txt
+vesicles.egg-info/top_level.txt
+vesicles/common_tools/#lif stuff.py
+vesicles/common_tools/__init__.py
+vesicles/common_tools/guv_binary_ops.py
+vesicles/common_tools/guv_io.py
+vesicles/common_tools/guv_process_stacks.py
+vesicles/common_tools/guv_tools.py
+vesicles/common_tools/nd2_splitter.py
+vesicles/common_tools/qi_trak.py
+vesicles/common_tools/tiff_processor.py
