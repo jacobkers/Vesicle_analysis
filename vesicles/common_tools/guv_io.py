@@ -4,7 +4,7 @@ Jacob Kers 2024
  """
 import numpy as np
 import matplotlib.pyplot as plt
-import nd2reader
+#import nd2reader
 #from readlif.reader import LifFile
 from pathlib import Path
 import csv
@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 from vesicles.common_tools import guv_tools
 from PIL import Image, ImageSequence
-import nd2
+#import nd2
 
 class Event:
     def __init__(self, row_dict):
