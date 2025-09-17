@@ -7,8 +7,6 @@
 # 
 # (under construction)
 
-# In[3]:
-
 
 import csv
 import numpy as np
@@ -21,8 +19,6 @@ from scipy.interpolate import make_interp_spline
 import vesicles as vs
 
 # ### GUV Class Definition
-
-# In[4]:
 
 
 class GUV:
@@ -41,8 +37,6 @@ class GUV:
 # 
 # This function reads GUV data from an Excel file and returns a list of GUV objects for a specific run ID.
 # We define a `GUV` class to store properties of a single GUV movie.
-
-# In[5]:
 
 
 def get_data_selections(run_id,filename):
@@ -67,14 +61,9 @@ def get_data_selections(run_id,filename):
 
 
 # ## Main Analysis Pipeline
-# 
-# The main analysis is divided in a few main steps. For historical reasons, these are labeled A00, A10 ...etc. These lalbels are also used for the organization of saved data (pictures, tables) so that one can backtrack this data to the generating code.
-
+# The main analysis is divided in a few main steps. For historical reasons, these are labeled A00, A10 ...etc. These lalbels are also used for the organization of saved data (pictures, tables) so that one can backtrack this data to the generating code
 # ### A00: set up the experiment
 # Fetch the experiment parameters: these are listed in 'A00_init and include paths, movienames etc.'. An experiment has a unique index. Since I keep some local copies, I added a decimal to this index to tell the code where to look (local or remote)
-
-# In[6]:
-
 
 from vesicles import A00_init
 expi = 0.2  
@@ -85,19 +74,15 @@ movie_simbol_list = ['r']
 
 initval = A00_init.get_exps(expi)
 
-
 # ### A10: Cropping
 # With cropping, we cut out indivdidual vesicles from the stack and save them to individual tiff files. We do this because this eases the follow-up analysis: each stack is assumed to contain only one full vesicle in the center, with approximately a constant coverage of the middle area of the ROI.
 # This step requires the user to perform (easy) pre-selection in Fiji or ImageJ. Please read the README.txt for detailed info how to do that.
 
-# In[ ]:
 from vesicles import A10_muscope_crop
 
 A10_muscope_crop.main(initval)
 
-
 # 
-
 # ## A20: First processing of regions-of-interest (ROIs)
 # In this step, we first isolate the area of the vesicle to obtain masks, but also some general geometry features such as radius, area and other shape characteristics. Next, we perfom detailed analysis of every color channel 
 
