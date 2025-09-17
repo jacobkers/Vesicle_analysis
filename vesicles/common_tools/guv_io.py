@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 #import nd2reader
 #from readlif.reader import LifFile
+from openpyxl import load_workbook
 from pathlib import Path
 import csv
 from skimage import io
@@ -15,6 +16,16 @@ from vesicles.common_tools import guv_tools
 from PIL import Image, ImageSequence
 import tifffile
 #import nd2
+
+# ### GUV Class Definition
+class GUV:
+    def __init__(self):
+        self.exp_id = 0
+        self.label = 'any_label'
+        self.comment = []
+        self.use_it = []
+        self.crop_it = []
+        self.dt = 1
 
 class Event:
     def __init__(self, row_dict):
@@ -559,4 +570,23 @@ def work_roi_tiffs(im_ori_name,guv_xyr,initval):
         fig.tight_layout()
         fig.show()
         plt.close("all")
-          
+
+def get_data_selections(run_id,filename):
+    wb = load_workbook(filename)
+    sheet_files = wb['guvs']
+
+    # Create a dictionary of column names
+    Header = {COL[0].value: idx for idx, COL in enumerate(sheet_files.iter_cols(1, sheet_files.max_column))}
+
+    Guv_list = []
+    for row_cells in sheet_files.iter_rows(min_row=2, max_row=sheet_files.max_row):
+        Guv = GUV()
+        Guv.exp_id = row_cells[Header["exp_id"]].value
+        Guv.movie_id = row_cells[Header["movie_id"]].value
+        Guv.label = row_cells[Header["guv_label"]].value
+        Guv.use_it = row_cells[Header["use"]].value
+        Guv.crop_it = row_cells[Header["crop"]].value
+        Guv.dt = row_cells[Header["dt(s)"]].value
+        if Guv.exp_id == run_id:
+            Guv_list.append(Guv)
+    return Guv_list
