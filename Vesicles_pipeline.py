@@ -1,10 +1,5 @@
-#!/usr/bin/env python
-# coding: utf-8
-
 # # GUV Image Analysis Pipeline
-# 
 # This notebook contains a pipeline for analyzing GUV (Giant Unilamellar Vesicle) images. It processes both single-frame and time-trace data from .tif files.
-# 
 # (under construction)
 
 import csv
@@ -13,13 +8,13 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from openpyxl import load_workbook
 from scipy.interpolate import make_interp_spline
+import vesicles as vs
+""" from vesicles import A00_init
 
+ """
 from vesicles import A00_init
 from vesicles import A10_muscope_crop
-
-# Import custom modules
-import vesicles as vs
-
+#from vesicles import A20_process_rois
 # ### GUV Class Definition
 
 class GUV:
@@ -81,42 +76,7 @@ A10_muscope_crop.main(initval)
 # 
 # ## A20: First processing of regions-of-interest (ROIs)
 # In this step, we first isolate the area of the vesicle to obtain masks, but also some general geometry features such as radius, area and other shape characteristics. Next, we perfom detailed analysis of every color channel 
-
-from vesicles import A20_process_rois
-
 A20_process_rois.main(initval)
-
-
-# ### I. Single-frame Data Processing
-# 
-# If the data is single-frame .tif files, we just collect all data points and save them in one file.
-
-
-if initval.suffix == '.tif' and initval.sequence == 'single_frame':
-    load_dirname = initval.mainpath_out + initval.subdir + "/A20b_processed/"
-    csv_path_in = Path(load_dirname)
-
-    # Collect data from all CSV files
-    name, data = [], []
-    for csv_source in csv_path_in.glob("**/*.csv"):
-        print(csv_source.stem)
-        with open(csv_source) as f:
-            reader = csv.DictReader(f, delimiter=";")
-            for row in reader:
-                name.append(csv_source.stem)
-                data.append(row)
-
-    # Save collected data to a new CSV file
-    csv_path_out = Path(initval.mainpath_out + initval.subdir + "/A30_processed/")
-    csv_path_out.mkdir(exist_ok=True)
-
-    csv_target = load_dirname + "collected_data.csv"
-    with open(csv_target, "w", newline='') as csv_f:
-        writer = csv.writer(csv_f, delimiter=";")
-        writer.writerow(data[0].keys())
-        for data_row in data:
-            writer.writerow(data_row.values())
-
 
 # ### II. Multi-frame Data Processing and Visualization
 # 
