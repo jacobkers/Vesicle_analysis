@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 from openpyxl import load_workbook
 from scipy.interpolate import make_interp_spline
 
+from vesicles import A00_init
+from vesicles import A10_muscope_crop
 
 # Import custom modules
 import vesicles as vs
@@ -64,7 +66,6 @@ def get_data_selections(run_id,filename):
 # ### A00: set up the experiment
 # Fetch the experiment parameters: these are listed in 'A00_init and include paths, movienames etc.'. An experiment has a unique index. Since I keep some local copies, I added a decimal to this index to tell the code where to look (local or remote)
 
-from vesicles import A00_init
 expi = 0.2  
     # 0.2: Charu's test data, C=1, decimal .2 refers to remote drive
     # 1.2: Charu's test data, C=2, decimal .2 refers to remote drive
@@ -76,17 +77,10 @@ initval = A00_init.get_exps(expi)
 # ### A10: Cropping
 # With cropping, we cut out indivdidual vesicles from the stack and save them to individual tiff files. We do this because this eases the follow-up analysis: each stack is assumed to contain only one full vesicle in the center, with approximately a constant coverage of the middle area of the ROI.
 # This step requires the user to perform (easy) pre-selection in Fiji or ImageJ. Please read the README.txt for detailed info how to do that.
-
-from vesicles import A10_muscope_crop
-
 A10_muscope_crop.main(initval)
-
 # 
 # ## A20: First processing of regions-of-interest (ROIs)
 # In this step, we first isolate the area of the vesicle to obtain masks, but also some general geometry features such as radius, area and other shape characteristics. Next, we perfom detailed analysis of every color channel 
-
-# In[8]:
-
 
 from vesicles import A20_process_rois
 
@@ -96,8 +90,6 @@ A20_process_rois.main(initval)
 # ### I. Single-frame Data Processing
 # 
 # If the data is single-frame .tif files, we just collect all data points and save them in one file.
-
-# In[9]:
 
 
 if initval.suffix == '.tif' and initval.sequence == 'single_frame':
@@ -129,9 +121,6 @@ if initval.suffix == '.tif' and initval.sequence == 'single_frame':
 # ### II. Multi-frame Data Processing and Visualization
 # 
 # For time-trace or z-plane .tif files, we process the data and create visualizations. Since these movies can have some time slots-of-interest, we load an extra excel table that allows a user to crop dat a of processed movies (or discard them at all). Note that the 'movie-I' field should match the above movie-IDs.
-
-# In[10]:
-
 
 selections_filename="data_overview_Charu.xlsx"
 Guv_list = get_data_selections(round(expi), selections_filename)
@@ -185,31 +174,4 @@ if initval.suffix == '.tif' and initval.sequence == 'time_trace':
     plt.tight_layout()
     plt.show()
 
-
 # This completes the GUV image analysis pipeline. The notebook processes both single-frame and time-trace .tif files, collecting data and creating visualizations for various GUV metrics.
-
-# 
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
