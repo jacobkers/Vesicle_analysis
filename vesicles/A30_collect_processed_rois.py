@@ -4,14 +4,8 @@ Work guv imagery
 @author: jkerssemakers
 """
 import csv
-import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
-from openpyxl import load_workbook
-from scipy.interpolate import make_interp_spline
-from vesicles.common_tools import guv_process_stacks
-from vesicles.common_tools import guv_io
-from vesicles.A00_init import get_exps
 
 class GUV:
     """
@@ -33,8 +27,6 @@ def main(initval,Guv_list, movie_to_use_list):
         load_dirname=initval.mainpath_out + initval.subdir +str("/A20b_processed/")
         csv_path_in = Path(load_dirname)
         name=[]
-        X=[]
-        Y=[]
         data=[]
         for csv_source in csv_path_in.glob("**/*.csv"):  # find all relevant csv files in inpath
             print(csv_source.stem)
@@ -47,7 +39,6 @@ def main(initval,Guv_list, movie_to_use_list):
         csv_path_out = Path(initval.mainpath_out + initval.subdir +str("/A30_processed/"))
         if not csv_path_out.is_dir():
                 csv_path_out.mkdir()
-
         csv_target=load_dirname  + "collected_data" + str(".csv")
         with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
             # create the csv writer
@@ -55,17 +46,11 @@ def main(initval,Guv_list, movie_to_use_list):
             #f = open("test.csv", "a")
             writer.writerow(row.keys())
             for data_row in data:
-
-                # create the csv writer
                 writer = csv.writer(csv_f, delimiter=";")
-                #f = open("test.csv", "a")
                 writer.writerow(data_row.values())
-            dum=1
-
 
     if initval.suffix =='.tif'and initval.sequence=='time_trace':
-        fig, axs = plt.subplots(2, 4, figsize=(20, 15))
-        load_dirname_A20a = initval.mainpath_out + initval.subdir + "/A20a_tracked/"
+        fig, axs = plt.subplots(2, 3, figsize=(20, 15))
         load_dirname_A20b = initval.mainpath_out + initval.subdir + "/A20b_processed/"
         guv_labels = []
         for this_guv in Guv_list:
@@ -79,8 +64,20 @@ def main(initval,Guv_list, movie_to_use_list):
                     reader = csv.DictReader(g, delimiter=";")
                     data = list(reader)
                 # Process and plot data
-                plot_ax, area, roundness, major_minor = [], [], [], []
-                c0_edge_mx, c0_edge_sm = [], []
+                plot_ax = []
+                R_minor = []
+                R_major= []
+                all_areas = []
+                area = []
+                perimeter = []
+                roundness = []
+                color0_inside = []
+                c0_edge_mx = []
+                c0_edge_sum = []
+                c0_edge_sum_std = []
+                c0_outside = []
+                c0_contour_L = []
+                c0_contour_ratio = []
 
                 for fri, row in enumerate(data):
                     # ... (data processing code)
@@ -89,25 +86,45 @@ def main(initval,Guv_list, movie_to_use_list):
                     okay_point = 1
                     if okay_point:
                         # fetch work parameters:
-                        axis_major = float(row['R_major'])
-                        axis_minor = float(row['R_minor'])
-                        c0_mean_peaks = (float(row['c0_edge_mx']))
+                        R_major.append(float(row['R_major']))
+                        R_minor.append(float(row['R_minor']))
+                        area.append(float(row['area']))
+                        all_areas.append(float(row['all_areas']))
+                        perimeter.append(float(row['perimeter']))
+                        roundness.append((float(row['roundness'])))
+                        color0_inside.append((float(row['color0_inside'])))
+                        c0_edge_mx.append((float(row['c0_edge_mx'])))
+                        c0_edge_sum.append((float(row['c0_edge_sum'])))
+                        c0_edge_sum_std.append((float(row['c0_edge_sum_std'])))
+                        c0_outside.append((float(row['c0_outside'])))
+                        c0_contour_L.append((float(row['c0_contour_L'])))
+                        c0_contour_ratio.append((float(row['c0_contour_ratio'])))
+
                         # build plots:
-                        if 1:
-                            plot_ax.append(this_guv.dt * fri)
-                            axlabel = "time (s)"
+                        plot_ax.append(this_guv.dt * fri)
                         area.append(float(row['area']))
                         roundness.append(float(row['roundness']))
                         c0_edge_mx.append(c0_mean_peaks)
-                        c0_edge_sm.append(float(row['c0_edge_sum']))
+                        c0_edge_sum.append(float(row['c0_edge_sum']))
 
                 simbol_color = movie_simbol_list[movie_use_index]
                 sz = 2
                 # Plot various metrics
-                axs[0, 0].plot(plot_ax, area, 'o-', markersize=sz, color=simbol_color)
+                axs[0, 0].plot(area, 'o-', markersize=sz, color=simbol_color)
                 axs[0, 0].set_ylabel("area")
+                axs[0, 0].set_xlabel("time")
                 axs[0, 0].set_title("area")
-                # ... (more plotting code for other metrics)
+
+                axs[0, 1].plot(color0_inside, 'o-', markersize=sz, color=simbol_color)
+                axs[0, 1].set_ylabel("I, a.u.")
+                axs[0, 1].set_xlabel("time")
+                axs[0, 1].set_title("color0_inside")
+
+                axs[0, 2].plot(c0_outside, 'o-', markersize=sz, color=simbol_color)
+                axs[0, 2].set_ylabel("I, a.u.")
+                axs[0, 2].set_xlabel("time")
+                axs[0, 2].set_title("color0_outside")
+
                 plt.tight_layout()
 
 
