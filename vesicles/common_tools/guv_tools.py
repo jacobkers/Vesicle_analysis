@@ -339,18 +339,17 @@ def get_roi(image,x0,y0,r0):
     dims =np.shape(image)
     #force roi size:
 
-    roi = np.zeros((2*r0,2*r0))
-    if check_limits(x0,y0, dims):
+    roi = np.zeros((2*r0,2*r0),dtype='float64')
+    if 1: #check_limits(x0,y0, dims):
         lox=int(max([0, x0 - r0]))
-        hix=int(min([dims[0], x0+r0]))
+        hix=int(min([dims[1], x0+r0]))
         loy=int(max([0, y0 - r0]))
-        hiy=int(min([dims[1], y0+r0]))
-
+        hiy=int(min([dims[0], y0+r0]))
         if len(dims)==2:
             roi[0:hiy-loy, 0:hix-lox] = image[loy:hiy, lox:hix]
         if len(dims)==3:
             roi[0:hiy-loy, 0:hix-lox] = image[loy:hiy, lox:hix,:]
-
+    dum=1
     return roi
 
 def highlight_roi(image,x0,y0,r0):
