@@ -7,7 +7,6 @@
 # 
 # (under construction)
 
-
 import csv
 import numpy as np
 from pathlib import Path
@@ -15,11 +14,11 @@ import matplotlib.pyplot as plt
 from openpyxl import load_workbook
 from scipy.interpolate import make_interp_spline
 
+
 # Import custom modules
 import vesicles as vs
 
 # ### GUV Class Definition
-
 
 class GUV:
     def __init__(self):
