@@ -24,8 +24,6 @@ def set_up_xarray(XX0,YY0,RR0):
     """
     n_guvs=len(XX0)
 
-
-
     X0 = xr.DataArray(XX0, dims=("index",), coords={"index": np.arange(n_guvs) }, name="X0" )
     Y0 = xr.DataArray(YY0, dims = ("index",), coords = {"index": np.arange(n_guvs)}, name = "Y0" )
     R0 = xr.DataArray(RR0, dims=("index",), coords={"index": np.arange(n_guvs)}, name="R0")
@@ -51,9 +49,10 @@ def main(initval):
             guv_xyr.append(thisguv)
 
         #setup Xarray
+        target=initval.mainpath_out + initval.subdir + "all_guvs.nc"
         XGuvs=set_up_xarray(XX0,YY0,RR0)
-        XGuvs.to_netcdf("example.nc")
-        XGuvs2 = xr.open_dataset("example.nc")
+        XGuvs.to_netcdf(target)
+        XGuvs2 = xr.open_dataset(target)
         print(XGuvs2)
 
 
