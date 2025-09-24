@@ -52,7 +52,7 @@ initval = A00_init.get_exps(expi)
 # A10: Cropping
 # With cropping, we cut out individual vesicles from the stack and save them to individual tiff files. We do this because this eases the follow-up analysis: each stack is assumed to contain only one full vesicle in the center, with approximately a constant coverage of the middle area of the ROI.
 # This step requires the user to perform (easy) pre-selection in Fiji or ImageJ. Please read the README.txt for detailed info how to do that.
-if 0: A10_muscope_crop.main(initval)
+if 1: A10_muscope_crop.main(initval)
 # NOTE: this step stores intermediates and therefore needs to be run only once
 
 # A20: First processing of regions-of-interest (ROIs)
@@ -71,7 +71,7 @@ Guv_list = guv_io.get_data_selections(round(expi), selections_filename)
 
 # II. Multi-frame Data Processing and Visualization
 
-if 1:
+if 0:
     A30_collect_processed_rois.main(initval, Guv_list, movie_to_use_list)
     plt.show()
 

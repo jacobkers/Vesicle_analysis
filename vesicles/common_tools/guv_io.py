@@ -380,7 +380,7 @@ def cut_tif_to_roi_tiffs_hardwired(im_ori_name,guv_xyr,initval):
 
     #work each GUV and its center coordinates:
     fig, axs = plt.subplots(1,1)
-    for roi_i, cd in enumerate(guv_xyr):  
+    for roi_i, cd in enumerate(guv_xyr):
         roi_id=im_ori_name + str("_roi")+str(roi_i) 
         if initval.apply_drift_correction==2:
                     X_tr,Y_tr=get_drift_info_tracked(roi_id, initval)                   
