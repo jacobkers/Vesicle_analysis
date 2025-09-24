@@ -64,9 +64,7 @@ if 0: A20_process_rois.main(initval)
 # pre_selection
 # For time-trace or z-plane .tif files, we process the data and create visualizations. Since these movies can have some time slots-of-interest, we load an extra excel table that allows a user to crop dat a of processed movies (or discard them at all). Note that the 'movie-I' field should match the above movie-IDs.
 import importlib
-
 importlib.reload(guv_io)
-
 selections_filename="data_overview_Charu.xlsx"
 Guv_list = guv_io.get_data_selections(round(expi), selections_filename)
 
