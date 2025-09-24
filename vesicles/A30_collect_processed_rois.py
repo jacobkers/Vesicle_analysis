@@ -84,7 +84,6 @@ def main(initval,Guv_list, movie_to_use_list):
                     c0_mean_peaks = (float(row['c0_edge_mx']))
                     c0_sum = float(row['c0_edge_sum'])
                     okay_point = 1
-                    print('hello')
                     if okay_point:
                         # fetch work parameters:
                         R_major.append(float(row['R_major']))

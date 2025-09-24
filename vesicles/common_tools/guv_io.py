@@ -332,9 +332,22 @@ def cut_lif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
         dum=1
 
 def cut_tif_to_roi_tiffs_hardwired(im_ori_name,guv_xyr,initval):
-    """ use pre-set coordinates in imageJ to save standardized tif roi-stacks from .tif  format
+    """
+    description:use pre-set coordinates in imageJ to save standardized tif roi-stacks from .tif  format
     Since Fiji exports seem to differ in how python interprets the format (unwanted merging of color channels), here we re-shape the tiffstack if needed
-    #Jacob 2024 """ 
+
+    input:
+    1. a tiff file [filename] and
+    2. a csv file "Overlay Elements of " [filename],
+    The latter is user-made using the ROI manager of FIJI/imageJ
+
+    output:
+    1. single-guv cropped tiff stacks
+    2. an overview png file showing which ROIs were taken
+
+    # TO DO: save props to a guv.nc file, to be expanded on next stages
+    #Jacob 2024
+    """
     # load the stack by simple tiff reading
     # check the shape
     # check the intended number of colors

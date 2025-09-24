@@ -3,6 +3,7 @@ Jacob Kers 2024
 
  """
 import time as tm
+import xarray as xr
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
@@ -96,7 +97,7 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
         
     
         #end result
-        #set up csv for tracking data:
+        #I. set up csv for tracking data:
         csv_target=out_path_name  +str("file_")+ im_ori_name  + str("_roi")+str(roi_i) + "_xy_tracked.csv"
         with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
             # create the csv writer
@@ -105,14 +106,34 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
                     [
                         str("X"),
                         str("Y"),
-                        str("R_minor"), 
+                        str("R_minor"),
                         str("R_major"),
                         str("area"),
                         str("perimeter"),
-                        str("roundness"),  
+                        str("roundness"),
                     ]
                 )
         csv_f.close()
+
+        # save tracking results per GUV as csv
+        for fr_i, x in enumerate(all_xg):
+            with open(csv_target, "a", newline='') as csv_g:
+                # create the csv writer
+                writer = csv.writer(csv_g, delimiter=";")
+                writer.writerow(
+                    [
+                        all_xg[fr_i],
+                        all_yg[fr_i],
+                        all_R_minor[fr_i],
+                        all_R_major[fr_i],
+                        all_areas[fr_i],
+                        all_perimeters[fr_i],
+                        all_roundness[fr_i],
+                    ]
+                )
+        csv_g.close()
+
+        # set up some plotting
         frax=np.arange(len(all_roundness))
         roundness_plot=np.array(all_roundness)
         R_minor_plot=np.array(all_R_minor)
@@ -159,23 +180,7 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
         plt.close('all')
 
         
-        #save tracking results per GUV as csv
-        for fr_i, x in enumerate(all_xg):
-            with open(csv_target, "a",newline='') as csv_g:  
-                # create the csv writer
-                writer = csv.writer(csv_g, delimiter=";")    
-                writer.writerow(
-                    [
-                        all_xg[fr_i],
-                        all_yg[fr_i],
-                        all_R_minor[fr_i], 
-                        all_R_major[fr_i],
-                        all_areas[fr_i],
-                        all_perimeters[fr_i],
-                        all_roundness[fr_i],
-                    ]
-                )
-        csv_g.close()
+
 
 
 

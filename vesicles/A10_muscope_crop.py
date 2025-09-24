@@ -38,5 +38,10 @@ def main(initval):
         if initval.suffix =='.tif' and initval.sequence=='single_frame':
             guv_io.cut_singletime_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval)  # change this to a single frame operator
 
+        # here I would like to create an x-array as a general 'GUV' data container
+        # I'll keep the cropped tiffs and masks outside for access by other programs (such as image J)
+        # I also save some illustrations for quick evalaution, per GUV. So for now, I need to save only
+        # XYR as from the roi file
+
 if __name__ == "__main__":
     main()
