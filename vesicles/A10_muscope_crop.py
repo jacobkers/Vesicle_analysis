@@ -19,8 +19,8 @@ def set_up_xarray(XX0,YY0,RR0):
     """"
     here I create an x-array as a general 'GUV' data container
     I'll keep the cropped tiffs and masks outside for access by other programs (such as image J)
-    I also save some illustrations for quick evalaution, per GUV. So for now, I need to save only
-    XYR as from the roi file
+    I also save some illustrations for quick evalaution, per GUV. So for now, save only
+    XYR as from the roi file is included
     """
     n_guvs=len(XX0)
 
@@ -48,16 +48,14 @@ def main(initval):
             thisguv = [int(X0), int(YY0[ii]), int(RR0[ii])]
             guv_xyr.append(thisguv)
 
-        #setup Xarray
+        # setup Xarray
         target=initval.mainpath_out + initval.subdir + "all_guvs.nc"
         XGuvs=set_up_xarray(XX0,YY0,RR0)
         XGuvs.to_netcdf(target)
-        XGuvs2 = xr.open_dataset(target)
-        print(XGuvs2)
+        print(XGuvs)
 
 
-
-        #acces microscope data and save to ROI-stacks per guv:
+        # acces microscope data and save to ROI-stacks per guv:
         if initval.suffix == ".nd2":
             guv_io.cut_nd2_to_roi_tiffs(im_ori_name,guv_xyr,initval)
         if initval.suffix =='.lif': 
@@ -66,10 +64,6 @@ def main(initval):
             guv_io.cut_tif_to_roi_tiffs_hardwired(im_ori_name,guv_xyr,initval)
         if initval.suffix =='.tif' and initval.sequence=='single_frame':
             guv_io.cut_singletime_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval)  # change this to a single frame operator
-
-
-
-
 
 if __name__ == "__main__":
     main()

@@ -52,12 +52,11 @@ initval = A00_init.get_exps(expi)
 # A10: Cropping
 # With cropping, we cut out individual vesicles from the stack and save them to individual tiff files. We do this because this eases the follow-up analysis: each stack is assumed to contain only one full vesicle in the center, with approximately a constant coverage of the middle area of the ROI.
 # This step requires the user to perform (easy) pre-selection in Fiji or ImageJ. Please read the README.txt for detailed info how to do that.
-if 1: A10_muscope_crop.main(initval)
+if 0: A10_muscope_crop.main(initval)
 # NOTE: this step stores intermediates and therefore needs to be run only once
-
 # A20: First processing of regions-of-interest (ROIs)
 # In this step, we first isolate the area of the vesicle to obtain masks, but also some general geometry features such as radius, area and other shape characteristics. Next, we perfom detailed analysis of every color channel 
-if 0: A20_process_rois.main(initval)
+if 1: A20_process_rois.main(initval)
 # NOTE: this step stores intermediates and therefore needs to be run only once
 
 

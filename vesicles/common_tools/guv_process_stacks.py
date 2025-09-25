@@ -16,10 +16,17 @@ import csv
 from scipy.ndimage import binary_opening, binary_closing, binary_fill_holes, binary_dilation, binary_erosion
 from skimage.morphology import ball, disk, square, diamond, ball
 
+
+
 def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
-    """ collect relevant coordinates (such as guv center) from tiff stacks and save as csv
+    """
+    description: collect relevant coordinates (such as guv center) from tiff stacks and save as csv
+
+    approach: a 'work stack' is created by just adding up all color channels
+
+
 #Jacob 2024 """
-    #set apaths:
+    #set paths:
     datapath_out_name = initval.mainpath_out + initval.subdir 
     in_path_name_rois = initval.mainpath_out + initval.subdir +str("/A10_rois")
     outpath_masks_name = initval.mainpath_out + initval.subdir +str("/A20a_masks")
@@ -34,6 +41,16 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
         maskpath.mkdir()
     
     fig, axs = plt.subplots(1, 3)
+
+    # set up 2D maps (guv, plane):
+    all_guvs_xg = []
+    all_guvs_yg = []
+    all_guvs_R_minor = []
+    all_guvs_R_major = []
+    all_guvs_areas = []
+    all_guvs_perimeters = []
+    all_guvs_roundness = []
+
 
     for roi_i, cd in enumerate(guv_xyr):  #work each GUV and its center coordinates:
     #1) load tracking channels and add them up in one stack-to-track:
@@ -56,17 +73,14 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
             if fri==0:
                 roi0=roi
             #A. build an image that allows robust tracking 
-            # smooth, treshold:    
+            # smooth, threshold:
             roi_tr=roi-np.min(roi)
             if np.max(np.array(roi_tr))>0:
                 roi_tr=guv_tools.soft_mask_it(roi_tr)
                 roi_tr=guv_tools.smooth_it(roi_tr,labda=2)
                 roi_tr= roi_tr.astype(int)
-                #roi_tr= guv_tools.treshold_it(roi_tr)[0]
-                #roi_tr=guv_tools.sobel_it(roi_tr)   
-                #roi_tr=guv_tools.smooth_it(roi_tr,labda=1)
-                #transfer to binary operations to gat masks and robust coordinates
                 msk, BW_edge, xm, ym, rmin, rmaj, area, perimeter, roundness = guv_binary_ops.work_binaries(roi_tr)                    
+                #collect geometry properties for this guv:
                 all_xg.append(xm)
                 all_yg.append(ym)
                 all_R_minor.append(rmin) 
@@ -74,6 +88,7 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
                 all_areas.append(area)
                 all_perimeters.append(perimeter)
                 all_roundness.append(roundness)
+                #we build a separate mask stack, to be saved as tiff:
                 mask_stack[fri,:,:]=msk
             else:
                 all_xg.append(0)
@@ -94,9 +109,18 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
                 axs1[0,0].plot(ym,xm,'ro')
                 
                 print("a20a:" + titl + str("frame") + str(fri))
-        
-    
+        #grow 2D data maps:
+        all_guvs_xg.append(all_xg)
+        all_guvs_yg.append(all_yg)
+        all_guvs_R_minor.append(all_R_minor)
+        all_guvs_R_major.append(all_R_major)
+        all_guvs_areas.append(all_areas)
+        all_guvs_perimeters.append(all_perimeters)
+        all_guvs_roundness.append(all_roundness)
+
+
         #end result
+
         #I. set up csv for tracking data:
         csv_target=out_path_name  +str("file_")+ im_ori_name  + str("_roi")+str(roi_i) + "_xy_tracked.csv"
         with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
@@ -179,9 +203,35 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
         fig.savefig(overviewpath / f"{(mtg_plotname)}", dpi=500)
         plt.close('all')
 
-        
+    # save same data to existing .nc with planes as second axis for:
 
-
+    # all_guvs_xg = []
+    # all_guvs_yg = []
+    # all_guvs_R_minor = []
+    # all_guvs_R_major = []
+    # all_guvs_areas = []
+    # all_guvs_perimeters = []
+    # all_guvs_roundness = []
+    source = initval.mainpath_out + initval.subdir + "all_guvs.nc"
+    n_guvs, n_planes = np.shape(all_guvs_xg)
+    XGuvs = xr.load_dataset(source)
+    xg_da = xr.DataArray(all_guvs_xg, dims=("index", "plane"),
+                           coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Xg")
+    yg_da = xr.DataArray(all_guvs_yg, dims=("index", "plane"),
+                           coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Yg")
+    R_minor_da = xr.DataArray(all_guvs_R_minor, dims=("index", "plane"),
+                           coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="R_minor")
+    R_major_da = xr.DataArray(all_guvs_R_major, dims=("index", "plane"),
+                           coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="R_major")
+    area_da=xr.DataArray(all_guvs_areas, dims=("index","plane"),
+                         coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Area")
+    perimeters_da=xr.DataArray(all_guvs_perimeters, dims=("index","plane"),
+                         coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Perimeter")
+    roundness_da=xr.DataArray(all_guvs_roundness, dims=("index","plane"),
+                         coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Roundness")
+    XGuvs = xr.merge([XGuvs, area_da,xg_da,R_minor_da,R_major_da,perimeters_da,roundness_da])
+    XGuvs.to_netcdf(source, mode="w")
+    print(XGuvs)
 
 
 
