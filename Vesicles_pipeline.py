@@ -56,9 +56,8 @@ if 0: A10_muscope_crop.main(initval)
 # NOTE: this step stores intermediates and therefore needs to be run only once
 # A20: First processing of regions-of-interest (ROIs)
 # In this step, we first isolate the area of the vesicle to obtain masks, but also some general geometry features such as radius, area and other shape characteristics. Next, we perfom detailed analysis of every color channel 
-if 1: A20_process_rois.main(initval,0,1)
+if 1: A20_process_rois.main(initval,1,1)
 # NOTE: this step stores intermediates and therefore needs to be run only once
-
 
 # pre_selection
 # For time-trace or z-plane .tif files, we process the data and create visualizations. Since these movies can have some time slots-of-interest, we load an extra excel table that allows a user to crop dat a of processed movies (or discard them at all). Note that the 'movie-I' field should match the above movie-IDs.

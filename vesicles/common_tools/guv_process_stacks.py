@@ -19,14 +19,14 @@ from skimage.morphology import ball, disk, square, diamond, ball
 
 
 
-def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
+def a20a_build_coordinates(im_ori_name,initval):
     """
     description: collect relevant coordinates (such as guv center) from tiff stacks and save as csv
 
     approach: a 'work stack' is created by just adding up all color channels
 
 
-#Jacob 2024 """
+    #Jacob 2024 """
     #set paths:
     datapath_out_name = initval.mainpath_out + initval.subdir 
     in_path_name_rois = initval.mainpath_out + initval.subdir +str("/A10_rois")
@@ -42,7 +42,12 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
         maskpath.mkdir()
     
     fig, axs = plt.subplots(1, 3)
-
+    #
+    source = initval.mainpath_out + initval.subdir + "all_guvs.nc"
+    ds_guvs = xr.load_dataset(source)
+    xg=ds_guvs["X0"]
+    yg = ds_guvs["Y0"]
+    rg= ds_guvs["R0"]
     # set up 2D maps (guv, plane):
     all_guvs_xg = []
     all_guvs_yg = []
@@ -53,7 +58,7 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
     all_guvs_roundness = []
 
 
-    for roi_i, cd in enumerate(guv_xyr):  #work each GUV and its center coordinates:
+    for roi_i, x in enumerate(xg):  #work each GUV and its center coordinates:
     #1) load tracking channels and add them up in one stack-to-track:
         for ci, color_i in enumerate(initval.tracking_key):
             roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
@@ -205,7 +210,6 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
         plt.close('all')
 
     # save same data to existing .nc with planes as second axis:
-    source = initval.mainpath_out + initval.subdir + "all_guvs.nc"
     save_geometry(all_guvs_xg,
                   all_guvs_yg,
                   all_guvs_R_minor,
@@ -247,7 +251,7 @@ def analyze_edge_profile(profile, initval,fri):
         edge_value=np.nan
     return edge_value        
 
-def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
+def a20b_map_color_channels(im_ori_name,initval):
     """ collect values from various color channels
 #Jacob 2024 """
     datapath_out_name = initval.mainpath_out + initval.subdir 
@@ -262,8 +266,12 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
 
     #load existing nc data
     source = initval.mainpath_out + initval.subdir + "all_guvs.nc"
-    XGuvs = xr.load_dataset(source)
-    [n_guvs, n_planes]=np.shape(XGuvs["Area"])
+    ds_guvs = xr.load_dataset(source)
+    [n_guvs, n_planes]=np.shape(ds_guvs["Area"])
+    xg = ds_guvs["X0"]
+    yg = ds_guvs["Y0"]
+    rg = ds_guvs["R0"]
+
     n_col = initval.N_colors
     #set up the data containers(dims index, plane, color)
     all_guvs_inside_I = np.zeros((n_guvs, n_planes,n_col))
@@ -276,7 +284,7 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
     all_guvs_LC_excess = np.zeros((n_guvs, n_planes,n_col))
 
 
-    for guv_i, dum in enumerate(guv_xyr):  #work each GUV and its center coordinates:
+    for guv_i, dum in enumerate(xg):  #work each GUV and its center coordinates:
         ##load csv with prior info:
         csv_source=in_path_name_tracked  +str("file_")+ im_ori_name  + str("_roi")+str(guv_i) + "_xy_tracked.csv"
         all_xg,all_yg,all_R_minor, all_R_major, all_areas,all_perimeters, all_roundness = guv_io.get_XY_info(csv_source)
