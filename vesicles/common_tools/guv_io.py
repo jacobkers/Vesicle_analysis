@@ -103,14 +103,7 @@ def load_nd2_movie_try2(input_path, channel_index):
 
 
 def get_XY_info(csv_source):
-    """ ead roi data as acquired via ImageJ:
-    ImageJ area selection
-    * Open BF or Phase image
-    * Select "round" ROI (keep Shift pressed for a circle)
-    * Find the position and press "T" to load it into the ROI manager (check "show all" box)
-    * Click into the ROI manager window and CTRL+A to select all ROIs
-    * CLick More>list>File>Save As> ".....csv"
-    * for convenience, you might just save the screenshots with overlays """
+    """ read roi data from csv"""
     X = []
     Y = []
     R_minor = []
