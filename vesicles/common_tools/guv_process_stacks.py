@@ -18,6 +18,7 @@ from skimage.morphology import ball, disk, square, diamond, ball
 
 
 
+
 def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
     """
     description: collect relevant coordinates (such as guv center) from tiff stacks and save as csv
@@ -203,37 +204,15 @@ def a20a_build_coordinates(im_ori_name,guv_xyr,initval):
         fig.savefig(overviewpath / f"{(mtg_plotname)}", dpi=500)
         plt.close('all')
 
-    # save same data to existing .nc with planes as second axis for:
-
-    # all_guvs_xg = []
-    # all_guvs_yg = []
-    # all_guvs_R_minor = []
-    # all_guvs_R_major = []
-    # all_guvs_areas = []
-    # all_guvs_perimeters = []
-    # all_guvs_roundness = []
+    # save same data to existing .nc with planes as second axis:
     source = initval.mainpath_out + initval.subdir + "all_guvs.nc"
-    n_guvs, n_planes = np.shape(all_guvs_xg)
-    XGuvs = xr.load_dataset(source)
-    xg_da = xr.DataArray(all_guvs_xg, dims=("index", "plane"),
-                           coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Xg")
-    yg_da = xr.DataArray(all_guvs_yg, dims=("index", "plane"),
-                           coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Yg")
-    R_minor_da = xr.DataArray(all_guvs_R_minor, dims=("index", "plane"),
-                           coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="R_minor")
-    R_major_da = xr.DataArray(all_guvs_R_major, dims=("index", "plane"),
-                           coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="R_major")
-    area_da=xr.DataArray(all_guvs_areas, dims=("index","plane"),
-                         coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Area")
-    perimeters_da=xr.DataArray(all_guvs_perimeters, dims=("index","plane"),
-                         coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Perimeter")
-    roundness_da=xr.DataArray(all_guvs_roundness, dims=("index","plane"),
-                         coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Roundness")
-    XGuvs = xr.merge([XGuvs, area_da,xg_da,R_minor_da,R_major_da,perimeters_da,roundness_da])
-    XGuvs.to_netcdf(source, mode="w")
-    print(XGuvs)
-
-
+    save_geometry(all_guvs_xg,
+                  all_guvs_yg,
+                  all_guvs_R_minor,
+                  all_guvs_R_major,
+                  all_guvs_areas,
+                  all_guvs_perimeters,
+                  all_guvs_roundness, source)
 
 
 def analyze_edge_profile(profile, initval,fri):
@@ -280,11 +259,26 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
     maskpath= Path(in_path_name_masks)
     out_path = Path(out_path_name)
     if not out_path.is_dir(): out_path.mkdir()
-    for roi_i, cd in enumerate(guv_xyr):  #work each GUV and its center coordinates:
-        #color_i=initval.tracking_key
-        ##load csv::
-        csv_source=in_path_name_tracked  +str("file_")+ im_ori_name  + str("_roi")+str(roi_i) + "_xy_tracked.csv"
 
+    #load existing nc data
+    source = initval.mainpath_out + initval.subdir + "all_guvs.nc"
+    XGuvs = xr.load_dataset(source)
+    [n_guvs, n_planes]=np.shape(XGuvs["Area"])
+    n_col = initval.N_colors
+    #set up the data containers(dims index, plane, color)
+    all_guvs_inside_I = np.zeros((n_guvs, n_planes,n_col))
+    all_guvs_edge_I_mx = np.zeros((n_guvs, n_planes,n_col))
+    all_guvs_edge_I_sum_msk = np.zeros((n_guvs, n_planes,n_col))
+    all_guvs_edge_I_sum_pol = np.zeros((n_guvs, n_planes,n_col))
+    all_guvs_edge_I_sum_std = np.zeros((n_guvs, n_planes,n_col))
+    all_guvs_outside_I = np.zeros((n_guvs, n_planes,n_col))
+    all_guvs_LC = np.zeros((n_guvs, n_planes,n_col))
+    all_guvs_LC_excess = np.zeros((n_guvs, n_planes,n_col))
+
+
+    for guv_i, dum in enumerate(guv_xyr):  #work each GUV and its center coordinates:
+        ##load csv with prior info:
+        csv_source=in_path_name_tracked  +str("file_")+ im_ori_name  + str("_roi")+str(guv_i) + "_xy_tracked.csv"
         all_xg,all_yg,all_R_minor, all_R_major, all_areas,all_perimeters, all_roundness = guv_io.get_XY_info(csv_source)
         data_out=np.vstack((all_xg, 
                             all_yg, 
@@ -297,12 +291,10 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
         header_out=[str("X"), str("Y"),  str("R_minor"), str("R_major"), str("all_areas"),str("area"), str("perimeter"), str("roundness")]
 
         fig1, axs1=plt.subplots(2,initval.N_colors)
-        for color_i in np.arange(initval.N_colors): 
-            
-
+        for color_i in np.arange(initval.N_colors):
             #load tracking channel:
-            roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
-            maskname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(initval.tracking_key) + str("_BW.tif")
+            roiname=str("from_")+ im_ori_name + str("_roi")+str(guv_i) + str("_c")+str(color_i) + str(".tif")
+            maskname=str("from_")+ im_ori_name + str("_roi")+str(guv_i) + str("_c")+str(initval.tracking_key) + str("_BW.tif")
             roi_stack=io.imread(roipath / f"{roiname}")
             if roi_stack.ndim == 2: roi_stack = roi_stack[np.newaxis,:] # expand to third dimension
             mask_stack=io.imread(maskpath / f"{maskname}")
@@ -350,43 +342,18 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                     inner_map=guv_tools.QI_map(inner_mask*roi, presets, xm, ym)
                     outer_map=guv_tools.QI_map(outer_mask*roi, presets, xm, ym)
 
-                    if 0: #fri==0: #test
-                        fig, axs = plt.subplots(2,2)
-                        axs[0,0].imshow(roi)
-                        axs[0,0].set_title("roi_color:"+ str(color_i))
-                        axs[0,1].imshow(inner_map)
-                        axs[0,1].set_title("inner map")
-                        axs[0,1].set_xlabel("angular pos., a.u")
-                        axs[0,1].set_ylabel("radial pos., a.u")
-                        axs[1,0].imshow(edge_map)
-                        axs[1,0].set_title("edge map")
-                        axs[1,0].set_xlabel("angular pos., a.u")
-                        axs[1,0].set_ylabel("radial pos., a.u")
-                        axs[1,1].imshow(outer_map)
-                        axs[1,1].set_title("outer map")
-                        axs[1,1].set_xlabel("angular pos., a.u")
-                        axs[1,1].set_ylabel("radial pos., a.u")
-                        fig.tight_layout()
-                        fig.show()
-                        dum=1
-                        plt.close("all")
-                    if 0: 
-                        #crop on twice the object radius: note that radials are in half-pixel units
-                        radials =np.shape(edge_map)[0]
-                        if rm>1: 
-                            cropit=int(np.min([3*rm, radials]))
-                            edge_map=edge_map[0:cropit,:]
-                   
                     #analyze_map 
                     # 1) inside intensity, outside intensity
                     insides=(np.array(inner_map[np.nonzero(inner_map>0)]))
                     outsides=(np.array(outer_map[np.nonzero(outer_map>0)]))
                     if len(insides)>0: 
                         all_inside_I.append(np.mean(insides))
+                        all_guvs_inside_I[guv_i,fri,color_i]=np.mean(insides)
                     else:
                         all_inside_I.append(0)
                     if len(outsides)>0: 
                         all_outside_I.append(np.mean(outsides))
+                        all_guvs_outside_I[guv_i, fri, color_i] = np.mean(outsides)
                     else:
                         all_outside_I.append(0)
                     # 2) edge intensity (note we treat the edge differently:
@@ -396,21 +363,27 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                         profile=np.nanmax(edge_map, axis=0)
                         edge_val=analyze_edge_profile(profile, initval,fri)
                         all_edge_I_mx.append(edge_val)
+                        all_guvs_edge_I_mx[guv_i, fri, color_i] = edge_val
                         
                         #b1) sum of edge mask:
                         edge_mask_sum=np.sum(edge_mask*roi)
                         #b2) sampling-corrected sum of polar map
                         sum_profile=guv_tools.QI_map_analyze(edge_map, presets)
-                        all_edge_I_sum_msk.append(edge_mask_sum) 
+                        all_edge_I_sum_msk.append(edge_mask_sum)
+                        all_guvs_edge_I_sum_msk[guv_i, fri, color_i] = edge_mask_sum
                         edge_pol_sum=np.nansum(sum_profile)
                         edge_pol_std=np.nanstd(sum_profile)                   
                         all_edge_I_sum_pol.append(edge_pol_sum)
+                        all_guvs_edge_I_sum_pol[guv_i, fri, color_i] = edge_pol_sum
                         all_edge_I_sum_std.append(edge_pol_std)
+                        all_guvs_edge_I_sum_std[guv_i, fri, color_i] = edge_pol_std
                         # 3) edge length from smoothened contour:
                         true_x, true_y = guv_tools.get_xy_contour(edge_map, presets)
                         LC, LR, RC=guv_tools.measure_perimeter(true_x, true_y)
+                        all_guvs_LC[guv_i, fri, color_i] = LC
                         all_LC.append(LC)
                         all_LC_excess.append(LC/LR)
+                        all_guvs_LC_excess[guv_i, fri, color_i] = LC/LR
                     else:
                         all_edge_I_mx.append(0)
                         all_edge_I_sum_msk.append(0)
@@ -427,8 +400,9 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                     all_outside_I.append(0)
                     all_LC.append(0)
                     all_LC_excess.append(0)
-                    #process the work image
-                titl = str("file_")+ im_ori_name  + str("_roi")+str(roi_i) +  str("c") + str(color_i)
+
+                #plotting
+                titl = str("file_")+ im_ori_name  + str("_roi")+str(guv_i) +  str("c") + str(color_i)
                 if  fri==0:
                     #show track example:
                     if initval.N_colors>1:
@@ -474,7 +448,7 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
         plt.close()
         
         #csv:
-        csv_target=out_path_name  +str("file_")+ im_ori_name  + str("_roi")+str(roi_i) + "_all_data.csv"
+        csv_target=out_path_name  +str("file_")+ im_ori_name  + str("_roi")+str(guv_i) + "_all_data.csv"
         with open(csv_target, "w",newline='') as csv_h:  # will overwrite existing
             # create the csv writer
             writer = csv.writer(csv_h, delimiter=";")
@@ -488,6 +462,16 @@ def a20b_map_color_channels(im_ori_name,guv_xyr,initval):
                 writer = csv.writer(csv_hi, delimiter=";")    
                 writer.writerow(row)
         csv_hi.close()
+
+    #nc, all guvs:
+    save_colors(all_guvs_inside_I,
+                all_guvs_edge_I_mx,
+                all_guvs_edge_I_sum_msk,
+                all_guvs_edge_I_sum_pol,
+                all_guvs_edge_I_sum_std,
+                all_guvs_outside_I,
+                all_guvs_LC,
+                all_guvs_LC_excess, source)
 
 
 def show_roi_overviews(im_ori_name,guv_xyr,initval):
@@ -525,3 +509,66 @@ def show_roi_overviews(im_ori_name,guv_xyr,initval):
             outfig_name = out_path_name  + titl + str(".png")
             fig.savefig(outfig_name)
             plt.close()
+
+def save_geometry(all_guvs_xg,
+                  all_guvs_yg,
+                  all_guvs_R_minor,
+                  all_guvs_R_major,
+                  all_guvs_areas,
+                  all_guvs_perimeters,
+                  all_guvs_roundness, source):
+    n_guvs, n_planes = np.shape(all_guvs_xg)
+    XGuvs = xr.load_dataset(source)
+    xg_da = xr.DataArray(all_guvs_xg, dims=("index", "plane"),
+                         coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Xg")
+    yg_da = xr.DataArray(all_guvs_yg, dims=("index", "plane"),
+                         coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Yg")
+    R_minor_da = xr.DataArray(all_guvs_R_minor, dims=("index", "plane"),
+                              coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="R_minor")
+    R_major_da = xr.DataArray(all_guvs_R_major, dims=("index", "plane"),
+                              coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="R_major")
+    area_da = xr.DataArray(all_guvs_areas, dims=("index", "plane"),
+                           coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Area")
+    perimeters_da = xr.DataArray(all_guvs_perimeters, dims=("index", "plane"),
+                                 coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Perimeter")
+    roundness_da = xr.DataArray(all_guvs_roundness, dims=("index", "plane"),
+                                coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Roundness")
+    XGuvs = xr.merge([XGuvs, area_da, xg_da, R_minor_da, R_major_da, perimeters_da, roundness_da],compat='override')
+    XGuvs.to_netcdf(source, mode="w")
+    print(XGuvs)
+
+def save_colors(all_guvs_inside_I,
+                all_guvs_edge_I_mx,
+                all_guvs_edge_I_sum_msk,
+                all_guvs_edge_I_sum_pol,
+                all_guvs_edge_I_sum_std,
+                all_guvs_outside_I,
+                all_guvs_LC,
+                all_guvs_LC_excess, source):
+    n_guvs, n_planes, n_colors = np.shape(all_guvs_inside_I)
+    XGuvs = xr.load_dataset(source)
+    inside_I_da = xr.DataArray(all_guvs_inside_I, dims=("index", "plane", "channel"),
+                         coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes),
+                                 "channel": np.arange(n_colors)}, name="Inside_I")
+    outside_I_da = xr.DataArray(all_guvs_outside_I, dims=("index", "plane", "channel"), name="Outside_I")
+    edge_I_mx_da = xr.DataArray(all_guvs_edge_I_mx, dims=("index", "plane", "channel"), name="edge_I_mx")
+    edge_I_sum_msk_da = xr.DataArray(all_guvs_edge_I_sum_msk, dims=("index", "plane", "channel"),
+                                  coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes),
+                                          "channel": np.arange(n_colors)}, name="Edge_I_sum_msk")
+    edge_I_sum_pol_da = xr.DataArray(all_guvs_edge_I_sum_pol, dims=("index", "plane", "channel"),
+                                     coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes),
+                                             "channel": np.arange(n_colors)}, name="Edge_I_sum_pol")
+    edge_I_sum_std_da = xr.DataArray(all_guvs_edge_I_sum_std, dims=("index", "plane", "channel"),
+                                     coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes),
+                                             "channel": np.arange(n_colors)}, name="Edge_I_sum_std")
+    all_guvs_LC_da = xr.DataArray(all_guvs_LC, dims=("index", "plane", "channel"),
+                                     coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes),
+                                             "channel": np.arange(n_colors)}, name="Edge_LC")
+    all_guvs_LC_excess_da = xr.DataArray(all_guvs_LC_excess, dims=("index", "plane", "channel"),
+                                     coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes),
+                                             "channel": np.arange(n_colors)}, name="Edge_LC_excess")
+
+    XGuvs = xr.merge([XGuvs,inside_I_da, outside_I_da, edge_I_mx_da, edge_I_sum_msk_da, edge_I_sum_pol_da,
+                    edge_I_sum_std_da,all_guvs_LC_da, all_guvs_LC_excess_da],compat='override')
+    XGuvs.to_netcdf(source, mode="w")
+    print(XGuvs)

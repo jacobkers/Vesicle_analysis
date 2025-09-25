@@ -8,7 +8,7 @@ from vesicles.common_tools import guv_io
 from vesicles.A00_init import get_exps
 
 
-def main(initval):
+def main(initval,a=0,b=0):
     for im_ori_name in initval.movienames:
         #simage J coordinates:
         csv_source = initval.mainpath_in + initval.subdir + str("Overlay Elements of ") + im_ori_name + str(".csv")
@@ -19,8 +19,8 @@ def main(initval):
             thisguv = [int(X0), int(YY0[ii]), int(RR0[ii])]
             guv_xyr.append(thisguv)
         #access ROI-stacks per guv:
-        if 1: guv_process_stacks.a20a_build_coordinates(im_ori_name,guv_xyr,initval)
-        if 1: guv_process_stacks.a20b_map_color_channels(im_ori_name,guv_xyr,initval)
+        if a: guv_process_stacks.a20a_build_coordinates(im_ori_name,guv_xyr,initval)
+        if b: guv_process_stacks.a20b_map_color_channels(im_ori_name,guv_xyr,initval)
 
 if __name__ == "__main__":
     main()
