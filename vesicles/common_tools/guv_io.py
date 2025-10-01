@@ -15,6 +15,7 @@ import matplotlib.font_manager as fm
 from vesicles.common_tools import guv_tools
 from PIL import Image, ImageSequence
 import tifffile
+
 #import nd2
 
 # ### GUV Class Definition
@@ -123,21 +124,16 @@ def get_XY_info(csv_source):
             roundness.append(float(row["roundness"]))
     return X, Y,R_minor, R_major, areas, perimeters, roundness
 
-def get_roi_info(csv_source):
+def get_roi_info(csv_source, initval):
     """ ead roi data as acquired via ImageJ:
-    ImageJ area selection
-    * Open BF or Phase image
-    * Select "round" ROI (keep Shift pressed for a circle)
-    * Find the position and press "T" to load it into the ROI manager (check "show all" box)
-    * Click into the ROI manager window and CTRL+A to select all ROIs
-    * CLick More>list>File>Save As> ".....csv"
-    * for convenience, you might just save the screenshots with overlays """
+"""
     Xc = []
     Yc = []
     width = []
+
     with open(csv_source) as f:
         reader = csv.DictReader(f, delimiter=",")
-        for row in reader:
+        for idx, row in enumerate(reader):
             Xc.append(float(row["X"]))
             Yc.append(float(row["Y"]))
             width.append(float(row["Width"]))
@@ -145,6 +141,11 @@ def get_roi_info(csv_source):
     XX0 = np.array(Xc) + np.array(width) / 2
     YY0 = np.array(Yc) + np.array(width) / 2
     RR0 = np.array(width) / 2
+
+    if initval.short_set > 0:
+        XX0=  XX0[0:initval.short_set]
+        YY0 = YY0[0:initval.short_set]
+        RR0 = RR0[0:initval.short_set]
 
     return XX0,YY0,RR0
 
@@ -172,7 +173,7 @@ def get_drift_info_tracked(roi_id,initval):
 
 def get_drift_info(csv_source,initval):
     """ 
-    prepare an extimate of the drift usijg pre-clicked coordinates 
+    prepare an extimate of the drift using pre-clicked coordinates
     """
     Td = []
     Xd = []
@@ -184,13 +185,11 @@ def get_drift_info(csv_source,initval):
             Td.append(float(row["Frame"])-1)
             Xd.append(float(row["X"]))
             Yd.append(float(row["Y"]))
-    
-    
+
     #make sure drift vector is long enough: add some extra frame steps 
     last_driftX=Xd[-1]-Xd[-2]
     last_driftY=Xd[-1]-Xd[-2]
     last_T=Td[-1]
-    extra_t=float(0)
     for extra_t in np.arange(5.0):
         Td.append(extra_t + last_T)
         Xd.append(Xd[-1]+last_driftX)
@@ -373,16 +372,23 @@ def cut_tif_to_roi_tiffs_hardwired(im_ori_name,guv_xyr,initval):
 
     #work each GUV and its center coordinates:
     fig, axs = plt.subplots(1,1)
+    cut_x0_all_guvs = []
+    cut_y0_all_guvs = []
+    cut_r0_all_guvs = []
     for roi_i, cd in enumerate(guv_xyr):
-        roi_id=im_ori_name + str("_roi")+str(roi_i) 
+        roi_id=im_ori_name + str("_roi")+str(roi_i)
+        cut_x0 = []
+        cut_y0 = []
+        cut_r0 = []
         if initval.apply_drift_correction==2:
-                    X_tr,Y_tr=get_drift_info_tracked(roi_id, initval)                   
+                    X_tr,Y_tr=get_drift_info_tracked(roi_id, initval)
         for color_i, color_i_trace in enumerate(st):
             for fri, chan in enumerate(color_i_trace):                  
                 #cut (we assume roi just fits the vesicle)
                 extra_space=2       
                 x0 = cd[0]
                 y0 = cd[1]
+                #check drift corrections to apply:
                 if initval.apply_drift_correction==1:
                     x0=int(x0+initval.driftX[fri])
                     y0=int(y0+initval.driftY[fri])
@@ -396,7 +402,11 @@ def cut_tif_to_roi_tiffs_hardwired(im_ori_name,guv_xyr,initval):
                     rr,cc=np.shape(roi_1frame)
                     roi=np.zeros((ff,rr,cc),dtype=int)
                 roi[fri,:,:]=roi_1frame
-                
+                # collect actual cutting coordinates
+                if color_i == 0:
+                    cut_x0.append(x0)
+                    cut_y0.append(y0)
+                    cut_r0.append(r0)
                 # save overview plots per GUVp, last channel
                 if roi_i==0 and fri==0:
                     ovv_im=np.log(chan)
@@ -411,30 +421,42 @@ def cut_tif_to_roi_tiffs_hardwired(im_ori_name,guv_xyr,initval):
                             }
                     kwargs_.update(kwargs_)
                     axs.annotate(str(roi_i), xy = (x0-6, y0+6), xycoords = 'data',  **kwargs_)
-                    fig.tight_layout()             
-
+                    fig.tight_layout()
+            #add cut info (once for all colors)
+            if color_i == 0:
+                cut_x0_all_guvs.append(cut_x0)
+                cut_y0_all_guvs.append(cut_y0)
+                cut_r0_all_guvs.append(cut_r0)
             #build a savename, save the tiff:
             roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
             print(str("a10:") + roiname)
             roi = roi.astype('uint8')
             tifffile.imwrite(roipath / f"{roiname}", roi)
-            dum=1
-            
-               
+
+    #end: save all crop info (once per guv)
+    target = initval.mainpath_out + initval.subdir + im_ori_name + initval.nc_name
+    save_crop_info_to_xr(cut_x0_all_guvs, cut_y0_all_guvs, cut_r0_all_guvs, target)
+
     fig.show()
     overviewname=str("from_")+ im_ori_name + str("_roi_overview.png")
     fig.savefig(overviewpath / f"{overviewname}")
-    dum=1
 
 
+def save_crop_info_to_xr(cut_x0, cut_y0, cut_r0, target):
+    import xarray as xr
 
-    dum=1
-    """ st = tiff_in #loads as TXY
-    st = np.reshape(st, st.shape + (1, ))
-   
-    shrink_tiff=st
- """
-
+    # collect final info to trace roi back to original:
+    n_guvs, n_planes = np.shape(cut_x0)
+    cut_X0_da = xr.DataArray(cut_x0, dims = ("index", "plane"),
+    coords = {"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="X0_cut")
+    cut_Y0_da = xr.DataArray(cut_y0, dims = ("index", "plane"),
+    coords = {"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Y0_cut")
+    cut_R0_da = xr.DataArray(cut_r0, dims = ("index", "plane"),
+    coords = {"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="R0_cut")
+    XGuvs = xr.load_dataset(target)
+    XGuvs = xr.merge([XGuvs, cut_X0_da, cut_Y0_da, cut_R0_da], compat='override')
+    XGuvs.to_netcdf(target, mode="w")
+    print(XGuvs)
 
 def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
     """ use pre-set coordinates in imageJ to save standardized tif roi-stacks from .tif  format
@@ -577,22 +599,8 @@ def work_roi_tiffs(im_ori_name,guv_xyr,initval):
         fig.show()
         plt.close("all")
 
-def get_data_selections(run_id,filename):
-    wb = load_workbook(filename)
-    sheet_files = wb['guvs']
+def get_data_selections(filename,initval):
+    import pandas as pd
+    guvs_user = pd.read_excel(filename, sheet_name="guvs")
 
-    # Create a dictionary of column names
-    Header = {COL[0].value: idx for idx, COL in enumerate(sheet_files.iter_cols(1, sheet_files.max_column))}
-
-    Guv_list = []
-    for row_cells in sheet_files.iter_rows(min_row=2, max_row=sheet_files.max_row):
-        Guv = GUV()
-        Guv.exp_id = row_cells[Header["exp_id"]].value
-        Guv.movie_id = row_cells[Header["movie_id"]].value
-        Guv.label = row_cells[Header["guv_label"]].value
-        Guv.use_it = row_cells[Header["use"]].value
-        Guv.crop_it = row_cells[Header["crop"]].value
-        Guv.dt = row_cells[Header["dt(s)"]].value
-        if Guv.exp_id == run_id:
-            Guv_list.append(Guv)
-    return Guv_list
+    return guvs_user

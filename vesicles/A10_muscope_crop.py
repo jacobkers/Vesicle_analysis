@@ -37,25 +37,25 @@ def main(initval):
         csv_source = initval.mainpath_in + initval.subdir + str("Overlay Elements of ") + im_ori_name + str(".csv")
         #build list of GUVs:
         guv_xyr = []
-        XX0, YY0, RR0 = guv_io.get_roi_info(csv_source)
+        XX0, YY0, RR0 = guv_io.get_roi_info(csv_source,initval)
+
 
         if initval.apply_drift_correction==1:
             csv_drift = initval.mainpath_in + initval.subdir + im_ori_name + str("_drift.csv")
-            initval.driftX, initval.driftY= guv_io.get_drift_info(csv_drift,initval)
+            driftX, driftY= guv_io.get_drift_info(csv_drift,initval)
 
-        #build a list of crop info:
+        #build a list of crop info, just for passing on:
         for ii, X0 in enumerate(XX0):
             thisguv = [int(X0), int(YY0[ii]), int(RR0[ii])]
             guv_xyr.append(thisguv)
 
-        # setup Xarray
-        target=initval.mainpath_out + initval.subdir + "all_guvs.nc"
+        # setup Xarray and save initial ROI data
+
+        target=initval.mainpath_out + initval.subdir + im_ori_name + initval.nc_name
         XGuvs=set_up_xarray(XX0,YY0,RR0)
-        XGuvs.to_netcdf(target)
-        print(XGuvs)
+        XGuvs.to_netcdf(target,'w')
 
-
-        # acces microscope data and save to ROI-stacks per guv:
+        # access microscope data and save to ROI-stacks per guv:
         if initval.suffix == ".nd2":
             guv_io.cut_nd2_to_roi_tiffs(im_ori_name,guv_xyr,initval)
         if initval.suffix =='.lif': 

@@ -39,12 +39,13 @@ def a20a_build_coordinates(im_ori_name,initval):
     
     fig, axs = plt.subplots(1, 3)
     #
-    source = initval.mainpath_out + initval.subdir + "all_guvs.nc"
+    source = initval.mainpath_out + initval.subdir + im_ori_name + initval.nc_name
     ds_guvs = xr.load_dataset(source)
     xg=ds_guvs["X0"]
     yg = ds_guvs["Y0"]
     rg= ds_guvs["R0"]
     # set up 2D maps (guv, plane):
+    all_guvs_okay_fr =[]
     all_guvs_xg = []
     all_guvs_yg = []
     all_guvs_R_minor = []
@@ -55,155 +56,123 @@ def a20a_build_coordinates(im_ori_name,initval):
 
 
     for roi_i, x in enumerate(xg):  #work each GUV and its center coordinates:
-    #1) load tracking channels and add them up in one stack-to-track:
-        for ci, color_i in enumerate(initval.tracking_key):
-            roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
-            if ci==0:
-                roi_stack=io.imread(roipath / f"{roiname}")
-            else:
-                roi_stack=roi_stack + io.imread(roipath / f"{roiname}")
-    #2) obtain basic area properties from this tracking image:
-        if roi_stack.ndim == 2: roi_stack = roi_stack[np.newaxis,:] # expand to third dimension
-        #set up:
-        all_xg=[];     all_yg=[];          all_R_minor=[];  all_R_major=[]
-        all_areas=[];  all_perimeters=[];  all_roundness=[]
-        mask_stack=0*roi_stack
-        roi_shp=np.shape(roi_stack)
-        n_frames=roi_shp[0]
-        for fri in np.arange(n_frames):
-            roi=roi_stack[fri,:,:]
-            if fri==0:
-                roi0=roi
-            #A. build an image that allows robust tracking 
-            # smooth, threshold:
-            roi_tr=roi-np.min(roi)
-            if np.max(np.array(roi_tr))>0:
-                roi_tr=guv_tools.soft_mask_it(roi_tr)
-                roi_tr=guv_tools.smooth_it(roi_tr,labda=2)
-                roi_tr= roi_tr.astype(int)
-                msk, BW_edge, xm, ym, rmin, rmaj, area, perimeter, roundness = guv_binary_ops.work_binaries(roi_tr)                    
-                #collect geometry properties for this guv:
-                all_xg.append(xm)
-                all_yg.append(ym)
-                all_R_minor.append(rmin) 
-                all_R_major.append(rmaj) 
-                all_areas.append(area)
-                all_perimeters.append(perimeter)
-                all_roundness.append(roundness)
-                #we build a separate mask stack, to be saved as tiff:
-                mask_stack[fri,:,:]=msk
-            else:
-                all_xg.append(0)
-                all_yg.append(0)
-                all_R_minor.append(0)
-                all_R_major.append(0) 
-                all_areas.append(0)
-                all_perimeters.append(0)
-                all_roundness.append(0)
-            #build and save summary figure:    
-            titl = str("file_")+ im_ori_name  + str("_roi")+str(roi_i) +  str("c") + str(color_i)
-            if  fri==0:
-                #show track example:
-                #image
-                fig1, axs1=plt.subplots(2,2)
-                axs1[0,0].imshow(roi)
-                axs1[0,0].set_title('original')
-                axs1[0,0].plot(ym,xm,'ro')
-                
-                print("a20a:" + titl + str("frame") + str(fri))
-        #grow 2D data maps:
-        all_guvs_xg.append(all_xg)
-        all_guvs_yg.append(all_yg)
-        all_guvs_R_minor.append(all_R_minor)
-        all_guvs_R_major.append(all_R_major)
-        all_guvs_areas.append(all_areas)
-        all_guvs_perimeters.append(all_perimeters)
-        all_guvs_roundness.append(all_roundness)
+        if initval.movie_id==-1 or roi_i==initval.movie_id:
+        #1) load tracking channels and add them up in one stack-to-track:
+            for ci, color_i in enumerate(initval.tracking_key):
+                roiname=str("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(color_i) + str(".tif")
+                if ci==0:
+                    roi_stack=io.imread(roipath / f"{roiname}")
+                else:
+                    roi_stack=roi_stack + io.imread(roipath / f"{roiname}")
+        #2) obtain basic area properties from this tracking image:
+            if roi_stack.ndim == 2: roi_stack = roi_stack[np.newaxis,:] # expand to third dimension
+            #set up:
+            all_xg=[];     all_yg=[];          all_R_minor=[];  all_R_major=[]
+            all_areas=[];  all_perimeters=[];  all_roundness=[]; all_ok_frame =[]
+            mask_stack=0*roi_stack
+            roi_shp=np.shape(roi_stack)
+            n_frames=roi_shp[0]
+            for fri in np.arange(n_frames):
+                good_guv_fr = True
+                roi=roi_stack[fri,:,:]
+                if fri==0:
+                    roi0=roi
+                #A. build an image that allows robust tracking
+                # smooth, threshold:
+                roi_tr=roi-np.min(roi)
+                roi_tr = guv_tools.soft_mask_it(roi_tr)
+                roi_tr = guv_tools.smooth_it(roi_tr, labda=2)
+                roi_tr = roi_tr.astype(int)
+                if np.ptp(roi_tr) < 1e-6:
+                    good_guv_fr = False
+                if good_guv_fr:
+                    msk, BW_edge, xm, ym, rmin, rmaj, area, perimeter, roundness = guv_binary_ops.work_binaries(roi_tr)
+                    #collect geometry properties for this guv:
+                    all_ok_frame.append(True)
+                    all_xg.append(xm)
+                    all_yg.append(ym)
+                    all_R_minor.append(rmin)
+                    all_R_major.append(rmaj)
+                    all_areas.append(area)
+                    all_perimeters.append(perimeter)
+                    all_roundness.append(roundness)
+                    #we build a separate mask stack, to be saved as tiff:
+                    mask_stack[fri,:,:]=msk
+                else:
+                    all_ok_frame.append(False)
+                    all_xg.append(0)
+                    all_yg.append(0)
+                    all_R_minor.append(0)
+                    all_R_major.append(0)
+                    all_areas.append(0)
+                    all_perimeters.append(0)
+                    all_roundness.append(0)
+                #build and save summary figure:
+                titl = str("file_")+ im_ori_name  + str("_roi")+str(roi_i) +  str("c") + str(color_i)
+                if  fri==0:
+                    #show track example:
+                    #image
+                    fig1, axs1=plt.subplots(2,2)
+                    axs1[0,0].imshow(roi)
+                    axs1[0,0].set_title('original')
+                    axs1[0,0].plot(ym,xm,'ro')
 
+                    print("a20a:" + titl + str("frame") + str(fri))
+            #grow 2D data maps:
+            all_guvs_okay_fr.append(all_ok_frame)
+            all_guvs_xg.append(all_xg)
+            all_guvs_yg.append(all_yg)
+            all_guvs_R_minor.append(all_R_minor)
+            all_guvs_R_major.append(all_R_major)
+            all_guvs_areas.append(all_areas)
+            all_guvs_perimeters.append(all_perimeters)
+            all_guvs_roundness.append(all_roundness)
 
-        #end result
+            # set up some plotting
+            frax=np.arange(len(all_roundness))
+            roundness_plot=np.array(all_roundness)
+            R_minor_plot=np.array(all_R_minor)
+            R_major_plot=np.array(all_R_major)
+            areas_plot=np.array(all_areas)
 
-        #I. set up csv for tracking data:
-        csv_target=out_path_name  +str("file_")+ im_ori_name  + str("_roi")+str(roi_i) + "_xy_tracked.csv"
-        with open(csv_target, "w",newline='') as csv_f:  # will overwrite existing
-            # create the csv writer
-            writer = csv.writer(csv_f, delimiter=";")
-            writer.writerow(
-                    [
-                        str("X"),
-                        str("Y"),
-                        str("R_minor"),
-                        str("R_major"),
-                        str("area"),
-                        str("perimeter"),
-                        str("roundness"),
-                    ]
-                )
-        csv_f.close()
+            valid_idx=np.nonzero(np.array(all_roundness)>0)
+            #main axes
+            axs1[0,1].plot(frax[valid_idx], R_minor_plot[valid_idx],'ko-')
+            axs1[0,1].plot(frax[valid_idx], R_major_plot[valid_idx],'ro-')
+            axs1[0,1].set_ylabel('ax length')
+            axs1[0,1].set_xlabel('frame no.')
+            axs1[0,1].legend(['R_minor', 'R_major'],loc='best', fontsize='xx-small')
 
-        # save tracking results per GUV as csv
-        for fr_i, x in enumerate(all_xg):
-            with open(csv_target, "a", newline='') as csv_g:
-                # create the csv writer
-                writer = csv.writer(csv_g, delimiter=";")
-                writer.writerow(
-                    [
-                        all_xg[fr_i],
-                        all_yg[fr_i],
-                        all_R_minor[fr_i],
-                        all_R_major[fr_i],
-                        all_areas[fr_i],
-                        all_perimeters[fr_i],
-                        all_roundness[fr_i],
-                    ]
-                )
-        csv_g.close()
+            axs1[1,0].plot(frax[valid_idx], areas_plot[valid_idx],'bo-')
+            axs1[1,0].set_ylabel('area')
+            axs1[1,0].set_xlabel('frame no.')
 
-        # set up some plotting
-        frax=np.arange(len(all_roundness))
-        roundness_plot=np.array(all_roundness)
-        R_minor_plot=np.array(all_R_minor)
-        R_major_plot=np.array(all_R_major)
-        areas_plot=np.array(all_areas)
+            axs1[1,1].plot(frax[valid_idx], roundness_plot[valid_idx],'ko-')
+            axs1[1,1].set_ylabel('roundness')
+            axs1[1,1].set_xlabel('frame no.')
+            outfig_name = out_path_name  + titl + str("frame") + str(fri)+ str("_track_example.png")
+            fig1.savefig(outfig_name)
+            plt.close()
 
-        valid_idx=np.nonzero(np.array(all_roundness)>0)
-        #main axes
-        axs1[0,1].plot(frax[valid_idx], R_minor_plot[valid_idx],'ko-')
-        axs1[0,1].plot(frax[valid_idx], R_major_plot[valid_idx],'ro-')
-        axs1[0,1].set_ylabel('ax length')
-        axs1[0,1].set_xlabel('frame no.')
-        axs1[0,1].legend(['R_minor', 'R_major'],loc='best', fontsize='xx-small')
-        
-        axs1[1,0].plot(frax[valid_idx], areas_plot[valid_idx],'bo-')
-        axs1[1,0].set_ylabel('area')
-        axs1[1,0].set_xlabel('frame no.')
- 
-        axs1[1,1].plot(frax[valid_idx], roundness_plot[valid_idx],'ko-')
-        axs1[1,1].set_ylabel('roundness')
-        axs1[1,1].set_xlabel('frame no.')
-        outfig_name = out_path_name  + titl + str("frame") + str(fri)+ str("_track_example.png")
-        fig1.savefig(outfig_name)
-        plt.close()
+            #save_mask:
+            maskname= ("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(initval.tracking_key) + str("_BW.tif")
+            io.imsave(maskpath / f"{maskname}", mask_stack, check_contrast=False)
 
-        #save_mask:    
-        maskname= ("from_")+ im_ori_name + str("_roi")+str(roi_i) + str("_c")+str(initval.tracking_key) + str("_BW.tif")
-        io.imsave(maskpath / f"{maskname}", mask_stack, check_contrast=False)
+            #save montage 1:
+            fig, axs = plt.subplots(1, 1)
+            mtg=guv_tools.make_montage(mask_stack, format_out='tiff')
+            axs.imshow(mtg, cmap="gray", interpolation="nearest")
+            mtg_plotname= titl + str("frame") + str(fri)+ str("_mask_example.png")
+            fig.savefig(overviewpath / f"{(mtg_plotname)}", dpi=500)
+            plt.close('all')
 
-        #save montage 1:
-        fig, axs = plt.subplots(1, 1)
-        mtg=guv_tools.make_montage(mask_stack, format_out='tiff')
-        axs.imshow(mtg, cmap="gray", interpolation="nearest")
-        mtg_plotname= titl + str("frame") + str(fri)+ str("_mask_example.png")
-        fig.savefig(overviewpath / f"{(mtg_plotname)}", dpi=500)
-        plt.close('all')
-
-        #save montage 2:
-        fig, axs = plt.subplots(1, 1)
-        mtg=guv_tools.make_montage(roi_stack*mask_stack, format_out='tiff')
-        axs.imshow(mtg, cmap="gray", interpolation="nearest")
-        mtg_plotname= titl + str("frame") + str(fri)+ str("_work_im_example.png")
-        fig.savefig(overviewpath / f"{(mtg_plotname)}", dpi=500)
-        plt.close('all')
+            #save montage 2:
+            fig, axs = plt.subplots(1, 1)
+            mtg=guv_tools.make_montage(roi_stack*mask_stack, format_out='tiff')
+            axs.imshow(mtg, cmap="gray", interpolation="nearest")
+            mtg_plotname= titl + str("frame") + str(fri)+ str("_work_im_example.png")
+            fig.savefig(overviewpath / f"{(mtg_plotname)}", dpi=500)
+            plt.close('all')
 
     # save same data to existing .nc with planes as second axis:
     save_geometry(all_guvs_xg,
@@ -212,7 +181,9 @@ def a20a_build_coordinates(im_ori_name,initval):
                   all_guvs_R_major,
                   all_guvs_areas,
                   all_guvs_perimeters,
-                  all_guvs_roundness, source)
+                  all_guvs_roundness,
+                  all_guvs_okay_fr,
+                  source)
 
 
 def analyze_edge_profile(profile, initval,fri):
@@ -261,12 +232,10 @@ def a20b_map_color_channels(im_ori_name,initval):
     if not out_path.is_dir(): out_path.mkdir()
 
     #load existing nc data
-    source = initval.mainpath_out + initval.subdir + "all_guvs.nc"
+    source = initval.mainpath_out + initval.subdir + im_ori_name + initval.nc_name
     ds_guvs = xr.load_dataset(source)
     [n_guvs, n_planes]=np.shape(ds_guvs["Area"])
     xg = ds_guvs["X0"]
-    yg = ds_guvs["Y0"]
-    rg = ds_guvs["R0"]
 
     n_col = initval.N_colors
     #set up the data containers(dims index, plane, color)
@@ -281,19 +250,6 @@ def a20b_map_color_channels(im_ori_name,initval):
 
 
     for guv_i, dum in enumerate(xg):  #work each GUV and its center coordinates:
-        ##load csv with prior info:
-        csv_source=in_path_name_tracked  +str("file_")+ im_ori_name  + str("_roi")+str(guv_i) + "_xy_tracked.csv"
-        all_xg,all_yg,all_R_minor, all_R_major, all_areas,all_perimeters, all_roundness = guv_io.get_XY_info(csv_source)
-        data_out=np.vstack((all_xg, 
-                            all_yg, 
-                            all_R_minor,
-                            all_R_major,
-                            all_areas,
-                            all_areas,
-                            all_perimeters, 
-                            all_roundness))
-        header_out=[str("X"), str("Y"),  str("R_minor"), str("R_major"), str("all_areas"),str("area"), str("perimeter"), str("roundness")]
-
         fig1, axs1=plt.subplots(2,initval.N_colors)
         for color_i in np.arange(initval.N_colors):
             #load tracking channel:
@@ -317,21 +273,23 @@ def a20b_map_color_channels(im_ori_name,initval):
             all_LC=[]
             all_LC_excess=[]
             for fri in np.arange(n_frames):
-                if len(roi_shp)==2:
-                    roi=roi_stack
-                if len(roi_shp)==3: #stack
-                    roi=roi_stack[fri,:,:]
-                    all_mask=mask_stack[fri,:,:]
-                    inner_mask = binary_erosion(all_mask, disk(3), iterations = 3)
-                    blankcenter_mask= binary_erosion(all_mask, disk(3), iterations = 8)
-                    edge_mask=all_mask-inner_mask
-                    outer_mask = 1-binary_dilation(all_mask, disk(3), iterations = 3)
-                    inner_donut_mask=inner_mask & ~blankcenter_mask
-                xm=all_xg[fri]
-                ym=all_yg[fri]
-                rm=all_R_major[fri]
+                ok_fr = ds_guvs["Okayframe"].isel(index=guv_i, plane=fri).item()
+                if ok_fr:
+                    if len(roi_shp)==2:
+                        roi=roi_stack
+                    if len(roi_shp)==3: #stack
+                        roi=roi_stack[fri,:,:]
+                        all_mask=mask_stack[fri,:,:]
+                        inner_mask = binary_erosion(all_mask, disk(3), iterations = 3)
+                        blankcenter_mask= binary_erosion(all_mask, disk(3), iterations = 8)
+                        edge_mask=all_mask-inner_mask
+                        outer_mask = 1-binary_dilation(all_mask, disk(3), iterations = 3)
+                        inner_donut_mask=inner_mask & ~blankcenter_mask
 
-                if np.max(np.array(roi))>0:
+                    xm = ds_guvs["Xg"].isel(index=guv_i, plane=fri).item()
+                    ym = ds_guvs["Yg"].isel(index=guv_i, plane=fri).item()
+                    rm = ds_guvs["R_major"].isel(index=guv_i, plane=fri).item()
+
                     #B. use the track coordinates to force-edge_map the original image 
                     maxrad=2*rm
                     #perimeter_pixels_quart=np.ceil(2*np.pi*maxrad)/4
@@ -443,29 +401,28 @@ def a20b_map_color_channels(im_ori_name,initval):
                         ]
             
 
-            data_out=np.vstack((data_out,color_data))
-            header_out=np.hstack((header_out, color_header))
+
         dum=1
         #final savings:
         outfig_name = out_path_name  + titl + str("frame") + str(fri)+ str("_intensities.png")
         fig1.savefig(outfig_name)
         plt.close()
         
-        #csv:
-        csv_target=out_path_name  +str("file_")+ im_ori_name  + str("_roi")+str(guv_i) + "_all_data.csv"
-        with open(csv_target, "w",newline='') as csv_h:  # will overwrite existing
-            # create the csv writer
-            writer = csv.writer(csv_h, delimiter=";")
-            writer.writerow(header_out)
-        csv_h.close()
-        tm.sleep(2) 
-        #save results per GUV as csv
-        for row in np.transpose(data_out):
-            with open(csv_target, "a",newline='') as csv_hi:  
-                # create the csv writer
-                writer = csv.writer(csv_hi, delimiter=";")    
-                writer.writerow(row)
-        csv_hi.close()
+        # #csv:
+        # csv_target=out_path_name  +str("file_")+ im_ori_name  + str("_roi")+str(guv_i) + "_all_data.csv"
+        # with open(csv_target, "w",newline='') as csv_h:  # will overwrite existing
+        #     # create the csv writer
+        #     writer = csv.writer(csv_h, delimiter=";")
+        #     writer.writerow(header_out)
+        # csv_h.close()
+        # tm.sleep(2)
+        # #save results per GUV as csv
+        # for row in np.transpose(data_out):
+        #     with open(csv_target, "a",newline='') as csv_hi:
+        #         # create the csv writer
+        #         writer = csv.writer(csv_hi, delimiter=";")
+        #         writer.writerow(row)
+        # csv_hi.close()
 
     #nc, all guvs:
     save_colors(all_guvs_inside_I,
@@ -520,7 +477,9 @@ def save_geometry(all_guvs_xg,
                   all_guvs_R_major,
                   all_guvs_areas,
                   all_guvs_perimeters,
-                  all_guvs_roundness, source):
+                  all_guvs_roundness,
+                  all_guvs_okay_fr,
+                  source):
     n_guvs, n_planes = np.shape(all_guvs_xg)
     XGuvs = xr.load_dataset(source)
     xg_da = xr.DataArray(all_guvs_xg, dims=("index", "plane"),
@@ -537,7 +496,10 @@ def save_geometry(all_guvs_xg,
                                  coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Perimeter")
     roundness_da = xr.DataArray(all_guvs_roundness, dims=("index", "plane"),
                                 coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Roundness")
-    XGuvs = xr.merge([XGuvs, area_da, xg_da, R_minor_da, R_major_da, perimeters_da, roundness_da],compat='override')
+    okayframe_da = xr.DataArray(all_guvs_okay_fr, dims=("index", "plane"),
+                                coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Okayframe")
+
+    XGuvs = xr.merge([area_da, xg_da, yg_da, R_minor_da, R_major_da, perimeters_da, roundness_da, okayframe_da,XGuvs],compat='override')
     XGuvs.to_netcdf(source, mode="w")
     print(XGuvs)
 
@@ -572,7 +534,7 @@ def save_colors(all_guvs_inside_I,
                                      coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes),
                                              "channel": np.arange(n_colors)}, name="Edge_LC_excess")
 
-    XGuvs = xr.merge([XGuvs,inside_I_da, outside_I_da, edge_I_mx_da, edge_I_sum_msk_da, edge_I_sum_pol_da,
-                    edge_I_sum_std_da,all_guvs_LC_da, all_guvs_LC_excess_da],compat='override')
+    XGuvs = xr.merge([inside_I_da, outside_I_da, edge_I_mx_da, edge_I_sum_msk_da, edge_I_sum_pol_da,
+                    edge_I_sum_std_da,all_guvs_LC_da, all_guvs_LC_excess_da,XGuvs],compat='override')
     XGuvs.to_netcdf(source, mode="w")
     print(XGuvs)

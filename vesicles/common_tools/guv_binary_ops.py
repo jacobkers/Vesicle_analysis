@@ -72,8 +72,11 @@ def sorted_pixels_treshold(im):
     rr=np.hypot(pix_ax-xc,impixels_sorted-yc)
     x_kn=pix_ax[(rr== min(rr))]
     y_kn=impixels_sorted[(rr== min(rr))]
+    if ~isinstance(y_kn, (int, float)):
+        y_kn=y_kn[0]
     #scale value back
     treshold=y_kn/Npix*Ipix
+
     msk=im>treshold
     spot_tres=msk*im
     return spot_tres, msk, treshold 
@@ -87,7 +90,8 @@ def binary_actions(im):
     if 0: im = np.ma.masked_where(np.isnan(im), im) 
     #simple treshold:
     if 0: fgm = im>0.2*(np.max(im) -np.mean(im)) + np.mean(im)
-    # triangulation treshold:
+    # triangula
+    # tion treshold:
     if 1: 
         fgm=sorted_pixels_treshold(im)[1]           
         if showit: 

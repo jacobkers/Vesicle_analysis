@@ -30,6 +30,11 @@ class Guv_experiment:
         self.apply_drift_correction=False
         self.pix2mu=0.4141253
         self.counts2perc=1/4000 #app., see callibration_curve_EP.xlsx
+        self.short_set=-1
+        if self.short_set>0:
+            self.nc_name="_all_guvs_short.nc"
+        else:
+            self.nc_name = "_all_guvs.nc"
 
 # overview of experiments:
 def get_exps(exp_idx):
@@ -45,28 +50,22 @@ def get_exps(exp_idx):
     if exp_idx_dec==2: #remote
         in_root=str("M:/tnw/bn/cd/Shared/Jacob/TESTdata_in/2025_Charu/")
         out_root=str("M:/tnw/bn/cd/Shared/Jacob/TESTdata_out/2025_Charu/")
-    #set up various experiment configurations:    
-    Exp0 = Guv_experiment()   
-    Exp0.mainpath_in=in_root+ str("pilots/")
-    Exp0.mainpath_out =out_root + str("pilots/")   
-    Exp0.subdir = str("20082025_CS_test/")
-    Exp0.movienames = ["20082025_CS_For Jacob.lif - R 4_Merged - C=1"]  # the ones that have ROIs measured in ImageJ  
-    Exp0.suffix='.tif'
-    Exp0.tracking_key=[0]  #write as list! #1: use hand-set drift #2: use x, y from prior run A20
-    Exp0.N_colors=1
-    Exp0.sequence='time_trace'
+    #set up various experiment configurations:
    
-    Exp1 = Guv_experiment()   
+    Exp1 = Guv_experiment()
+    Exp1.exp_id = 0
     Exp1.mainpath_in=in_root+ str("pilots/")
     Exp1.mainpath_out =out_root + str("pilots/")   
-    Exp1.subdir = str("20082025_CS_test2/")
-    Exp1.movienames = ["20082025_CS_For Jacob.lif - R 4_Merged"]  # the ones that have ROIs measured in ImageJ
-    Exp1.suffix='.tif'
-    Exp0.tracking_key=[0]  #write as list! #1: use hand-set drift #2: use x, y from prior run A20
-    Exp1.N_colors=2
-    Exp1.sequence='time_trace'
+    Exp1.subdir = str("20082025_CS_test/")
+    Exp1.movienames = ["tiff_00", "tiff_01"]  # the ones that have ROIs measured in ImageJ
+    #Exp1.movienames = ["tiff_01"]  # the ones that have ROIs measured in ImageJ
 
-    all_Experiments = [Exp0, Exp1]
+    Exp1.suffix='.tif'
+    Exp1.tracking_key=[0]  #write as list! #1: use hand-set drift #2: use x, y from prior run A20
+    Exp1.N_colors=1
+    Exp1.sequence='time_trace'
+    Exp1.movie_id = -1 #if not -1, test only this movie_id
+    all_Experiments = [Exp1]
 
     Experiment = all_Experiments[exp_idx_base]
 

@@ -506,7 +506,7 @@ def make_montage(tiff_in, format_out='tiff'):
         hix=lox+cc
         loy=rw_i*rr
         hiy=loy+rr
-        montage_tiff[loy:hiy,lox:hix]=np.log(fov+1)
+        montage_tiff[loy:hiy,lox:hix]=np.log(abs(fov)+1)
         t=np.log(fov+1)
         if 0:
             fig, ax = plt.subplots(1, 2)
