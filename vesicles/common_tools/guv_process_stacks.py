@@ -85,6 +85,7 @@ def a20a_build_coordinates(im_ori_name,initval):
                 roi_tr = roi_tr.astype(int)
                 if np.ptp(roi_tr) < 1e-6:
                     good_guv_fr = False
+                    print('bad' + str(fri))
                 if good_guv_fr:
                     msk, BW_edge, xm, ym, rmin, rmaj, area, perimeter, roundness = guv_binary_ops.work_binaries(roi_tr)
                     #collect geometry properties for this guv:

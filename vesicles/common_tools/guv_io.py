@@ -141,11 +141,16 @@ def get_roi_info(csv_source, initval):
     XX0 = np.array(Xc) + np.array(width) / 2
     YY0 = np.array(Yc) + np.array(width) / 2
     RR0 = np.array(width) / 2
-
+    #crop (optional)
     if initval.short_set > 0:
         XX0=  XX0[0:initval.short_set]
         YY0 = YY0[0:initval.short_set]
         RR0 = RR0[0:initval.short_set]
+    #sort by RR0 (ascending):
+    idx = np.argsort(RR0)
+    XX0 = XX0[idx]
+    YY0 = YY0[idx]
+    RR0 = RR0[idx]
 
     return XX0,YY0,RR0
 

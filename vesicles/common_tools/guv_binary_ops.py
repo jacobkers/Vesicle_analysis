@@ -84,6 +84,9 @@ def sorted_pixels_treshold(im):
 def binary_actions(im):
     """ examples of binary image operations, re-edited from M.Holub'24 
     MH sequence default ON is labeled with (1)"""
+    #use this to scale some values:
+    typical_size=150
+    rr,cc=im.shape
     showit=0
     if showit: fig,ax = plt.subplots(3,3)
     #ignore nans:
@@ -104,8 +107,10 @@ def binary_actions(im):
             ax[0,1].imshow(fgm)
             ax[0,1].set_title("fill")
     # remove tiny regions:
-    if 1: 
-        fgm = binary_opening(fgm, disk(3), iterations = 6)
+    it_scale = (np.ceil(6 / rr / typical_size)).astype(int)
+    if 1:
+
+        fgm = binary_opening(fgm, disk(3), iterations = it_scale)
         if showit: 
             ax[0,2].imshow(fgm)
             ax[0,2].set_title("despeckle")
@@ -113,7 +118,7 @@ def binary_actions(im):
 
     #shrink to split neigbouring objects:
     if 1: 
-        fgm = binary_erosion(fgm, disk(3), iterations = 5)
+        fgm = binary_erosion(fgm, disk(3), iterations = it_scale)
         if showit: 
             ax[1,0].imshow(fgm)
             ax[1,0].set_title("erode")
@@ -131,7 +136,7 @@ def binary_actions(im):
     if 0: fgm = binary_closing(fgm, square(3))
     #reverse shrinking:#dilate(1)
     if 1: 
-        fgm = binary_dilation(fgm, disk(3), iterations = 5)
+        fgm = binary_dilation(fgm, disk(3), iterations = it_scale)
         if showit: 
             ax[1,2].imshow(fgm)
             ax[1,2].set_title("dilate")

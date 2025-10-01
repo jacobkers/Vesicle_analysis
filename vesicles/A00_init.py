@@ -57,7 +57,7 @@ def get_exps(exp_idx):
     Exp1.mainpath_in=in_root+ str("pilots/")
     Exp1.mainpath_out =out_root + str("pilots/")   
     Exp1.subdir = str("20082025_CS_test/")
-    Exp1.movienames = ["tiff_00", "tiff_01"]  # the ones that have ROIs measured in ImageJ
+    Exp1.movienames = ["tiff_01", "tiff_00", ]  # the ones that have ROIs measured in ImageJ
     #Exp1.movienames = ["tiff_01"]  # the ones that have ROIs measured in ImageJ
 
     Exp1.suffix='.tif'
