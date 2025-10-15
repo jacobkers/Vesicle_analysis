@@ -118,19 +118,6 @@ def calculate_diffusion_constant_xy(x, y, dt, max_lag=None):
 
     return D, msd, times
 
-# Example usage:
-# xy = np.array([[x0, y0], [x1, y1], ..., [xN, yN]])
-# dt = 0.1  # seconds per frame
-# D, msd, times = calculate_diffusion_constant(xy, dt)
-
-# Optionally plot:
-# plt.plot(times, msd, 'o', label='MSD')
-# plt.plot(times, 4*D*times, '-', label=f'Fit: D={D:.3f} px²/s')
-# plt.xlabel('Time (s)')
-# plt.ylabel('MSD (px²)')
-# plt.legend()
-# plt.show()
-
 
 plot_per_file=1
 #read trackmate exports:
@@ -244,7 +231,6 @@ for filname, fr2ms in zip(files,fr2ms_all):
             ax[1,1].set_xlabel('intensity variation,%')
             ax[1,1].set_ylabel('counts')  
     
-            dum=1
             fig.show()
             print(counter)
             plt.savefig(datapath + filname + '_proc_histograms.png')  # You can also use .pdf, .svg, .jpg, etc.
@@ -280,7 +266,7 @@ for filname, fr2ms in zip(files,fr2ms_all):
             #fig.tight_layout()
             fig.show()
             plt.savefig(datapath +'all_data' + '_proc_motility_vs_release.png')  # You can also use .pdf, .svg, .jpg, etc.
-            
+            dum=1
     #plt.close('all')
     dum=1
     #make an export data frame:
