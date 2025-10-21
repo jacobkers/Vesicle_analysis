@@ -1,5 +1,5 @@
-from Bert import Bert_basic_pipeline_notebook_convert
+import Bert_pipeline_vesicle_mapping
 
 if __name__ == "__main__":
     print("Running from vesicles directory:")
-    Bert_basic_pipeline_notebook_convert()  # Call Bert's function
+    Bert_pipeline_vesicle_mapping()  # Call Bert's function

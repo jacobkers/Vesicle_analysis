@@ -9,7 +9,7 @@ experiment run indices (add 0.1 to run on K:):
 """
 
 import numpy as np
-
+import pathlib
 class Guv_experiment:
     """
     sets paths, names

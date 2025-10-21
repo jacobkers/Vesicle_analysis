@@ -385,7 +385,7 @@ def highlight_roi(image,x0,y0,r0):
 def smooth_it(roi,labda=3):
     #gaussian smooth
     roi = roi.astype(float)
-    k_size=np.int(np.ceil(labda))
+    k_size=int(np.ceil(labda))
     x, y = np.linspace(-k_size, k_size, 2*k_size), np.linspace(-k_size, k_size, 2*k_size)
     KX, KY = np.meshgrid(x, y)
     radii = np.hypot(KX, KY)
@@ -672,3 +672,15 @@ def extract_subarray(array, x0, y0, z0, L, W, H):
     sub_array = array[x_min:x_max, y_min:y_max, z_min:z_max]
     
     return sub_array, x_min, x_max, y_min, y_max, z_min, z_max
+
+def subpix_step(ys): #This function calculates a sub pixel step of a local maximum
+        #This is achieved with again a parabolic fitting
+        xs=np.arange(-1,2)#Here an array is made from 0 to the value of ld
+        if np.max(ys)>np.min(ys) and len(ys)==3:
+            prms=np.polyfit(xs,ys,2)#Here the location is polyfitted
+            x=-prms[1]/(2*prms[0])
+            ft=np.polyval(xs,prms)
+        else:
+            x=np.nan
+            ft=np.nan
+        return x

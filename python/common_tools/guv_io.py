@@ -4,16 +4,16 @@ Jacob Kers 2024
  """
 import numpy as np
 import matplotlib.pyplot as plt
-#import nd2reader
+import nd2reader
 #from readlif.reader import LifFile
 from pathlib import Path
 import csv
 from skimage import io
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
-import guv_tools
+from common_tools import guv_tools
 from PIL import Image, ImageSequence
-
+import nd2
 
 class Event:
     def __init__(self, row_dict):
@@ -37,6 +37,58 @@ def read_csv_to_events(file_path):
             events.append(event)
     
     return events
+
+def load_tiff_frame(file_path, frame_index):
+    # Open the TIFF file
+    with tf.TiffFile(file_path) as tif:
+        # Load a specific frame (zero-indexed)
+        frame = tif.pages[frame_index].asarray()
+    return frame
+
+def load_tiff_movie_as_array(input_path):
+    """Load a TIFF movie as a 3D NumPy array (frames, height, width)."""
+    with Image.open(input_path) as img:
+        frames = []
+        while True:
+            frames.append(np.array(img))  # Convert each frame to a NumPy array
+            try:
+                img.seek(img.tell() + 1)
+            except EOFError:
+                break
+    
+    return np.stack(frames)  # Convert list of frames into a 3D NumPy array
+
+def load_tiff_movie(input_path):
+    """Load a TIFF movie as a list of frames."""
+    with Image.open(input_path) as img:
+        frames = []
+        while True:
+            frames.append(img.copy())
+            try:
+                img.seek(img.tell() + 1)
+            except EOFError:
+                break
+    return frames
+
+def load_nd2_movie(input_path, channel_index):
+    #loop: 'images' contains all colors and all frames
+    with nd2reader.Nd2(str(input_path)) as images:
+        # Change to the third channel (0-based indexing)
+        num_frames = len(images)  # Total number of images in the stack
+        num_channels = len(images.channels)  # Assuming 4 channels if not automatically detected
+        # Select the proper channel 
+        chan_images = [images[i] for i in range(channel_index, num_frames, num_channels)]
+    
+    # Convert to a NumPy array (optional, if needed for further processing)
+    frames = np.array(chan_images)    
+    return frames
+
+def load_nd2_movie_try2(input_path, channel_index):
+    with nd2.ND2File(input_path) as ndfile:
+        data = ndfile.asarray()  # Load the full multi-dimensional dataset
+    frames=data[:,channel_index,:,:]
+    return frames
+
 
 def get_XY_info(csv_source):
     """ ead roi data as acquired via ImageJ:
@@ -360,10 +412,6 @@ def cut_tif_to_roi_tiffs_hardwired(im_ori_name,guv_xyr,initval):
    
     shrink_tiff=st
  """
-
-def 
-
-
 
 
 def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
