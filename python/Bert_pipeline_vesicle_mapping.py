@@ -69,7 +69,7 @@ outdir_test='M:/tnw/bn/cd/Shared/Jacob/TESTdata_out/2024_Bert/2025_04_23 vesicle
 
 # Example usages 
 excelpath=Path("M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/005_analysis")
-excelname =str("Bert_data_overview_test.xlsx")
+excelname =str("Bert_data_overview_lm.xlsx")
 now = datetime.now()
 datecode = now.strftime("%Y%m%d%h")  # Bijvoorbeeld '20250702'
 
@@ -392,7 +392,7 @@ for Guv in Guv_list:
    
 
         else: #if nothing worked .....  
-            all_resolution.append(resolution)   
+            all_resolution.append(float('nan'))   
             all_radius_mean.append(float('nan')) 
             all_radius_minor.append(float('nan')) 
             all_radius_major.append(float('nan')) 

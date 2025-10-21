@@ -74,6 +74,8 @@ def sorted_pixels_treshold(im):
     y_kn=impixels_sorted[(rr== min(rr))]
     #scale value back
     treshold=y_kn/Npix*Ipix
+    if isinstance(treshold, np.ndarray):
+        treshold=treshold[0]
     msk=im>treshold
     spot_tres=msk*im
     return spot_tres, msk, treshold 
