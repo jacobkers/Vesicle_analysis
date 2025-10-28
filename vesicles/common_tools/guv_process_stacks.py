@@ -152,7 +152,10 @@ def a20a_build_coordinates(im_ori_name,initval):
             axs1[1,1].set_ylabel('roundness')
             axs1[1,1].set_xlabel('frame no.')
             outfig_name = out_path_name  + titl + str("frame") + str(fri)+ str("_track_example.png")
+
             fig1.savefig(outfig_name)
+            if roi_i==0:
+                fig.show()
             plt.close()
 
             #save_mask:
