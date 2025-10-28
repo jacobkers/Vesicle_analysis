@@ -4,16 +4,17 @@ Jacob Kers 2024
  """
 import numpy as np
 import matplotlib.pyplot as plt
-import nd2reader
+# import nd2reader
 #from readlif.reader import LifFile
 from pathlib import Path
 import csv
+print('imported')
 from skimage import io
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 from common_tools import guv_tools
 from PIL import Image, ImageSequence
-import nd2
+# import nd2
 
 class Event:
     def __init__(self, row_dict):
@@ -554,4 +555,4 @@ def work_roi_tiffs(im_ori_name,guv_xyr,initval):
         fig.tight_layout()
         fig.show()
         plt.close("all")
-          
+        

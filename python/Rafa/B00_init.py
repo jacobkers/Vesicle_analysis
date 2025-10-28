@@ -25,7 +25,7 @@ class Fusion_experiment:
 
 # overview of experiments; each entry is a single movie
 def get_exps():  
-    overviewfile_path=Path("M:/tnw/bn/cd\Shared/Jacob/TESTdata_in/2023_Rafa/membrane fusion")
+    overviewfile_path=Path("M:/tnw/bn/cd/Shared/Jacob/TESTdata_in/2023_Rafa/membrane fusion")
     overviewfile_name =str("fusion_data_overview.xlsx")
 
     # Read as DataFrame:
@@ -56,8 +56,8 @@ def get_exps():
         print(movie_entry.global_index)
         all_fusion_exps.append(movie_entry)
         #extra:
-        savepathname='M:/tnw/bn/cd\Shared/Jacob/TESTdata_out/2023_Rafa/membrane fusion/' + movie_entry.unique_label
-        movie_entry.savepath=Path(savepathname)
+        savepathname='M:/tnw/bn/cd/Shared/Jacob/TESTdata_out/2023_Rafa/membrane fusion/' + movie_entry.unique_label
+        #movie_entry.savepath=Path(savepathname)
 
         #define a zoomed, and a full kymograph:
         movie_entry.rws=[0,1]

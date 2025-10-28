@@ -6,12 +6,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import math as mt
-#import nd2reader
-#from readlif.reader import LifFile
 from pathlib import Path
 import cv2
-import csv
-from skimage import io
 from scipy.optimize import curve_fit
 from scipy.ndimage import sobel
 from scipy.ndimage import map_coordinates   # for converting cartesian to circular coördinates in QI

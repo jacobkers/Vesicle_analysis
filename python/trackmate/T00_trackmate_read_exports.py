@@ -122,34 +122,23 @@ def calculate_diffusion_constant_xy(x, y, dt, max_lag=None):
 plot_per_file=1
 #read trackmate exports:
 datapath='M:/tnw/bn/cd/Shared/Jacob/TESTdata_out/2023_Rafa/2025_06_26_trackmate/'
-if 0:
-    files=[
-    'PEG_0.5%_TIRF_488_001_30ms exposure_trackmate',
-    'PEG_1%_50msExpos_TIRF_488_001_trackmate',
-    '2_TIRF_488_001_PCPG_Chol_trackmate',
-    ]
-    legenda=[
-        '0.5% PEG',
-        '1% PEG',
-        'Rafa_hiQTirf',
-    ]
-else: 
-    files=[
-    '2_TIRF_488_001_PCPG_Chol_trackmate',
-    'PEG_0.5%_TIRF_488_001_30ms exposure_well1_trackmate',
-    'PEG_1%_50msExpos_TIRF_488_001_well1_trackmate',
-    'PEG_2%_50msExpos_TIRF_488_001_well1_mv1_trackmate',
-    'PEG_5%_50msExpos_TIRF_488_001_well1_vid1_trackmate',
-    ]
-    legenda=[
-        '0% PEG',
-        '0.5% PEG',
-        '1% PEG',
-        '2% PEG',
-        '5% PEG',
-    ]
-    fr2ms_all=[50,54, 68, 68, 68]
-    pix2um=0.125
+
+files=[
+'2_TIRF_488_001_PCPG_Chol_trackmate',
+'PEG_0.5%_TIRF_488_001_30ms exposure_well1_trackmate',
+'PEG_1%_50msExpos_TIRF_488_001_well1_trackmate',
+'PEG_2%_50msExpos_TIRF_488_001_well1_mv1_trackmate',
+'PEG_5%_50msExpos_TIRF_488_001_well1_vid1_trackmate',
+]
+legenda=[
+    '0% PEG',
+    '0.5% PEG',
+    '1% PEG',
+    '2% PEG',
+    '5% PEG',
+]
+fr2ms_all=[50,54, 68, 68, 68]
+pix2um=0.125
 
 if ~ plot_per_file: fig, ax=plt.subplots(2,2)
 All_labels=[]
@@ -161,6 +150,7 @@ for filname, fr2ms in zip(files,fr2ms_all):
     if plot_per_file: fig, ax=plt.subplots(2,2)
     startrow=0
     counter=0
+    #single parameters per trace:
     All_trace_IDs=[]
     All_trace_lengths=[]
     All_trace_duration_ms=[]
@@ -171,12 +161,17 @@ for filname, fr2ms in zip(files,fr2ms_all):
     All_time_to_max=[]
     All_flush_times=[]
     All_intensity_vars=[]
+    #full trace recors per property:
+    data={'time': np.arange(3000)*fr2ms}
+    All_traces_intensity=pd.DataFrame(data)
 
+    #loop per trace:
     for trace_ID in trace_IDs:    
             Tu=traces_df["POSITION_T"][startrow:][traces_df['TRACK_ID'][startrow:]==trace_ID]
             Xu=traces_df["POSITION_X"][startrow:][traces_df['TRACK_ID'][startrow:]==trace_ID]
             Yu=traces_df["POSITION_Y"][startrow:][traces_df['TRACK_ID'][startrow:]==trace_ID]
             Iu=traces_df["MEAN_INTENSITY_CH1"][4:][traces_df['TRACK_ID'][startrow:]==trace_ID]
+            
             # Zip them together and sort by the first list
             combined = sorted(zip(Tu, Xu, Yu, Iu))
 
@@ -187,7 +182,12 @@ for filname, fr2ms in zip(files,fr2ms_all):
             X = np.array(X_str, dtype=float)
             Y=  np.array(Y_str, dtype=float)
             I=  np.array(I_str, dtype=float)
-            if len(T)>2:  #Get parameters!
+
+            #add to full record_per_property (note padding for different lengths)
+            I_series = pd.Series(I, index=All_traces_intensity.index[:len(I)])
+            All_traces_intensity['trace_'+ str(trace_ID)] = I_series
+
+            if len(T)>2:
                     counter=counter+1
                     if plot_per_file:
                             ax[0,0].plot(T-T[0],X-X[0])
@@ -263,13 +263,29 @@ for filname, fr2ms in zip(files,fr2ms_all):
             ax[1,1].set_yscale('log')
             ax[1,1].set_ylabel('I_variation, %')
             fig.tight_layout()
+    
+            #plot and save:
             #fig.tight_layout()
             fig.show()
-            plt.savefig(datapath +'all_data' + '_proc_motility_vs_release.png')  # You can also use .pdf, .svg, .jpg, etc.
+            plt.savefig(datapath +'T00_all_data' + '_parameters_per_trace.png')  # You can also use .pdf, .svg, .jpg, etc.
             dum=1
     #plt.close('all')
-    dum=1
-    #make an export data frame:
+
+    #crop and save the per-record_data:
+    lengths = All_traces_intensity.iloc[:, 1:].notna().sum()
+    # 2️⃣  Find the maximum trace length
+    max_len = lengths.max()
+    print(f"Longest trace length: {max_len}")
+    # 3️⃣  Crop the DataFrame to that many rows
+    All_traces_intensity_cropped = All_traces_intensity.iloc[:max_len].copy()
+    # 2️⃣  Sort the column names by those lengths (descending or ascending)
+    sorted_cols = [All_traces_intensity_cropped.columns[0]] + list(lengths.sort_values(ascending=False).index)
+    # 3️⃣  Reorder the DataFrame columns
+    All_traces_intensity_sorted = All_traces_intensity_cropped[sorted_cols].copy()
+    csv_target1=(datapath + 'T00_' + filname +'_all_traces_intensities.csv')
+    All_traces_intensity_sorted.to_csv(csv_target1, index=False)
+    
+    #make an export data frame for the single parameters:
     events_df = pd.DataFrame()
     events_df['trace_ID'] = All_trace_IDs  
     events_df['trace_length,frs'] = All_trace_lengths 
@@ -281,11 +297,8 @@ for filname, fr2ms in zip(files,fr2ms_all):
     events_df['intensity_peaks%'] = All_intensity_peaks # Example values
     events_df['intensity_drop%'] = All_intensity_drops # Example values
     events_df['intensity_var%'] = All_intensity_vars # Example values
-
     
-    xls_target=(datapath + filname +'_proc.xlsx')
-
-    # Write the updated data to a new Excel file
-    events_df.to_excel(xls_target, index=False)
+    xls_target2=(datapath + 'T00_' + filname +'_parameters_per_trace.xlsx')
+    events_df.to_excel(xls_target2, index=False)
 
     print(f"\nUpdated data has been written to target")

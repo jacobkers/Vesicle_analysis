@@ -38,7 +38,7 @@ sys.path.insert(0, two_levels_up)
 from common_tools import guv_binary_ops
 from common_tools import guv_tools
 
-
+print("i don't get it")
 # set up autoreload on all files
 #get_ipython().run_line_magic('load_ext', 'autoreload')
 #get_ipython().run_line_magic('autoreload', '2')

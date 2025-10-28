@@ -286,5 +286,3 @@ def click_them(exps):
                     } ]
                 with open(out_path / json_name, "w") as f:
                     json.dump( json_dict, f, indent=2)
-
-                
