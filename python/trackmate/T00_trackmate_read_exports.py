@@ -121,7 +121,12 @@ def calculate_diffusion_constant_xy(x, y, dt, max_lag=None):
 
 plot_per_file=1
 #read trackmate exports:
-datapath='M:/tnw/bn/cd/Shared/Jacob/TESTdata_out/2023_Rafa/2025_06_26_trackmate/'
+
+main_datapath= 'M:/tnw/bn/cd/Shared/Jacob/TESTdata_out/2023_Rafa/2025_06_26_trackmate/'
+trackmatepath=main_datapath + 'from_trackmate/'
+save_traces_path=main_datapath + 'T00_trace_vs_time/'
+save_plots_path=main_datapath + 'T00_plots/'
+save_properties_path=main_datapath + 'T00_trace_properties/'
 
 files=[
 '2_TIRF_488_001_PCPG_Chol_trackmate',
@@ -143,7 +148,7 @@ pix2um=0.125
 if ~ plot_per_file: fig, ax=plt.subplots(2,2)
 All_labels=[]
 for filname, fr2ms in zip(files,fr2ms_all):
-    source=datapath + filname +'.csv'
+    source= trackmatepath + filname + '.csv'
     traces_df =pd.read_csv((source),delimiter=',')
     trace_IDs=np.unique(traces_df['TRACK_ID'][4:])
     All_labels.append(filname)
@@ -182,7 +187,7 @@ for filname, fr2ms in zip(files,fr2ms_all):
             X = np.array(X_str, dtype=float)
             Y=  np.array(Y_str, dtype=float)
             I=  np.array(I_str, dtype=float)
-
+            I = np.array(I, dtype=int)
             #add to full record_per_property (note padding for different lengths)
             I_series = pd.Series(I, index=All_traces_intensity.index[:len(I)])
             All_traces_intensity['trace_'+ str(trace_ID)] = I_series
@@ -233,7 +238,7 @@ for filname, fr2ms in zip(files,fr2ms_all):
     
             fig.show()
             print(counter)
-            plt.savefig(datapath + filname + '_proc_histograms.png')  # You can also use .pdf, .svg, .jpg, etc.
+            plt.savefig(save_plots_path + filname + '_proc_histograms.png')  # You can also use .pdf, .svg, .jpg, etc.
             plt.close('all')
 
     if plot_per_file ==0:
@@ -267,7 +272,7 @@ for filname, fr2ms in zip(files,fr2ms_all):
             #plot and save:
             #fig.tight_layout()
             fig.show()
-            plt.savefig(datapath +'T00_all_data' + '_parameters_per_trace.png')  # You can also use .pdf, .svg, .jpg, etc.
+            plt.savefig(save_plots_path + 'T00_all_data' + '_parameters_per_trace.png')  # You can also use .pdf, .svg, .jpg, etc.
             dum=1
     #plt.close('all')
 
@@ -282,7 +287,7 @@ for filname, fr2ms in zip(files,fr2ms_all):
     sorted_cols = [All_traces_intensity_cropped.columns[0]] + list(lengths.sort_values(ascending=False).index)
     # 3️⃣  Reorder the DataFrame columns
     All_traces_intensity_sorted = All_traces_intensity_cropped[sorted_cols].copy()
-    csv_target1=(datapath + 'T00_' + filname +'_all_traces_intensities.csv')
+    csv_target1=(save_traces_path + 'T00_' + filname + '_all_traces_intensities.csv')
     All_traces_intensity_sorted.to_csv(csv_target1, index=False)
     
     #make an export data frame for the single parameters:
@@ -298,7 +303,7 @@ for filname, fr2ms in zip(files,fr2ms_all):
     events_df['intensity_drop%'] = All_intensity_drops # Example values
     events_df['intensity_var%'] = All_intensity_vars # Example values
     
-    xls_target2=(datapath + 'T00_' + filname +'_parameters_per_trace.xlsx')
+    xls_target2=(save_properties_path + 'T00_' + filname + '_parameters_per_trace.xlsx')
     events_df.to_excel(xls_target2, index=False)
 
     print(f"\nUpdated data has been written to target")
