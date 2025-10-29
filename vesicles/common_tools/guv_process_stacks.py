@@ -199,6 +199,7 @@ def a20a_build_coordinates(im_ori_name,initval):
                   all_guvs_perimeters,
                   all_guvs_roundness,
                   all_guvs_std,
+                  all_guvs_focalplane,
                   all_guvs_okay_fr,
                   source)
 
@@ -496,6 +497,7 @@ def save_geometry(all_guvs_xg,
                   all_guvs_perimeters,
                   all_guvs_roundness,
                   all_guvs_std,
+                  all_guvs_focalplane,
                   all_guvs_okay_fr,
                   source):
     n_guvs, n_planes = np.shape(all_guvs_xg)
@@ -516,10 +518,13 @@ def save_geometry(all_guvs_xg,
                                 coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Roundness")
     std_da = xr.DataArray(all_guvs_std, dims=("index", "plane"),
                                 coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Standard_Deviation")
+    focal_plane_da= xr.DataArray(all_guvs_focalplane, dims=("index"),
+                          coords={"index": np.arange(n_guvs)}, name="focal_plane")
+
     okayframe_da = xr.DataArray(all_guvs_okay_fr, dims=("index", "plane"),
                                 coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Okayframe")
 
-    XGuvs = xr.merge([area_da, xg_da, yg_da, R_minor_da, R_major_da, perimeters_da, roundness_da, std_da, okayframe_da,XGuvs],compat='override')
+    XGuvs = xr.merge([area_da, xg_da, yg_da, R_minor_da, R_major_da, perimeters_da, roundness_da, std_da, focal_plane_da, okayframe_da,XGuvs],compat='override')
     XGuvs.to_netcdf(source, mode="w")
     print(XGuvs)
 
