@@ -16,6 +16,7 @@ import csv
 from scipy.ndimage import binary_opening, binary_closing, binary_fill_holes, binary_dilation, binary_erosion
 from skimage.morphology import ball, disk, square, diamond, ball
 
+
 def a20a_build_coordinates(im_ori_name,initval):
     """
     description: collect relevant coordinates (such as guv center) from tiff stacks and save as csv
@@ -53,7 +54,8 @@ def a20a_build_coordinates(im_ori_name,initval):
     all_guvs_areas = []
     all_guvs_perimeters = []
     all_guvs_roundness = []
-
+    all_guvs_std = []
+    all_guvs_focalplane=[]
 
     for roi_i, x in enumerate(xg):  #work each GUV and its center coordinates:
         if initval.movie_id==-1 or roi_i==initval.movie_id:
@@ -69,6 +71,7 @@ def a20a_build_coordinates(im_ori_name,initval):
             #set up:
             all_xg=[];     all_yg=[];          all_R_minor=[];  all_R_major=[]
             all_areas=[];  all_perimeters=[];  all_roundness=[]; all_ok_frame =[]
+            all_std=[]
             mask_stack=0*roi_stack
             roi_shp=np.shape(roi_stack)
             n_frames=roi_shp[0]
@@ -97,6 +100,7 @@ def a20a_build_coordinates(im_ori_name,initval):
                     all_areas.append(area)
                     all_perimeters.append(perimeter)
                     all_roundness.append(roundness)
+                    all_std.append(np.std(roi_tr*msk))
                     #we build a separate mask stack, to be saved as tiff:
                     mask_stack[fri,:,:]=msk
                 else:
@@ -108,6 +112,7 @@ def a20a_build_coordinates(im_ori_name,initval):
                     all_areas.append(0)
                     all_perimeters.append(0)
                     all_roundness.append(0)
+                    all_std.append(0)
                 #build and save summary figure:
                 titl = str("file_")+ im_ori_name  + str("_roi")+str(roi_i) +  str("c") + str(color_i)
                 if  fri==0:
@@ -117,7 +122,6 @@ def a20a_build_coordinates(im_ori_name,initval):
                     axs1[0,0].imshow(roi)
                     axs1[0,0].set_title('original')
                     axs1[0,0].plot(ym,xm,'ro')
-
                     print("a20a:" + titl + str("frame") + str(fri))
             #grow 2D data maps:
             all_guvs_okay_fr.append(all_ok_frame)
@@ -128,10 +132,16 @@ def a20a_build_coordinates(im_ori_name,initval):
             all_guvs_areas.append(all_areas)
             all_guvs_perimeters.append(all_perimeters)
             all_guvs_roundness.append(all_roundness)
+            all_guvs_std.append(all_std)
+            #1D:
+            focalplane=np.argmax(all_std)
+
+            all_guvs_focalplane.append(focalplane)
 
             # set up some plotting
             frax=np.arange(len(all_roundness))
             roundness_plot=np.array(all_roundness)
+            std_plot = np.array(all_std)
             R_minor_plot=np.array(all_R_minor)
             R_major_plot=np.array(all_R_major)
             areas_plot=np.array(all_areas)
@@ -148,8 +158,9 @@ def a20a_build_coordinates(im_ori_name,initval):
             axs1[1,0].set_ylabel('area')
             axs1[1,0].set_xlabel('frame no.')
 
-            axs1[1,1].plot(frax[valid_idx], roundness_plot[valid_idx],'ko-')
-            axs1[1,1].set_ylabel('roundness')
+            axs1[1,1].plot(frax[valid_idx], std_plot[valid_idx],'ko-')
+            axs1[1, 1].plot(frax[focalplane], std_plot[focalplane], 'ro-')
+            axs1[1,1].set_ylabel('standard deviation')
             axs1[1,1].set_xlabel('frame no.')
             outfig_name = out_path_name  + titl + str("frame") + str(fri)+ str("_track_example.png")
 
@@ -178,6 +189,7 @@ def a20a_build_coordinates(im_ori_name,initval):
             fig.savefig(overviewpath / f"{(mtg_plotname)}", dpi=500)
             plt.close('all')
 
+
     # save same data to existing .nc with planes as second axis:
     save_geometry(all_guvs_xg,
                   all_guvs_yg,
@@ -186,6 +198,7 @@ def a20a_build_coordinates(im_ori_name,initval):
                   all_guvs_areas,
                   all_guvs_perimeters,
                   all_guvs_roundness,
+                  all_guvs_std,
                   all_guvs_okay_fr,
                   source)
 
@@ -482,6 +495,7 @@ def save_geometry(all_guvs_xg,
                   all_guvs_areas,
                   all_guvs_perimeters,
                   all_guvs_roundness,
+                  all_guvs_std,
                   all_guvs_okay_fr,
                   source):
     n_guvs, n_planes = np.shape(all_guvs_xg)
@@ -500,10 +514,12 @@ def save_geometry(all_guvs_xg,
                                  coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Perimeter")
     roundness_da = xr.DataArray(all_guvs_roundness, dims=("index", "plane"),
                                 coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Roundness")
+    std_da = xr.DataArray(all_guvs_std, dims=("index", "plane"),
+                                coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Standard_Deviation")
     okayframe_da = xr.DataArray(all_guvs_okay_fr, dims=("index", "plane"),
                                 coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Okayframe")
 
-    XGuvs = xr.merge([area_da, xg_da, yg_da, R_minor_da, R_major_da, perimeters_da, roundness_da, okayframe_da,XGuvs],compat='override')
+    XGuvs = xr.merge([area_da, xg_da, yg_da, R_minor_da, R_major_da, perimeters_da, roundness_da, std_da, okayframe_da,XGuvs],compat='override')
     XGuvs.to_netcdf(source, mode="w")
     print(XGuvs)
 

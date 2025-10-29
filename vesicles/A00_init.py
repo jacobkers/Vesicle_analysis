@@ -58,7 +58,7 @@ def get_exps(exp_idx):
     Exp1.mainpath_out =out_root + str("pilots/")   
     Exp1.subdir = str("20082025_CS_test/")
     Exp1.movienames = ["tiff_01", "tiff_00", ]  # the ones that have ROIs measured in ImageJ
-    Exp1.movienames = ["tiff_01"]  # the ones that have ROIs measured in ImageJ
+    #Exp1.movienames = ["tiff_01"]  # the ones that have ROIs measured in ImageJ
     Exp1.suffix='.tif'
     Exp1.tracking_key=[0]  #write as list! #1: use hand-set drift #2: use x, y from prior run A20
     Exp1.N_colors=1
