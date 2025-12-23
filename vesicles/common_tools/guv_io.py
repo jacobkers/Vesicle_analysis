@@ -604,7 +604,7 @@ def work_roi_tiffs(im_ori_name,guv_xyr,initval):
         fig.show()
         plt.close("all")
 
-def get_data_selections(filename,initval):
+def get_data_selections(filename):
     import pandas as pd
     guvs_user = pd.read_excel(filename, sheet_name="guvs")
 

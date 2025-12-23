@@ -39,7 +39,7 @@ def a20a_build_coordinates(im_ori_name,initval):
         maskpath.mkdir()
     
     fig, axs = plt.subplots(1, 3)
-    #
+    #bring in coordinates
     source = initval.mainpath_out + initval.subdir + im_ori_name + initval.nc_name
     ds_guvs = xr.load_dataset(source)
     xg=ds_guvs["X0"]

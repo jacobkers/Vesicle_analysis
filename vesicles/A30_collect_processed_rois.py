@@ -28,7 +28,7 @@ def main(initval):
     import importlib
     importlib.reload(guv_io)
     selections_filename = "data_overview_Charu.xlsx"
-    guv_users_df = guv_io.get_data_selections(selections_filename,initval)
+    guv_users_df = guv_io.get_data_selections(selections_filename)
 
     if initval.suffix =='.tif'and initval.sequence=='time_trace':
         for mv_id, im_ori_name in enumerate(initval.movienames):
