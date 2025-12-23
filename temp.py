@@ -1,19 +1,10 @@
+# ## Imports and Setup
+#import pandas as pd
+from pathlib import Path
+#import matplotlib.pyplot as plt
+#from skimage import io
+#from skimage import measure
+#import numpy as np
+#from datetime import datetime
+#import tifffile
 print("ellende")
-
-import sys
-print("Python:", sys.executable)
-
-import skimage
-print("skimage:", skimage.__version__)
-
-import cv2
-print("cv2:", cv2.__version__)
-
-import scipy
-print("scipy:", scipy.__version__)
-
-import numpy
-print("numpy:", numpy.__version__)
-
-
-
