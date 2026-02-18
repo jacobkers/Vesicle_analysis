@@ -40,7 +40,11 @@ def main(initval):
             #save a flattened file to excel for external use:
 
             df = ds_guvs.to_dataframe().reset_index()
-            xls_target= initval.mainpath_out + initval.subdir_out + im_ori_name + initval.nc_name[:-4] + ".xlsx"
+            df["focal_plane"] = df["focal_plane"].astype(int)
+            df["Okayframe"] = df["Okayframe"].astype(int)
+
+
+            xls_target= initval.mainpath_out + initval.subdir_out + im_ori_name + initval.nc_name[:-3] + ".xlsx"
             df.to_excel(xls_target, index=False)
 
 
