@@ -25,9 +25,10 @@ def init_db():
         conn.execute("""
         CREATE TABLE IF NOT EXISTS directories (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            path TEXT UNIQUE,
+            path_in TEXT UNIQUE,
+            path_out TEXT UNIQUE,
             use_this INTEGER,
-            salt_concentration REAL,
+            salt_concentration TEXT,
             remarks TEXT,
             property_hash TEXT,
             last_run_hash TEXT,
