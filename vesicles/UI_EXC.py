@@ -24,10 +24,10 @@ def init_db():
     with sqlite3.connect(DB_FILE) as conn:
         conn.execute("""
         CREATE TABLE IF NOT EXISTS directories (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            path TEXT UNIQUE,
-            use_this INTEGER,
-            salt_concentration REAL,
+            experiment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            experiment_path_in TEXT UNIQUE,
+            experiment_path_out TEXT UNIQUE,
+            experiment_use_it INTEGER,
             remarks TEXT,
             property_hash TEXT,
             last_run_hash TEXT,
@@ -44,18 +44,25 @@ def add_directory(path):
     with sqlite3.connect(DB_FILE) as conn:
         conn.execute("""
         INSERT OR IGNORE INTO directories
-        (path, use_this, salt_concentration, remarks, property_hash, last_run_hash, status)
-        VALUES (?, 1, NULL, '', '', '', 'dirty')
+        (
+        experiment_path_in,
+        experiment_path_out,
+        experiment_use_it,
+        remarks,
+        property_hash,
+        last_run_hash,
+        status
+        )
+        VALUES (  ?,?,1, '?','', '', 'dirty')
         """, (str(path),))
     print(f"Added directory: {path}")
-
 
 # ---------------------------
 # 3. Export to Excel
 # ---------------------------
 def export_to_excel():
     with sqlite3.connect(DB_FILE) as conn:
-        df = pd.read_sql("SELECT id, path, use_this, salt_concentration, remarks FROM directories", conn)
+        df = pd.read_sql("SELECT id, experiment_path_in,experiment_path_out,experiment_use_it,remarks FROM directories", conn)
 
     df.to_excel(EXCEL_FILE, index=False)
     print(f"Exported to {EXCEL_FILE}")
@@ -73,7 +80,6 @@ def import_from_excel():
         for _, row in df.iterrows():
             data_dict = {
                 "use_this": int(row["use_this"]),
-                "salt_concentration": row["salt_concentration"],
                 "remarks": row["remarks"],
                 "code_version": CODE_VERSION
             }
@@ -89,15 +95,13 @@ def import_from_excel():
 
             cursor.execute("""
                 UPDATE directories
-                SET use_this=?,
-                    salt_concentration=?,
+                SET use_this=?,,
                     remarks=?,
                     property_hash=?,
                     status=?
                 WHERE id=?
             """, (
                 int(row["use_this"]),
-                row["salt_concentration"],
                 row["remarks"],
                 new_hash,
                 status,
@@ -143,8 +147,9 @@ if __name__ == "__main__":
     init_db()
 
     # Add some directories (only needed once)
-    add_directory("data/experiment_1")
-    add_directory("data/experiment_2")
+    add_directory("M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Charu\pilots\20082025_CS_test/")
+    add_directory("M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Charu\pilots\20082025_CS_test_00/")
+    add_directory("M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Charu\pilots\20082025_CS_test_01/")
 
     # Export editable Excel
     export_to_excel()
