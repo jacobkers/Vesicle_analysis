@@ -20,9 +20,7 @@ from skimage.morphology import ball, disk, square, diamond, ball
 def a20a_build_coordinates(im_ori_name,initval):
     """
     description: collect relevant coordinates (such as guv center) from tiff stacks and save as csv
-
     approach: a 'work stack' is created by just adding up all color channels
-
     #Jacob 2024 """
     #set paths:
     datapath_out_name = initval.mainpath_out + initval.subdir 

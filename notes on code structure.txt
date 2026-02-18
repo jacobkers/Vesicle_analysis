@@ -1,0 +1,56 @@
+define classes that link to a single row in an excel table
+
+---------------------------
+dirs_list
+highest level: experiments (a collection of thematic directories)  
+descriptor: experiments_list .xls
+into df (possibly .nc save?)
+saves expanded experiments & movies list to .xls, one per directory
+in: dir_list.xlsx (user_assembled)
+out: .nc file?
+----------firewall------------
+
+movies_list
+second level: movie collection for single directory
+descriptor: movies_list.xls in a single directory
+saves per movie: frame order, calib etc.
+
+-----firewall-----------------
+
+crops_list 
+third level: guv collection for a single movie (Needs Fiji detour)
+reads a single movie.xls plus ROI selection
+out: guv list.xls
+out: single_guv_crops.tif
+out: .nc?
+
+-----firewall-------------------------
+[BvH starts here]
+in: guv list.xls
+in: single_guv_crops.tif
+frame_list 
+fourth level: single crops per guv
+saves per guv as tiffs, pics, snapshots
+out: rows of all frames and planes
+
+
+
+fifth level: single frames
+property dump, fully expanded
+saves per frame and plane , numeric properties
+keep colors as columns
+numbers are of order frs[1--1E4], plns[1--100], clr[1-5]
+
+
+
+definitions:
+a firewall is a point in the pipeline where the user can step in or step out use an excel to interrupt or add notes, columns etc
+that can be a use_movie, _use_guv, or any variable. These will be passed on to any next table 
+
+To think about: 
+-leaders (the excels), 
+-internal format ( xarray, df) : what is their function? 
+-run_ids for updates 
+possibly a simple GUI
+
+
