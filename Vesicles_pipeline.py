@@ -36,10 +36,10 @@ if 0: A10_muscope_crop.main(initval)
     # NOTE: this step stores intermediates and therefore needs to be run only once
     # A20: First processing of regions-of-interest (ROIs)
     # In this step, we first isolate the area of the vesicle to obtain masks, but also some general geometry features such as radius, area and other shape characteristics. Next, we perfom detailed analysis of every color channel
-if 0: A20_process_rois.main(initval,0,0) #needs to be run only once
+if 1: A20_process_rois.main(initval,1,1) #needs to be run only once
     # NOTE: this step stores intermediates and therefore needs to be run only once
 
-# II. Multi-frame Data Processing and Visualization
+# II. Multi-frame Data Processing and Visualization; saving to excel
 if 1:
     A30_collect_processed_rois.main(initval)
     plt.show()

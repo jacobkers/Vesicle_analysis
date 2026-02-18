@@ -37,6 +37,11 @@ def main(initval):
             ds_guvs = xr.load_dataset(source)
             print(ds_guvs.info)
 
+            #save a flattened file to excel for external use:
+
+
+
+
             for guv_id, this_guv in enumerate(ds_guvs["index"]):
                 #check if guv was user_judged and if so, how
                 mask = (
