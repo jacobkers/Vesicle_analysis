@@ -45,15 +45,15 @@ def add_directory(path):
         conn.execute("""
         INSERT OR IGNORE INTO directories
         (
-        experiment_path_in,
-        experiment_path_out,
-        experiment_use_it,
-        remarks,
-        property_hash,
-        last_run_hash,
-        status
+            experiment_path_in,
+            experiment_path_out,
+            experiment_use_it,
+            remarks,
+            property_hash,
+            last_run_hash,
+            status
         )
-        VALUES (  ?,?,1, '?','', '', 'dirty')
+        VALUES (?, '', 1, '', '', '', 'dirty')
         """, (str(path),))
     print(f"Added directory: {path}")
 
@@ -62,7 +62,7 @@ def add_directory(path):
 # ---------------------------
 def export_to_excel():
     with sqlite3.connect(DB_FILE) as conn:
-        df = pd.read_sql("SELECT id, experiment_path_in,experiment_path_out,experiment_use_it,remarks FROM directories", conn)
+        df = pd.read_sql("SELECT experiment_path_in,experiment_path_out,experiment_use_it,remarks FROM directories", conn)
 
     df.to_excel(EXCEL_FILE, index=False)
     print(f"Exported to {EXCEL_FILE}")
@@ -147,9 +147,9 @@ if __name__ == "__main__":
     init_db()
 
     # Add some directories (only needed once)
-    add_directory("M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Charu\pilots\20082025_CS_test/")
-    add_directory("M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Charu\pilots\20082025_CS_test_00/")
-    add_directory("M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Charu\pilots\20082025_CS_test_01/")
+    add_directory(r'M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Charu\pilots\20082025_CS_test')
+    add_directory(r'M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Charu\pilots\20082025_CS_test_00')
+    add_directory(r'M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Charu\pilots\20082025_CS_test_01')
 
     # Export editable Excel
     export_to_excel()
