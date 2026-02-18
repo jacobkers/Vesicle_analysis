@@ -33,14 +33,14 @@ def main(initval):
     if initval.suffix =='.tif'and initval.sequence=='time_trace':
         for mv_id, im_ori_name in enumerate(initval.movienames):
             fig, axs = plt.subplots(2, 3, figsize=(20, 15))
-            source = initval.mainpath_out + initval.subdir + im_ori_name + initval.nc_name
+            source = initval.mainpath_out + initval.subdir_out + im_ori_name + initval.nc_name
             ds_guvs = xr.load_dataset(source)
             print(ds_guvs.info)
 
             #save a flattened file to excel for external use:
 
             df = ds_guvs.to_dataframe().reset_index()
-            xls_target= initval.mainpath_out + initval.subdir + im_ori_name + initval.nc_name[:-4] + ".xlsx"
+            xls_target= initval.mainpath_out + initval.subdir_out + im_ori_name + initval.nc_name[:-4] + ".xlsx"
             df.to_excel(xls_target, index=False)
 
 

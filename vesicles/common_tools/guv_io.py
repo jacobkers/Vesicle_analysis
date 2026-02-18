@@ -352,9 +352,9 @@ def cut_tif_to_roi_tiffs_hardwired(im_ori_name,guv_xyr,initval):
     
     #standard setting up:
     source = initval.mainpath_in + initval.subdir + im_ori_name + str(initval.suffix)
-    datapath_out_name = initval.mainpath_out + initval.subdir 
-    roipath_name = initval.mainpath_out + initval.subdir +str("/A10_rois")
-    overviewpath_name = initval.mainpath_out + initval.subdir +str("/A100_overviews")
+    datapath_out_name = initval.mainpath_out + initval.subdir_out
+    roipath_name = initval.mainpath_out + initval.subdir_out +str("/A10_rois")
+    overviewpath_name = initval.mainpath_out + initval.subdir_out +str("/A100_overviews")
     
     outpath = Path(datapath_out_name)
     overviewpath= Path(overviewpath_name)
@@ -439,7 +439,7 @@ def cut_tif_to_roi_tiffs_hardwired(im_ori_name,guv_xyr,initval):
             tifffile.imwrite(roipath / f"{roiname}", roi)
 
     #end: save all crop info (once per guv)
-    target = initval.mainpath_out + initval.subdir + im_ori_name + initval.nc_name
+    target = initval.mainpath_out + initval.subdir_out + im_ori_name + initval.nc_name
     save_crop_info_to_xr(cut_x0_all_guvs, cut_y0_all_guvs, cut_r0_all_guvs, target)
 
     fig.show()
@@ -466,9 +466,9 @@ def save_crop_info_to_xr(cut_x0, cut_y0, cut_r0, target):
 def cut_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval):
     """ use pre-set coordinates in imageJ to save standardized tif roi-stacks from .tif  format
     #Jacob 2024 """
-    source = initval.mainpath_in + initval.subdir + im_ori_name + str(initval.suffix)
-    datapath_out_name = initval.mainpath_out + initval.subdir 
-    roipath_name = initval.mainpath_out + initval.subdir +str("/A10_rois")   
+    source = initval.mainpath_in + initval.subdir_out + im_ori_name + str(initval.suffix)
+    datapath_out_name = initval.mainpath_out + initval.subdir_out
+    roipath_name = initval.mainpath_out + initval.subdir_out +str("/A10_rois")
     outpath = Path(datapath_out_name)
     if not outpath.is_dir():
         outpath.mkdir()
