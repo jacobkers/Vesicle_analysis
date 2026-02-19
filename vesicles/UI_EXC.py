@@ -144,16 +144,19 @@ def run_dirty_directories():
 # Example workflow
 # ---------------------------
 if __name__ == "__main__":
-    init_db()
+    if 1:
+        init_db()
 
-    # Add some directories (only needed once)
-    add_directory(r'M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Charu\pilots\20082025_CS_test')
-    add_directory(r'M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Charu\pilots\20082025_CS_test_00')
-    add_directory(r'M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Charu\pilots\20082025_CS_test_01')
+        # Add some directories (only needed once)
+        add_directory(r'M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Charu\pilots\20082025_CS_test')
+        add_directory(r'M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Charu\pilots\20082025_CS_test_00')
+        add_directory(r'M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Charu\pilots\20082025_CS_test_01')
 
 
-    # Export editable Excel
-    export_to_excel()
+        # Export editable Excel
+        export_to_excel()
 
     print("Edit directories.xlsx, then re-run this script with:")
-    print("import_from_excel()")
+else:
+
+    import_from_excel()
