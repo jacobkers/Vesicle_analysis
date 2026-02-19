@@ -45,6 +45,7 @@ def add_directory(path):
         conn.execute("""
         INSERT OR IGNORE INTO directories
         (
+            experiment_id,
             experiment_path_in,
             experiment_path_out,
             experiment_use_it,
@@ -53,7 +54,7 @@ def add_directory(path):
             last_run_hash,
             status
         )
-        VALUES (?, '', 1, 'remarks', '', '', 'dirty')
+        VALUES (-1,?, '', 1, 'remarks', '', '', 'dirty')
         """, (str(path),))
     print(f"Added directory: {path}")
 
@@ -62,7 +63,7 @@ def add_directory(path):
 # ---------------------------
 def export_to_excel():
     with sqlite3.connect(DB_FILE) as conn:
-        df = pd.read_sql("SELECT experiment_path_in,experiment_path_out,experiment_use_it,remarks FROM directories", conn)
+        df = pd.read_sql("SELECT experiment_id, experiment_path_in,experiment_path_out,experiment_use_it,remarks FROM directories", conn)
 
     df.to_excel(EXCEL_FILE, index=False)
     print(f"Exported to {EXCEL_FILE}")
@@ -86,7 +87,7 @@ def import_from_excel():
 
             new_hash = compute_hash(data_dict)
 
-            cursor.execute("SELECT property_hash FROM directories WHERE id=?", (row["id"],))
+            cursor.execute("SELECT property_hash FROM directories WHERE experiment_id=?", (row["experiment_id"],))
             result = cursor.fetchone()
 
             old_hash = result[0] if result else None
@@ -99,13 +100,13 @@ def import_from_excel():
                     remarks=?,
                     property_hash=?,
                     status=?
-                WHERE id=?
+                WHERE experiment_id=?
             """, (
                 int(row["experiment_use_it"]),
                 row["remarks"],
                 new_hash,
                 status,
-                row["id"]
+                row["experiment_id"]
             ))
 
         conn.commit()
@@ -149,8 +150,6 @@ if __name__ == "__main__":
 
         # Add some directories (only needed once)
         add_directory(r'any_directory\any_sub_directory')
-
-
 
         # Export editable Excel
         export_to_excel()
