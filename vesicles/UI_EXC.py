@@ -53,7 +53,7 @@ def add_directory(path):
             last_run_hash,
             status
         )
-        VALUES (?, '', 1, '', '', '', 'dirty')
+        VALUES (?, '', 1, 'remarks', '', '', 'dirty')
         """, (str(path),))
     print(f"Added directory: {path}")
 
@@ -79,7 +79,7 @@ def import_from_excel():
 
         for _, row in df.iterrows():
             data_dict = {
-                "use_this": int(row["use_this"]),
+                "experiment_use_it": int(row["experiment_use_it"]),
                 "remarks": row["remarks"],
                 "code_version": CODE_VERSION
             }
@@ -95,13 +95,13 @@ def import_from_excel():
 
             cursor.execute("""
                 UPDATE directories
-                SET use_this=?,
+                SET experiment_use_it=?,
                     remarks=?,
                     property_hash=?,
                     status=?
                 WHERE id=?
             """, (
-                int(row["use_this"]),
+                int(row["experiment_use_it"]),
                 row["remarks"],
                 new_hash,
                 status,
@@ -144,19 +144,18 @@ def run_dirty_directories():
 # Example workflow
 # ---------------------------
 if __name__ == "__main__":
-    if 1:
+    if 0:
         init_db()
 
         # Add some directories (only needed once)
-        add_directory(r'M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Charu\pilots\20082025_CS_test')
-        add_directory(r'M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Charu\pilots\20082025_CS_test_00')
-        add_directory(r'M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Charu\pilots\20082025_CS_test_01')
+        add_directory(r'any_directory\any_sub_directory')
+
 
 
         # Export editable Excel
         export_to_excel()
 
-    print("Edit directories.xlsx, then re-run this script with:")
-else:
-
-    import_from_excel()
+        print("initialized Excel")
+    else:
+        import_from_excel()
+        print("imported Excel")

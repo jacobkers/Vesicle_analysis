@@ -13,7 +13,7 @@ from matplotlib.backends.backend_qtagg import (
     FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
 
 from gui.common_layouts import ImageCanvas,Expander,HelpDialog
-from gui.kinetics_widget import KineticsWidget
+from gui.results_view_widget import ResultsWidget
 class MainWindow(QMainWindow):
 
 
@@ -40,11 +40,13 @@ class MainWindow(QMainWindow):
 
         main_help_button = QPushButton('Read me')
         main_help_button.clicked.connect(self.show_main_help)
-
+        update_dir_button = QPushButton('Update dirs')
+        update_movies_button = QPushButton('Update movies')
+        update_vesicles_button = QPushButton('Update vesicles')
 
 
         start_tab_layout=QVBoxLayout()
-        start_tab_layout.addWidget(main_help_button)
+
 
 
         tabs = QTabWidget()
@@ -54,24 +56,27 @@ class MainWindow(QMainWindow):
 
         tab0 = QWidget(self)
         tab0.setLayout(start_tab_layout)
-        tabs.addTab(tab0, 'Start')
-        kinetics = KineticsWidget(parent=self)
-        tabs.addTab(kinetics, 'Kinetics (beta)')
+        tabs.addTab(tab0, 'Pictures')
+        kinetics = ResultsWidget(parent=self)
+        tabs.addTab(kinetics, 'Graphs')
         tabs.currentChanged.connect(self.setTabFocus)
 
         experiment_layout = QVBoxLayout()
 
 
-        top_layout = QHBoxLayout()
-        top_layout.addWidget(self.image)
+        left_layout = QVBoxLayout()
+        left_layout.addWidget(main_help_button)
+        left_layout.addWidget(update_dir_button)
+        left_layout.addWidget(update_movies_button)
+        left_layout.addWidget(update_vesicles_button)
 
         #build main panel
-        bottom_layout = QHBoxLayout()
-        bottom_layout.addWidget(tabs)
+        right_layout = QHBoxLayout()
+        right_layout.addWidget(tabs)
 
-        super_layout = QVBoxLayout()
-        super_layout.addLayout(top_layout)
-        super_layout.addLayout(bottom_layout)
+        super_layout = QHBoxLayout()
+        super_layout.addLayout(left_layout)
+        super_layout.addLayout(right_layout)
 
         widget = QWidget()
         widget.setLayout(super_layout)
@@ -106,18 +111,29 @@ class MainWindow(QMainWindow):
                     <h2>Welcome</h2>
 
                     <p>
-                      This gui is based on the Papylio framework
+                      This gui syncs user-based Excel entries with an database and an analysis pipeline. 
+                      It is intended to allow a user to adapt settings and annotate on various data levels,
+                      for example, to select and deselect movies or vesicles
                     </p>
+                     
+                     <p>
 
-                    <ul>
-                      <li>Select and view movies and variables in the top panel</li>
-                      <li>Walk the pipeline via the tabs in the bottom panel</li>
-                    </ul>
-
+                        <ul>
+                          <li>edit the various excel levels</li>
+                          <li>press the corresponding update button</li>
+                          <li></li>
+                        </ul>
+                     </p>   
+                    
+                    <p>   
+                    code will automatically add changes, re-analyze data if necessary
+                    and export updated results back to the Excels
+                    </p>
+                    
                     <p>
-                      For background, see the
-                      <a href="https://papylio.readthedocs.io/en/stable/user_guide/index.html">
-                        Papylio documentation
+                      code is here:
+                      <a href="https://github.com/jacobkers/CD23_vesicles/">
+                        Vesicle code
                       </a>.
                     </p>
 

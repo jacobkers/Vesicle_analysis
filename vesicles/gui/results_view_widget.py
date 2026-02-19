@@ -16,7 +16,7 @@ import numpy as np
 from matplotlib.backends.backend_qtagg import (
     FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
 
-class KineticsWidget(QWidget):
+class ResultsWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent

@@ -19,7 +19,7 @@ from PySide6.QtCore import Qt
 import sys
 
 class ImageCanvas(FigureCanvas):
-    def __init__(self, parent=None, width=14, height=7, dpi=100):
+    def __init__(self, parent=None, width=5, height=5, dpi=100):
         self.figure = mpl.figure.Figure(figsize=(width, height), dpi=dpi, constrained_layout=True)  # , figsize=(2, 2))
         super().__init__(self.figure)
         self.parent = parent
@@ -82,7 +82,7 @@ class HelpDialog(QDialog):
     def __init__(self, parent=None, help_text=""):
         super().__init__(parent)
         self.setWindowTitle("Help")
-        self.resize(900, 800)
+        self.resize(400, 600)
 
         layout = QVBoxLayout(self)
 
