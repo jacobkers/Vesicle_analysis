@@ -95,7 +95,7 @@ def import_from_excel():
 
             cursor.execute("""
                 UPDATE directories
-                SET use_this=?,,
+                SET use_this=?,
                     remarks=?,
                     property_hash=?,
                     status=?
@@ -150,6 +150,7 @@ if __name__ == "__main__":
     add_directory(r'M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Charu\pilots\20082025_CS_test')
     add_directory(r'M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Charu\pilots\20082025_CS_test_00')
     add_directory(r'M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Charu\pilots\20082025_CS_test_01')
+
 
     # Export editable Excel
     export_to_excel()
