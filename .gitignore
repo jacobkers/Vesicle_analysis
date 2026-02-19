@@ -4,7 +4,8 @@
 *.pdf
 
 # test data
-*.xls*
+*.xls
+*.xlsx
 *.nc
 *.db
 
