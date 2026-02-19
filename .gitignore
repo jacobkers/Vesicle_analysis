@@ -4,8 +4,9 @@
 *.pdf
 
 # test data
-*.XXxls*
+*.xls*
 *.nc
+*.db
 
 *.mat
 *.zip
