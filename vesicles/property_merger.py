@@ -60,7 +60,7 @@ def export_to_excel():
 
     df = pd.concat([df.drop(columns=["properties_json"]), props_df], axis=1)
 
-    df.to_excel(EXCEL_OUT_FILE, index=False)
+    df.to_excel(EXCEL_IN_FILE, index=False)
     print("Exported clean Excel (no hash columns).")
 
 # ---------------------------
