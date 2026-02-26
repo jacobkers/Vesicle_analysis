@@ -7,7 +7,8 @@ import json
 from pathlib import Path
 
 DB_FILE = "project.db"
-EXCEL_FILE = "movies.xlsx"
+EXCEL_IN_FILE = "movies_in.xlsx"
+EXCEL_OUT_FILE = "movies_out.xlsx"
 CODE_VERSION = "v1.0-movies"
 
 
@@ -27,7 +28,7 @@ def init_db():
         conn.execute("""
         CREATE TABLE IF NOT EXISTS movies (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            label TEXT UNIQUE,
+            experiment_label TEXT UNIQUE,
             properties_json TEXT,
             property_hash TEXT,
             last_run_hash TEXT,
@@ -39,54 +40,51 @@ def init_db():
 # ---------------------------
 # 2. Add movie entries
 # ---------------------------
-def add_movie(path):
+def add_movie(experiment_label):
     with sqlite3.connect(DB_FILE) as conn:
         conn.execute("""
         INSERT OR IGNORE INTO movies
-        (label, properties_json, property_hash, last_run_hash, status)
+        (experiment_label, properties_json, property_hash, last_run_hash, status)
         VALUES (?, '{}', '', '', 'dirty')
-        """, (str(path),))
-    print(f"Added movie: {path}")
+        """, (str(experiment_label),))
+    print(f"Added movie: {experiment_label}")
 
 def export_to_excel():
     with sqlite3.connect(DB_FILE) as conn:
-        df = pd.read_sql("SELECT * FROM movies", conn)
+        df = pd.read_sql("SELECT id, experiment_label, properties_json FROM movies", conn)
 
     # Expand JSON properties into columns
-    props_df = df["properties_json"].apply(json.loads).apply(pd.Series)
+    props_df = df["properties_json"].apply(
+        lambda x: json.loads(x) if x else {}
+    ).apply(pd.Series)
+
     df = pd.concat([df.drop(columns=["properties_json"]), props_df], axis=1)
 
-    df.to_excel(EXCEL_FILE, index=False)
-    print("Exported.")
+    df.to_excel(EXCEL_OUT_FILE, index=False)
+    print("Exported clean Excel (no hash columns).")
 
 # ---------------------------
 # 4. Import from Excel + detect changes
 # ---------------------------
 def import_from_excel():
-    df = pd.read_excel(EXCEL_FILE)
+    df = pd.read_excel(EXCEL_IN_FILE)
 
-    fixed_columns = {"id", "label"}
+    fixed_columns = {"id", "experiment_label"}
 
     with sqlite3.connect(DB_FILE) as conn:
         cursor = conn.cursor()
 
         for _, row in df.iterrows():
-            dir_id = row["id"]
 
-            # Everything except fixed columns is a user property
+            dir_id = row.get("id", None)
+
+            # Extract user properties
             properties = {
-                col: row[col]
+                col: (None if pd.isna(row[col]) else row[col])
                 for col in df.columns
                 if col not in fixed_columns
             }
 
-            # Remove NaN → convert to None
-            properties = {
-                k: (None if pd.isna(v) else v)
-                for k, v in properties.items()
-            }
-
-            # Include code version in hash
             hash_input = {
                 "properties": properties,
                 "code_version": CODE_VERSION
@@ -94,27 +92,52 @@ def import_from_excel():
 
             new_hash = compute_hash(hash_input)
 
-            cursor.execute("SELECT property_hash FROM movies WHERE id=?", (dir_id,))
-            old_hash = cursor.fetchone()[0]
+            # -----------------------
+            # CASE 1: New row (no id)
+            # -----------------------
+            if pd.isna(dir_id):
+                cursor.execute("""
+                    INSERT INTO movies
+                    (experiment_label, properties_json, property_hash, last_run_hash, status)
+                    VALUES (?, ?, ?, NULL, 'dirty')
+                """, (
+                    row["experiment_label"],
+                    json.dumps(properties),
+                    new_hash
+                ))
+                continue
 
+            # -----------------------
+            # CASE 2: Existing row
+            # -----------------------
+            cursor.execute("SELECT property_hash FROM movies WHERE id=?", (int(dir_id),))
+            result = cursor.fetchone()
+
+            if result is None:
+                print(f"Warning: ID {dir_id} not found. Skipping.")
+                continue
+
+            old_hash = result[0]
             status = "dirty" if new_hash != old_hash else "clean"
 
             cursor.execute("""
                 UPDATE movies
-                SET properties_json=?,
+                SET experiment_label=?,
+                    properties_json=?,
                     property_hash=?,
                     status=?
                 WHERE id=?
             """, (
+                row["experiment_label"],
                 json.dumps(properties),
                 new_hash,
                 status,
-                dir_id
+                int(dir_id)
             ))
 
         conn.commit()
 
-    print("Import complete.")
+    print("Excel import complete.")
 
 
 # ---------------------------
@@ -143,8 +166,6 @@ def run_dirty_movies():
 
     print("Run complete.")
 
-
-
 def show_movies_df():
     with sqlite3.connect("project.db") as conn:
         df = pd.read_sql("SELECT * FROM movies", conn)
@@ -157,6 +178,33 @@ def show_movies_df():
     df = pd.concat([df.drop(columns=["properties_json"]), props_df], axis=1)
 
     print(df.to_string(index=False))
+
+    # ---------------------------
+    # 5. Simulated run step
+    # ---------------------------
+def run_dirty_movies():
+    with sqlite3.connect(DB_FILE) as conn:
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT id, property_hash FROM movies WHERE status='dirty'")
+        rows = cursor.fetchall()
+
+        for dir_id, prop_hash in rows:
+            print(f"Running movies {dir_id}...")
+
+            # Simulate processing here
+
+            cursor.execute("""
+                UPDATE movies
+                SET last_run_hash=?,
+                    status='clean'
+                WHERE id=?
+            """, (prop_hash, dir_id))
+
+        conn.commit()
+
+    print("Run complete.")
+
 
 # ---------------------------
 # Example workflow
@@ -179,4 +227,6 @@ if __name__ == "__main__":
         # update & close your Excel first
         #export_to_excel()
         import_from_excel()
+        run_dirty_movies()
+        export_to_excel()
         show_movies_df()

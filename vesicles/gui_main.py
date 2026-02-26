@@ -89,6 +89,10 @@ class MainWindow(QMainWindow):
             dum=1
     def update_movies(self):
         property_merger.import_from_excel()
+        property_merger.run_dirty_movies()
+        property_merger.export_to_excel()
+        property_merger.show_movies_df()
+
         print("current data base contents:")
         property_merger.show_movies_df()
 
