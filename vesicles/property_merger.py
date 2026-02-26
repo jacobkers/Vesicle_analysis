@@ -177,5 +177,6 @@ if __name__ == "__main__":
         print("import_from_excel()")
     else:  #regular use
         # update & close your Excel first
+        #export_to_excel()
         import_from_excel()
         show_movies_df()
