@@ -42,9 +42,18 @@ class MainWindow(QMainWindow):
         main_help_button.clicked.connect(self.show_main_help)
         #update_dir_button = QPushButton('Update dirs.xls')
         #update_movies_button = QPushButton('Update movies.xls')
-        update_vesicles_button = QPushButton('Update vesicles.xls')
+        update_vesicles_button = QPushButton('read from movies_in.xls')
         update_vesicles_button.setToolTip("close Excel and press to update project data")
         update_vesicles_button.clicked.connect(self.update_movies)
+
+        process_vesicles_button = QPushButton('process')
+        process_vesicles_button.setToolTip("press to update project data")
+        process_vesicles_button.clicked.connect(self.process_vesicles)
+
+        export_vesicles_button = QPushButton('export to vesicles.xls')
+        export_vesicles_button.setToolTip("press to save to vesicles.xls")
+        export_vesicles_button.clicked.connect(self.export_vesicles)
+
         start_tab_layout=QVBoxLayout()
 
         tabs = QTabWidget()
@@ -63,6 +72,10 @@ class MainWindow(QMainWindow):
         left_layout = QVBoxLayout()
         left_layout.addWidget(main_help_button)
         left_layout.addWidget(update_vesicles_button)
+        left_layout.addWidget(process_vesicles_button)
+        left_layout.addWidget(export_vesicles_button)
+
+
 
         #build main panel
         right_layout = QHBoxLayout()
@@ -88,13 +101,19 @@ class MainWindow(QMainWindow):
             #self.traces.setFocus()
             dum=1
     def update_movies(self):
-        property_merger.import_from_excel()
+        property_merger.import_from_excel_in()
         property_merger.run_dirty_movies()
-        property_merger.export_to_excel()
-        property_merger.show_movies_df()
-
         print("current data base contents:")
         property_merger.show_movies_df()
+
+    def process_vesicles(self):
+        dum=1
+        print(f"processed vesicle data")
+
+    def export_vesicles(self):
+        property_merger.export_to_excel_out()
+        print(f"exported vesicle data")
+
 
     def show_main_help(self):
         help_text = """
