@@ -226,8 +226,6 @@ def show_movies_df():
 
     print(df.to_string(index=False))
 
-
-
 # ---------------------------
 # Example workflow
 # ---------------------------
