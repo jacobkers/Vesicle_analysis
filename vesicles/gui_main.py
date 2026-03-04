@@ -79,7 +79,7 @@ class MainWindow(QMainWindow):
 
         #build main panel
         right_layout = QHBoxLayout()
-        right_layout.addWidget(tabs)
+        #right_layout.addWidget(tabs)
 
         super_layout = QHBoxLayout()
         super_layout.addLayout(left_layout)
@@ -101,7 +101,7 @@ class MainWindow(QMainWindow):
             #self.traces.setFocus()
             dum=1
     def update_movies(self):
-        property_merger.import_from_excel_in()
+        property_merger.import_from_excel()
         property_merger.run_dirty_movies()
         print("current data base contents:")
         property_merger.show_movies_df()
@@ -111,7 +111,7 @@ class MainWindow(QMainWindow):
         print(f"processed vesicle data")
 
     def export_vesicles(self):
-        property_merger.export_to_excel_out()
+        property_merger.export_to_excel()
         print(f"exported vesicle data")
 
 

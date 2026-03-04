@@ -66,7 +66,7 @@ def add_movie(experiment_label):
         """, (str(experiment_label),))
     print(f"Added movie: {experiment_label}")
 
-def export_results():
+def export_to_excel():
     backup_file(VESICLES_OUT)
 
     with sqlite3.connect(DB_FILE) as conn:
@@ -89,7 +89,7 @@ def export_results():
 # ---------------------------
 # 4. Import from Excel + detect changes
 # ---------------------------
-def import_movies(rerun_all=False):
+def import_from_excel(rerun_all=False):
     backup_file(MOVIES_IN)
 
     df = pd.read_excel(MOVIES_IN)
@@ -232,19 +232,9 @@ def show_movies_df():
 # Example workflow
 # ---------------------------
 if __name__ == "__main__":
-    if 0:  #Danger zone_will overwrite your table!
+    if 1:  #Danger zone_will overwrite your table!
         init_db()
 
-        # Add some movies (only needed once)
-        add_movie(r'File A')
-        add_movie(r'File B')
-        add_movie(r'File D')
-
-        # Export editable Excel
-        export_to_excel()
-
-        print("Edit movies.xlsx, then re-run this script with:")
-        print("import_from_excel()")
     else:  #regular use
         # update & close your Excel first
         #export_to_excel()
