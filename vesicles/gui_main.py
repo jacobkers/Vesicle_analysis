@@ -1,7 +1,7 @@
-import sys
-import PySide6
+
+
 import platform
-import property_merger
+import property_merger_nw as property_merger
 
 import sys
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QGridLayout, QTreeView, QApplication, QMainWindow, \
@@ -42,11 +42,13 @@ class MainWindow(QMainWindow):
         main_help_button.clicked.connect(self.show_main_help)
         #update_dir_button = QPushButton('Update dirs.xls')
         #update_movies_button = QPushButton('Update movies.xls')
-        update_vesicles_button = QPushButton('read from movies_in.xls')
+        self.check_vesicles_button = QPushButton('check movies')
+        self.check_vesicles_button.clicked.connect(self.check_movies)
+        update_vesicles_button = QPushButton('import movies')
         update_vesicles_button.setToolTip("close Excel and press to update project data")
         update_vesicles_button.clicked.connect(self.update_movies)
 
-        process_vesicles_button = QPushButton('process')
+        process_vesicles_button = QPushButton('(re)process')
         process_vesicles_button.setToolTip("press to update project data")
         process_vesicles_button.clicked.connect(self.process_vesicles)
 
@@ -71,6 +73,7 @@ class MainWindow(QMainWindow):
 
         left_layout = QVBoxLayout()
         left_layout.addWidget(main_help_button)
+        left_layout.addWidget(self.check_vesicles_button)
         left_layout.addWidget(update_vesicles_button)
         left_layout.addWidget(process_vesicles_button)
         left_layout.addWidget(export_vesicles_button)
@@ -90,6 +93,11 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
         self.show()
 
+    def update_button_color(self,button):
+        if property_merger.any_dirty():
+            button.setStyleSheet("background-color: red;")
+        else:
+            button.setStyleSheet("background-color: lightgreen;")
 
     def keyPressEvent(self, e):
         self.traces.keyPressEvent(e)
@@ -100,9 +108,20 @@ class MainWindow(QMainWindow):
         if e == 1:
             #self.traces.setFocus()
             dum=1
+
+    def check_movies(self):
+        _, changed = property_merger.excel_changed()
+
+        if changed:
+            print("changed")
+            self.check_vesicles_button.setStyleSheet("background-color: tomato;")
+        else:
+            print("unchanged")
+            self.check_vesicles_button.setStyleSheet("background-color: lightgreen;")
+
     def update_movies(self):
-        property_merger.import_from_excel()
-        property_merger.run_dirty_movies()
+        property_merger.import_excel()
+        property_merger.process_movies()
         print("current data base contents:")
         property_merger.show_movies_df()
 

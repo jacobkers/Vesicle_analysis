@@ -1,29 +1,48 @@
 import sqlite3
 import pandas as pd
+import numpy as np
 import hashlib
 import json
 from pathlib import Path
 from datetime import datetime
 import shutil
 
-DB_FILE = "project.db"
-EXCEL_IN_FILE = "movies_in.xlsx"
-EXCEL_OUT_FILE = "vesicles_out.xlsx"
-CODE_VERSION = "v1.0-movies"
 
-
-# ---------------------------
-# Utilities: hash computation
-# ---------------------------
 DB_FILE = "project.db"
 MOVIES_IN = "movies_in.xlsx"
 VESICLES_OUT = "vesicles_out.xlsx"
 CODE_VERSION = "v1.0-movies"
 
 
+def canonicalize_value(v):
+    if pd.isna(v):
+        return None
+
+    # convert numpy scalars to python
+    if isinstance(v, np.generic):
+        return v.item()
+
+    # convert timestamps
+    if isinstance(v, pd.Timestamp):
+        return v.isoformat()
+
+    return v
+
+def build_properties(row, columns):
+    return {
+        col: canonicalize_value(row[col])
+        for col in columns
+        if col != "id"
+    }
+
 def compute_hash(data_dict):
-    s = json.dumps(data_dict, sort_keys=True)
-    return hashlib.sha256(s.encode()).hexdigest()
+    s = json.dumps(
+        data_dict,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False
+    )
+    return hashlib.sha256(s.encode("utf-8")).hexdigest()
 
 
 def timestamp():
@@ -31,6 +50,7 @@ def timestamp():
 
 #Backup function
 def backup_file(filepath):
+    #Save a date-stamped copy from work files
     path = Path(filepath)
     if path.exists():
         backup_name = f"{path.stem}_backup_{timestamp()}{path.suffix}"
@@ -41,6 +61,7 @@ def backup_file(filepath):
 # 1. Initialize database
 # ---------------------------
 def init_db():
+    #needs to be done only once: build first contents of database
     with sqlite3.connect(DB_FILE) as conn:
         conn.execute("""
         CREATE TABLE IF NOT EXISTS movies (
@@ -117,11 +138,7 @@ def import_from_excel(rerun_all=False):
         for _, row in df.iterrows():
             movie_id = int(row["id"])
 
-            properties = {
-                col: (None if pd.isna(row[col]) else row[col])
-                for col in df.columns
-                if col not in fixed_columns
-            }
+            properties = build_properties(row, df.columns)
 
             hash_input = {
                 "properties": properties,
@@ -158,6 +175,14 @@ def import_from_excel(rerun_all=False):
 
     print("Import complete.")
 
+
+def any_dirty():
+    with sqlite3.connect(DB_FILE) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT 1 FROM movies WHERE status='dirty' LIMIT 1"
+        )
+        return cursor.fetchone() is not None
 
 # ---------------------------
 # 5. Simulated run step
@@ -226,12 +251,50 @@ def show_movies_df():
 
     print(df.to_string(index=False))
 
+def preview_excel_changes():
+    df = pd.read_excel(MOVIES_IN)
+
+    with sqlite3.connect(DB_FILE) as conn:
+        db_df = pd.read_sql("SELECT id, property_hash FROM movies", conn)
+
+    db_ids = set(db_df["id"])
+    excel_ids = set(df["id"])
+    new_ids = excel_ids - db_ids
+    deleted_ids = db_ids - excel_ids
+    changed_ids = []
+
+    for _, row in df.iterrows():
+        movie_id = row["id"]
+
+        if movie_id not in db_ids: #new entry: skip following
+            continue
+
+        properties = build_properties(row, df.columns)
+
+        new_hash = compute_hash({
+            "properties": properties,
+            "code_version": CODE_VERSION
+        })
+
+        old_hash = db_df.loc[db_df["id"] == movie_id, "properties_json"].iloc[0]
+
+        if new_hash != old_hash:
+            changed_ids.append(movie_id)
+
+    return {
+        "new": new_ids,
+        "deleted": deleted_ids,
+        "changed": changed_ids
+    }
+
+
 # ---------------------------
 # Example workflow
 # ---------------------------
 if __name__ == "__main__":
     if 1:  #Danger zone_will overwrite your table!
-        init_db()
+        dum=1
+        #init_db()
 
     else:  #regular use
         # update & close your Excel first
