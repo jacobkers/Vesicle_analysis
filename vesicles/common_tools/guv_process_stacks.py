@@ -23,10 +23,10 @@ def a20a_build_coordinates(im_ori_name,initval):
     approach: a 'work stack' is created by just adding up all color channels
     #Jacob 2024 """
     #set paths:
-    datapath_out_name = initval.mainpath_out + initval.subdir 
-    in_path_name_rois = initval.mainpath_out + initval.subdir +str("/A10_rois")
-    outpath_masks_name = initval.mainpath_out + initval.subdir +str("/A20a_masks")
-    out_path_name = initval.mainpath_out + initval.subdir +str("/A20a_tracked/")
+    datapath_out_name = initval.mainpath_out + initval.subdir_out
+    in_path_name_rois = initval.mainpath_out + initval.subdir_out +str("/A10_rois")
+    outpath_masks_name = initval.mainpath_out + initval.subdir_out +str("/A20a_masks")
+    out_path_name = initval.mainpath_out + initval.subdir_out +str("/A20a_tracked/")
     roipath = Path(in_path_name_rois)
     maskpath=Path(outpath_masks_name)
     overviewpath = Path(out_path_name)
@@ -38,7 +38,7 @@ def a20a_build_coordinates(im_ori_name,initval):
     
     fig, axs = plt.subplots(1, 3)
     #bring in coordinates
-    source = initval.mainpath_out + initval.subdir + im_ori_name + initval.nc_name
+    source = initval.mainpath_out + initval.subdir_out + im_ori_name + initval.nc_name
     ds_guvs = xr.load_dataset(source)
     xg=ds_guvs["X0"]
     yg = ds_guvs["Y0"]
@@ -132,9 +132,9 @@ def a20a_build_coordinates(im_ori_name,initval):
             all_guvs_roundness.append(all_roundness)
             all_guvs_std.append(all_std)
             #1D:
-            focalplane=np.argmax(all_std)
+            isfocalplane=(all_perimeters==np.max(all_perimeters))
 
-            all_guvs_focalplane.append(focalplane)
+            all_guvs_focalplane.append(isfocalplane)
 
             # set up some plotting
             frax=np.arange(len(all_roundness))
@@ -156,10 +156,6 @@ def a20a_build_coordinates(im_ori_name,initval):
             axs1[1,0].set_ylabel('area')
             axs1[1,0].set_xlabel('frame no.')
 
-            axs1[1,1].plot(frax[valid_idx], std_plot[valid_idx],'ko-')
-            axs1[1, 1].plot(frax[focalplane], std_plot[focalplane], 'ro-')
-            axs1[1,1].set_ylabel('standard deviation')
-            axs1[1,1].set_xlabel('frame no.')
             outfig_name = out_path_name  + titl + str("frame") + str(fri)+ str("_track_example.png")
 
             fig1.savefig(outfig_name)
@@ -237,18 +233,18 @@ def analyze_edge_profile(profile, initval,fri):
 def a20b_map_color_channels(im_ori_name,initval):
     """ collect values from various color channels
 #Jacob 2024 """
-    datapath_out_name = initval.mainpath_out + initval.subdir 
-    in_path_name_rois = initval.mainpath_out + initval.subdir +str("/A10_rois")
-    in_path_name_masks = initval.mainpath_out + initval.subdir +str("/A20a_masks")
-    in_path_name_tracked = initval.mainpath_out + initval.subdir +str("/A20a_tracked/")
-    out_path_name = initval.mainpath_out + initval.subdir +str("/A20b_processed/")
+    datapath_out_name = initval.mainpath_out + initval.subdir_out
+    in_path_name_rois = initval.mainpath_out + initval.subdir_out +str("/A10_rois")
+    in_path_name_masks = initval.mainpath_out + initval.subdir_out +str("/A20a_masks")
+    in_path_name_tracked = initval.mainpath_out + initval.subdir_out +str("/A20a_tracked/")
+    out_path_name = initval.mainpath_out + initval.subdir_out +str("/A20b_processed/")
     roipath = Path(in_path_name_rois)
     maskpath= Path(in_path_name_masks)
     out_path = Path(out_path_name)
     if not out_path.is_dir(): out_path.mkdir()
 
     #load existing nc data
-    source = initval.mainpath_out + initval.subdir + im_ori_name + initval.nc_name
+    source = initval.mainpath_out + initval.subdir_out + im_ori_name + initval.nc_name
     ds_guvs = xr.load_dataset(source)
     [n_guvs, n_planes]=np.shape(ds_guvs["Area"])
     xg = ds_guvs["X0"]
@@ -454,9 +450,9 @@ def a20b_map_color_channels(im_ori_name,initval):
 def show_roi_overviews(im_ori_name,guv_xyr,initval):
     """ use pre-set coordinates in imageJ to processed standardized tif roi-stacks from  format
     #Jacob 2024 """
-    datapath_out_name = initval.mainpath_out + initval.subdir 
-    in_path_name_rois = initval.mainpath_out + initval.subdir +str("/A10_rois")
-    out_path_name = initval.mainpath_out + initval.subdir +str("/A20a_overviews/")
+    datapath_out_name = initval.mainpath_out + initval.subdir_out
+    in_path_name_rois = initval.mainpath_out + initval.subdir_out +str("/A10_rois")
+    out_path_name = initval.mainpath_out + initval.subdir_out +str("/A20a_overviews/")
     roipath = Path(in_path_name_rois)
     overviewpath = Path(out_path_name)
     if not overviewpath.is_dir():
@@ -516,7 +512,7 @@ def save_geometry(all_guvs_xg,
                                 coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Roundness")
     std_da = xr.DataArray(all_guvs_std, dims=("index", "plane"),
                                 coords={"index": np.arange(n_guvs), "plane": np.arange(n_planes)}, name="Standard_Deviation")
-    focal_plane_da= xr.DataArray(all_guvs_focalplane, dims=("index"),
+    focal_plane_da= xr.DataArray(all_guvs_focalplane, dims=("index","plane"),
                           coords={"index": np.arange(n_guvs)}, name="focal_plane")
 
     okayframe_da = xr.DataArray(all_guvs_okay_fr, dims=("index", "plane"),

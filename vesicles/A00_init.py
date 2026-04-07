@@ -9,6 +9,7 @@ experiment run indices (add 0.1 to run on K:):
 """
 
 import numpy as np
+from pathlib import Path
 
 class Guv_experiment:
     """
@@ -30,11 +31,13 @@ class Guv_experiment:
         self.apply_drift_correction=False
         self.pix2mu=0.4141253
         self.counts2perc=1/4000 #app., see callibration_curve_EP.xlsx
-        self.short_set=-1
+        self.short_set=4  #-1 for full, otherwise say 4 vesicles?
         if self.short_set>0:
             self.nc_name="_all_guvs_short.nc"
+            self.shortstring='_short'+str(self.short_set)
         else:
             self.nc_name = "_all_guvs.nc"
+            self.shortstring = None
 
 # overview of experiments:
 def get_exps(exp_idx):
@@ -57,6 +60,11 @@ def get_exps(exp_idx):
     Exp1.mainpath_in=in_root+ str("pilots/")
     Exp1.mainpath_out =out_root + str("pilots/")   
     Exp1.subdir = str("20082025_CS_test/")
+    Exp1.subdir_out = str("20082025_CS_test") + Exp1.shortstring + str("/")
+    outpath=Path(Exp1.mainpath_out + Exp1.subdir_out)
+    if not outpath.is_dir():
+        outpath.mkdir()
+
     Exp1.movienames = ["tiff_01", "tiff_00", ]  # the ones that have ROIs measured in ImageJ
     #Exp1.movienames = ["tiff_01"]  # the ones that have ROIs measured in ImageJ
     Exp1.suffix='.tif'

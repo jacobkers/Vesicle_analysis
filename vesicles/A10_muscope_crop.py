@@ -51,7 +51,7 @@ def main(initval):
 
         # setup Xarray and save initial ROI data
 
-        target=initval.mainpath_out + initval.subdir + im_ori_name + initval.nc_name
+        target=initval.mainpath_out + initval.subdir_out + im_ori_name + initval.nc_name
         XGuvs=set_up_xarray(XX0,YY0,RR0)
         XGuvs.to_netcdf(target,'w')
 
