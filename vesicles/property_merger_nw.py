@@ -210,26 +210,6 @@ def show_movies_df():
 
     print(df.to_string(index=False))
 
-def excel_changed(excel_file=MOVIES_IN, stored_hash=None):
-
-    df = pd.read_excel(excel_file)
-
-    # normalize dataframe
-    df = df.where(pd.notna(df), None)
-
-    # convert to deterministic structure
-    data = {
-        "columns": list(df.columns),
-        "rows": df.to_dict(orient="records")
-    }
-
-    s = json.dumps(data, sort_keys=True, separators=(",", ":"))
-    new_hash = hashlib.sha256(s.encode()).hexdigest()
-
-    if stored_hash is None:
-        return new_hash, False
-
-    return new_hash, (new_hash != stored_hash)
 
 # ---------------------------
 # Example workflow

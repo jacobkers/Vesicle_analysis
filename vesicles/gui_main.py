@@ -109,15 +109,7 @@ class MainWindow(QMainWindow):
             #self.traces.setFocus()
             dum=1
 
-    def check_movies(self):
-        _, changed = property_merger.excel_changed()
 
-        if changed:
-            print("changed")
-            self.check_vesicles_button.setStyleSheet("background-color: tomato;")
-        else:
-            print("unchanged")
-            self.check_vesicles_button.setStyleSheet("background-color: lightgreen;")
 
     def update_movies(self):
         property_merger.import_excel()
