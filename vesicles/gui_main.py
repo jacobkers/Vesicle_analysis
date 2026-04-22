@@ -113,11 +113,9 @@ class MainWindow(QMainWindow):
         print("current data base contents:")
         property_merger.show_movies_df()
 
-
     def export_vesicles(self):
         property_merger.export_to_excel()
         print(f"exported vesicle data")
-
 
     def show_main_help(self):
         help_text = """

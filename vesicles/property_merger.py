@@ -12,10 +12,8 @@ import os
 PATH_IN =str("C:/Users/jkerssemakers/OneDrive - Delft University of Technology/CD_recent/BN_CD24_Bert/Joss paper/example_data_set/")
 MOVIES_IN = os.path.join(PATH_IN, "data_overview.xlsx")
 VESICLES_OUT = os.path.join(PATH_IN, "vesicles_out.xlsx")
-
 DB_FILE = os.path.join(PATH_IN, "project.db")
 CODE_VERSION = "v1.0-movies"
-
 
 def canonical_value(v):
     import numpy as np
@@ -40,18 +38,6 @@ def build_properties(row, columns):
 def timestamp():
     return datetime.now().strftime("%y%m%d%H")
 
-#Backup function
-def backup_file(filepath):
-    #Save a date-stamped copy from work files
-    path = Path(filepath)
-    if path.exists():
-        backup_name = f"{path.stem}_backup_{timestamp()}{path.suffix}"
-        shutil.copy(path, backup_name)
-        print(f"Backup created: {backup_name}")
-
-# ---------------------------
-# 1. Initialize database
-# ---------------------------
 def init_db():
     #needs to be done only once: build first contents of database
     with sqlite3.connect(DB_FILE) as conn:
@@ -64,9 +50,6 @@ def init_db():
         """)
     print("Database initialized.")
 
-# ---------------------------
-# 2. Add movie entries
-# ---------------------------
 def add_movie(experiment_label):
     with sqlite3.connect(DB_FILE) as conn:
         conn.execute("""
@@ -105,9 +88,7 @@ def export_to_excel():
     df_out.to_excel(VESICLES_OUT, index=False)
     print("Export complete.")
 
-# ---------------------------
-# 4. Import from Excel + detect changes
-# ---------------------------
+
 def import_excel():
     #pass a path here
     df = pd.read_excel(MOVIES_IN)
