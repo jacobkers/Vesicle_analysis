@@ -1,7 +1,7 @@
 
 
 import platform
-import property_merger_nw as property_merger
+import property_merger
 
 import sys
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QGridLayout, QTreeView, QApplication, QMainWindow, \
@@ -16,7 +16,6 @@ from matplotlib.backends.backend_qtagg import (
 from gui_commons import ImageCanvas,HelpDialog
 from gui_results_view_widget import ResultsWidget
 class MainWindow(QMainWindow):
-
 
     def __init__(self, main_path=None):
         super().__init__()
@@ -40,17 +39,14 @@ class MainWindow(QMainWindow):
         #main buttons:
         main_help_button = QPushButton('Read me')
         main_help_button.clicked.connect(self.show_main_help)
-        #update_dir_button = QPushButton('Update dirs.xls')
-        #update_movies_button = QPushButton('Update movies.xls')
-        self.check_vesicles_button = QPushButton('check movies')
-        self.check_vesicles_button.clicked.connect(self.check_movies)
-        update_vesicles_button = QPushButton('import movies')
-        update_vesicles_button.setToolTip("close Excel and press to update project data")
-        update_vesicles_button.clicked.connect(self.update_movies)
+
+        import_vesicles_button = QPushButton('import excel')
+        import_vesicles_button.setToolTip("press to re-import excel")
+        import_vesicles_button.clicked.connect(self.import_excel)
 
         process_vesicles_button = QPushButton('(re)process')
         process_vesicles_button.setToolTip("press to update project data")
-        process_vesicles_button.clicked.connect(self.process_vesicles)
+        process_vesicles_button.clicked.connect(self.update_movies)
 
         export_vesicles_button = QPushButton('export to vesicles.xls')
         export_vesicles_button.setToolTip("press to save to vesicles.xls")
@@ -73,11 +69,9 @@ class MainWindow(QMainWindow):
 
         left_layout = QVBoxLayout()
         left_layout.addWidget(main_help_button)
-        left_layout.addWidget(self.check_vesicles_button)
-        left_layout.addWidget(update_vesicles_button)
+        left_layout.addWidget(import_vesicles_button)
         left_layout.addWidget(process_vesicles_button)
         left_layout.addWidget(export_vesicles_button)
-
 
 
         #build main panel
@@ -110,16 +104,15 @@ class MainWindow(QMainWindow):
             dum=1
 
 
+    def import_excel(self):
+        property_merger.import_excel()
+        print("imported vesicle data:")
 
     def update_movies(self):
-        property_merger.import_excel()
         property_merger.process_movies()
         print("current data base contents:")
         property_merger.show_movies_df()
 
-    def process_vesicles(self):
-        dum=1
-        print(f"processed vesicle data")
 
     def export_vesicles(self):
         property_merger.export_to_excel()
