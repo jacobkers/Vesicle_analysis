@@ -1,7 +1,7 @@
 
 
 import platform
-import vesicle_property_merger
+import gui_property_merger
 
 import sys
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QGridLayout, QTreeView, QApplication, QMainWindow, \
@@ -66,7 +66,6 @@ class MainWindow(QMainWindow):
         tabs.addTab(kinetics, 'Graphs')
         tabs.currentChanged.connect(self.setTabFocus)
 
-
         left_layout = QVBoxLayout()
         left_layout.addWidget(main_help_button)
         left_layout.addWidget(import_vesicles_button)
@@ -88,7 +87,7 @@ class MainWindow(QMainWindow):
         self.show()
 
     def update_button_color(self,button):
-        if vesicle_property_merger.any_dirty():
+        if gui_property_merger.any_dirty():
             button.setStyleSheet("background-color: red;")
         else:
             button.setStyleSheet("background-color: lightgreen;")
@@ -103,19 +102,18 @@ class MainWindow(QMainWindow):
             #self.traces.setFocus()
             dum=1
 
-
     def import_excel(self):
-        vesicle_property_merger.import_excel()
+        gui_property_merger.import_excel()
         print("imported vesicle data:")
-        vesicle_property_merger.show_movies_df()
+        gui_property_merger.show_movies_df()
 
     def update_movies(self):
-        vesicle_property_merger.process_movies()
+        gui_property_merger.process_movies()
         #print("current data base contents:")
-        #vesicle_property_merger.show_movies_df()
+        #gui_property_merger.show_movies_df()
 
     def export_vesicles(self):
-        vesicle_property_merger.export_to_excel()
+        gui_property_merger.export_to_excel()
         print(f"exported vesicle data")
 
     def show_main_help(self):

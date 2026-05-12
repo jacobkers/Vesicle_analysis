@@ -8,6 +8,8 @@ from datetime import datetime
 import shutil
 import os
 
+from gui_process import expand_df
+
 #set paths and files here
 PATH_IN =str("C:/Users/jkerssemakers/OneDrive - Delft University of Technology/CD_recent/BN_CD24_Bert/Joss paper/example_data_set/")
 MOVIES_IN = os.path.join(PATH_IN, "data_overview.xlsx")
@@ -163,9 +165,9 @@ def process_movies():
 
         df = pd.read_sql("SELECT * FROM movies", conn)
 
-        df_to_use=df.copy()
-        #loooots of analysis here------------------
 
+        #loooots of analysis here------------------
+        df_to_use = expand_df(df)
         #-------------------------------------
 
         #define new columns made in dataframe df during processing
