@@ -24,6 +24,9 @@ import tifffile
 #customs:
 import sys
 import os
+
+#from vesicles.flat_vesicle_mapper import diagnosis_pathname
+
 # Get the current working directory
 current_directory = os.getcwd()
 # Move one or two directories up
@@ -70,7 +73,6 @@ def expand_df(df):
         axis=1
     )
 
-
     df_to_use=df_flat[df_flat['use_it'] == 1]
     for ix, guvrow in enumerate(df_to_use["id"]):
         Guv = GUV()
@@ -82,30 +84,6 @@ def expand_df(df):
 
         #transform for later use:
         Guv.work_weights = ast.literal_eval(Guv.work_weights)
-
-        #current fields that are fetched from the excel table:
-        # experiment_label
-        # pathname
-        # tif_name
-        # tif_key
-        # tif_size
-        # exp_id
-        # movie_id
-        # run_index
-        # work_weights
-        # use_it
-        # frames
-        # pixel_size
-        # z_of_interest
-        # xy_of_interest
-        # long
-        # axis
-        # exports
-        # notes
-        # manual
-        # analysis
-
-        print('fetched: ', Guv.run_index, ':',Guv.experiment_label)
         Guv_list.append(Guv)
 
 
@@ -130,14 +108,15 @@ def expand_df(df):
     #Main:
     # pick a GUV and show its color channels and the 'work image', which is just the sum of these channels:
     for Guv in Guv_list:
-        print('working: ', str(Guv.run_index), ':',Guv.experiment_label)
-        image_path = Guv.pathname + '\\' + Guv.tif_name
+        print('working: ', str(Guv.id), ':',Guv.experiment_label)
+        image_path = Guv.pathname + '\\' + Guv.filename
+        diagnosis_pathname = Guv.pathname + '\\' + 'diagnosis\\'
 
         #if filename contains a template:
-        if  '*' in Guv.tif_name: #OR: assemble from more
+        if  '*' in Guv.filename: #OR: assemble from more
             roi=[]
             guvpth=Path(Guv.pathname)
-            for channelpath in guvpth.glob("**/*"+ Guv.tif_name):  # find all channel files in inpath
+            for channelpath in guvpth.glob("**/*"+ Guv.filename):  # find all channel files in inpath
                 roi.append(np.array(io.imread(channelpath)))
                 # To get info:
                 with tifffile.TiffFile(channelpath) as tif:
@@ -180,7 +159,7 @@ def expand_df(df):
         axs[color_i+1].imshow(roi_work)
         axs[color_i+1].set_title('work image')
         fig.tight_layout()
-        target = diagnosis_pathname + 'Guv' + str(Guv.run_index).zfill(3) + '_1_separate_channels.png'
+        target = diagnosis_pathname + 'Guv' + str(Guv.id).zfill(3) + '_1_separate_channels.png'
         fig.savefig(target)
         plt.close('all')
         #---------------------------------------------------------------------------------------------
@@ -227,7 +206,7 @@ def expand_df(df):
             fig.tight_layout()
             #plt.show()
             #save this figure
-            target= diagnosis_pathname + str(Guv.run_index).zfill(3) +'_2_masking.png'
+            target= diagnosis_pathname + str(Guv.id).zfill(3) +'_2_masking.png'
             fig.savefig(target)
             plt.close('all')
             #-----------------------------------------------------------------------------
@@ -315,7 +294,7 @@ def expand_df(df):
                         axs[2].imshow(outer_mask)
                         axs[3].imshow(edge_mask)
                         fig.tight_layout()
-                        target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/004_misc/output_figs/Guv_no' + str(Guv.run_index).zfill(3) +'_3_inner_outer_masks.png'
+                        target=diagnosis_pathname + 'Guv_no' + str(Guv.id).zfill(3) +'_3_inner_outer_masks.png'
                         fig.savefig(target)
                         plt.close('all')
 
@@ -326,7 +305,7 @@ def expand_df(df):
                         axs.plot(Ysamplinggrid[::skips,::skips], Xsamplinggrid[::skips,::skips], '-')
                         fig.tight_layout()
                         #save this figure
-                        target=diagnosis_pathname + 'Guv_no' + str(Guv.run_index).zfill(3) +'_4_radial_sampling.png'
+                        target=diagnosis_pathname + 'Guv_no' + str(Guv.id).zfill(3) +'_4_radial_sampling.png'
                         fig.savefig(target)
                         plt.close('all')
                         #plt.show()
@@ -343,7 +322,7 @@ def expand_df(df):
                         axs[2].set_title('edge')
                         axs[2].set_xlabel('angle')
                         fig.tight_layout()
-                        target=diagnosis_pathname +  '/Guv_no' + str(Guv.run_index).zfill(3) +'_5_radial_maps.png'
+                        target=diagnosis_pathname +  '/Guv_no' + str(Guv.id).zfill(3) +'_5_radial_maps.png'
                         fig.savefig(target)
                         plt.close('all')
                         #---------------------------------------------------------------------------
@@ -357,7 +336,7 @@ def expand_df(df):
                         axs.plot(y_fit)
                         fig.tight_layout()
                         #save this figure
-                        target=diagnosis_pathname +  '/Guv_no' + str(Guv.run_index).zfill(3) +'_6_edge_fit.png'
+                        target=diagnosis_pathname +  '/Guv_no' + str(Guv.id).zfill(3) +'_6_edge_fit.png'
                         fig.savefig(target)
                         plt.close('all')
                         #--------------------------------------------------------------------------------
