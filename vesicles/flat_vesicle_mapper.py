@@ -35,14 +35,13 @@ sys.path.insert(0, two_levels_up)
 from common_tools import guv_binary_ops
 from common_tools import guv_tools
 
-# set up autoreload on all files
-#get_ipython().run_line_magic('load_ext', 'autoreload')
-#get_ipython().run_line_magic('autoreload', '2')
-
 plt.rcParams['figure.figsize'] = [7, 5]
 
 # ## Giant Unilamellar Vesicle or GUV
-# Our basic 'info unit' is a single GUV, we note it as ROI (region-of-interest).  We keep track of where it came from via a simple excel table, easily readable for both user and Python. The 'GUV' class closely follows the header in the Excel table. Here, we index per movie, then per ROI. For a single GUV or ROI, we define a 'GUV object'.
+# Our basic 'info unit' is a single GUV, we note it as ROI (region-of-interest).
+# We keep track of where it came from via a simple excel table, easily readable for both user and Python.
+# The 'GUV' class closely follows the header in the Excel table.
+# Here, we index per movie, then per ROI. For a single GUV or ROI, we define a 'GUV object'.
 
 class GUV:
     def __init__(self):
@@ -73,6 +72,8 @@ if 1: #test file, local path
 now = datetime.now()
 datecode = now.strftime("%Y%m%d%h")  # Bijvoorbeeld '20250702'
 targetname=str("Bert_data_results_" + datecode + ".xlsx" )
+
+
 
 # Read as DataFrame:
 df = pd.read_excel(excelpath  / excelname)
@@ -174,30 +175,30 @@ for Guv in Guv_list:
     # extract other basic metadata
     clrs, rr,cc,=np.shape(roi)
 
-    #set up, show and save work plot:
-    fig, axs = plt.subplots(1, clrs +1)
-    #setup a work image for edge detection etc, use a weight key for this
-
-    #note that we assume that a picture is a single image of one or more channels, "CXY"
+    # setup a work image for edge detection etc, use a weight key for this
     for color_i, chan in enumerate(roi):
-        if color_i==0: 
+        if color_i==0:
             roi_work=Guv.work_weights[color_i]*(chan-np.min(chan))
         else:
             roi_work = roi_work + Guv.work_weights[color_i]*(chan - np.min(chan))
         if color_i== Guv.channel_of_interest:
             roi_main = chan  #to be used later, for illustration and so on
-        axs[color_i].imshow(chan)
-        axs[color_i].set_title('channel'+str(color_i)) 
 
-    #plot 
+    # EXPORT GRAPHICS: ---------------------------------------------------------
+    #set up, show and save work plot:
+    fig, axs = plt.subplots(1, clrs +1)
+    #note that we assume that a picture is a single image of one or more channels, "CXY"
+    for color_i, chan in enumerate(roi):
+        axs[color_i].imshow(chan)
+        axs[color_i].set_title('channel'+str(color_i))
     axs[color_i+1].imshow(roi_work)
     axs[color_i+1].set_title('work image') 
     fig.tight_layout()
-    #plt.show()
-    #save
     fig.savefig(outdir_test + 'Guv' + str(Guv.run_index).zfill(3) +'_1_separate_channels.png')
     plt.close('all')
-             
+    #---------------------------------------------------------------------------------------------
+
+
     #Isolate a GUV
     #set the scale of erosion /dilation
     disk_sz=int(0.02*np.shape(roi_work)[0])
@@ -218,7 +219,8 @@ for Guv in Guv_list:
         #get some basic shape properties:
         labels, n_labels = measure.label(mask_5, return_num = True)
         regprops = measure.regionprops(labels)
-        #show:
+
+        #EXPORT GRAPHICS: build a figure showing the masks:-------------------------------------
         fig, axs = plt.subplots(2, 4)
         axs[0,0].imshow(roi_work)
         axs[0,1].imshow(mask_0)
@@ -230,13 +232,8 @@ for Guv in Guv_list:
         #if succesful, plot COM:
         if len(regprops)>0:
             xm,ym = regprops[0].centroid
-            #because later we obtain a more precise measure of the avarge radius, here we revert to relative values for minor and major ax-radii
-            r_eq=regprops[0].equivalent_diameter/2
-            rmin_rel=regprops[0].axis_minor_length/2/r_eq
-            rmaj_rel=regprops[0].axis_major_length/2/r_eq
-            area_rel=regprops[0].area/(r_eq**2)
-            perimeter_rel= regprops[0].perimeter/r_eq      
-
+            #because later we obtain a more precise measure of the avarge radius,
+            # here we revert to relative values for minor and major ax-radii:
             axs[1,2].plot(ym,xm, 'ro', markersize=5)
             axs[1,3].imshow(roi_work*mask_5)
             axs[1,3].plot(ym,xm, 'ro', markersize=5)
@@ -246,7 +243,15 @@ for Guv in Guv_list:
         target= diagnosis_pathname + str(Guv.run_index).zfill(3) +'_2_masking.png'
         fig.savefig(target)
         plt.close('all')
-        
+        #-----------------------------------------------------------------------------
+
+        if len(regprops) > 0:
+            r_eq = regprops[0].equivalent_diameter / 2
+            rmin_rel = regprops[0].axis_minor_length / 2 / r_eq
+            rmaj_rel = regprops[0].axis_major_length / 2 / r_eq
+            area_rel = regprops[0].area / (r_eq ** 2)
+            perimeter_rel = regprops[0].perimeter / r_eq
+
 
         if len(regprops)>0:
             # build inner and outer masks (in cartesian coordiantes)
@@ -254,7 +259,6 @@ for Guv in Guv_list:
             inner_mask = guv_binary_ops.binary_erosion(mask_5, guv_binary_ops.disk(ring_band), iterations = 3)                 
             outer_mask = 1-guv_binary_ops.binary_dilation(mask_5, guv_binary_ops.disk(ring_band), iterations = 1)
             edge_mask=mask_5.astype(float) -inner_mask
-            
 
             #we would like to do this for all rois:
             I_inner_mean=[]
@@ -301,7 +305,6 @@ for Guv in Guv_list:
                 if color_i== Guv.channel_of_interest:
                     resolution=(x_calibration)
                     radius_mean=(np.nanmean(profile_max)/2)  #corrects for oversampling
-                
 
                 # for a clean fit, we should remove the mean and remove the outliers ('buds')
                 x=np.arange(len(profile))
@@ -310,30 +313,26 @@ for Guv in Guv_list:
                 cln_profile=profile[np.nonzero(flags)]
 
                 # Fit the sine wave
-                popt, pcov = guv_tools.fit_sine_to_trace(cln_x, cln_profile)   
-
+                popt, pcov = guv_tools.fit_sine_to_trace(cln_x, cln_profile)
                 # Generate the fitted curve (on original x)
                 y_fit = guv_tools.sine_function(np.arange(len(x)), *popt)
                 max_value.append(np.max(y_fit))
                 mean_value.append(np.mean(y_fit))
                 
-                #for illustration, show and save the results for the main channel-of interests:
+                #EXPORT GRAPHICS: ---------------------------------------------------------
                 if color_i== Guv.channel_of_interest:
-                    #show and save:
+                    #1) show and save the results for the main channel-of interests:
                     fig, axs = plt.subplots(1, 4)
                     axs[0].imshow(mask_5)
                     axs[1].imshow(inner_mask)
                     axs[2].imshow(outer_mask)
                     axs[3].imshow(edge_mask)
                     fig.tight_layout()
-                    
-                    #plt.show()
-                    #save this figure
                     target='M:/tnw/bn/cd/Shared/Bert/002_liposome_fusion/004_misc/output_figs/Guv_no' + str(Guv.run_index).zfill(3) +'_3_inner_outer_masks.png'
                     fig.savefig(target)
                     plt.close('all')
                     
-                    #show and save:
+                    #2) radial mapping geometry:
                     skips=5
                     fig, axs = plt.subplots(1, 1)
                     axs.imshow(roi_main)
@@ -345,7 +344,7 @@ for Guv in Guv_list:
                     plt.close('all')
                     #plt.show()
 
-                    #plot and save: radial mapping:
+                    #3) polar maps from the radial mapping:
                     fig, axs = plt.subplots(1, 3)
                     axs[0].imshow(inner_map,extent=[0,360,r_max,0], aspect='auto')
                     axs[0].set_title('inner')
@@ -356,15 +355,13 @@ for Guv in Guv_list:
                     axs[2].imshow(edge_map,extent=[0,360,r_max,0], aspect='auto')
                     axs[2].set_title('edge')
                     axs[2].set_xlabel('angle')
-
                     fig.tight_layout()
-                    #plt.show()
-                    #save this figure
                     target=diagnosis_pathname +  '/Guv_no' + str(Guv.run_index).zfill(3) +'_5_radial_maps.png'
                     fig.savefig(target)
                     plt.close('all')
+                    #---------------------------------------------------------------------------
 
-                    # plot and save: sine wave:
+                    # 4) sine wave:-----------------------------------------------
                     fig, axs = plt.subplots(1,1)
                     axs.plot(x, profile, 'b-')
                     axs.plot(cln_x, cln_profile, 'k-')
@@ -376,6 +373,7 @@ for Guv in Guv_list:
                     target=diagnosis_pathname +  '/Guv_no' + str(Guv.run_index).zfill(3) +'_6_edge_fit.png'
                     fig.savefig(target)
                     plt.close('all')
+                    #--------------------------------------------------------------------------------
 
             if N_colors<3: #pad channels 
                 for ii in range(3-N_colors):
@@ -394,7 +392,7 @@ for Guv in Guv_list:
             I_inner_median_all.append(I_inner_median)
             I_outer_mean_all.append(I_outer_mean)       
             I_outer_median_all.append(I_outer_median)
-            # this edge value compares to that of an IamgeJ cross-section profile
+            # this edge value compares to that of an ImageJ cross-section profile
             I_edge_max_all.append(max_value) 
             I_edge_mean_all.append(mean_value) 
           
@@ -407,7 +405,6 @@ for Guv in Guv_list:
             all_area.append(area_rel*(radius_mean**2))
             all_perimeter.append(perimeter_rel*radius_mean)
             all_radius_mean.append(radius_mean) 
-   
 
         else: #if nothing worked .....  
             all_resolution.append(float('nan'))   
@@ -428,21 +425,21 @@ for Guv in Guv_list:
 #add new data:
 #add geometry:
 df_to_use = df_to_use.copy()
-df_to_use['edge radius minor,pixels'] = all_radius_minor
-df_to_use['edge radius mean,pixels'] = all_radius_mean  
-df_to_use['edge radius major,pixels'] = all_radius_major
-df_to_use['area,pixels^2'] = all_area
-df_to_use['perimeter,pixels'] = all_perimeter
+df_to_use['edge_radius_minor_pixels'] = all_radius_minor
+df_to_use['edge_radius_mean_pixels'] = all_radius_mean
+df_to_use['edge_radius_major_pixels'] = all_radius_major
+df_to_use['area_pixels_sq'] = all_area
+df_to_use['perimeter_pixels'] = all_perimeter
 df_to_use['pix_per_um'] = all_resolution
 #intensity per channel:
 for chan_i in range(N_colors):
     ch_str='Ch'+str(chan_i)+'_'
-    df_to_use[ch_str+'edge maximum'] = [item[chan_i] for item in I_edge_max_all]  
-    df_to_use[ch_str+'edge mean'] = [item[chan_i] for item in I_edge_mean_all] 
-    df_to_use[ch_str+'inside mean'] = [item[chan_i] for item in I_inner_mean_all]
-    df_to_use[ch_str+'inside median'] = [item[chan_i] for item in I_inner_median_all]
-    df_to_use[ch_str+'outside mean'] = [item[chan_i] for item in I_outer_mean_all]
-    df_to_use[ch_str+'outside median'] = [item[chan_i] for item in I_outer_median_all]
+    df_to_use[ch_str+'edge_maximum'] = [item[chan_i] for item in I_edge_max_all]
+    df_to_use[ch_str+'edge_mean'] = [item[chan_i] for item in I_edge_mean_all]
+    df_to_use[ch_str+'inside_mean'] = [item[chan_i] for item in I_inner_mean_all]
+    df_to_use[ch_str+'inside_median'] = [item[chan_i] for item in I_inner_median_all]
+    df_to_use[ch_str+'outside_mean'] = [item[chan_i] for item in I_outer_mean_all]
+    df_to_use[ch_str+'outside_median'] = [item[chan_i] for item in I_outer_median_all]
     
 df_to_use.to_excel(diagnosis_path  / targetname, index=False)
 print(f"\nUpdated data has been written to target")

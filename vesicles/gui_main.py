@@ -107,11 +107,12 @@ class MainWindow(QMainWindow):
     def import_excel(self):
         property_merger.import_excel()
         print("imported vesicle data:")
+        property_merger.show_movies_df()
 
     def update_movies(self):
         property_merger.process_movies()
-        print("current data base contents:")
-        property_merger.show_movies_df()
+        #print("current data base contents:")
+        #property_merger.show_movies_df()
 
     def export_vesicles(self):
         property_merger.export_to_excel()

@@ -29,6 +29,7 @@ def canonical_value(v):
     return v
 
 def build_properties(row, columns):
+    #returns a row of column values except for the id column
     return {
         col: canonical_value(row[col])
         for col in columns
@@ -120,7 +121,6 @@ def import_excel():
                 """, (movie_id, props_json))
 
             else:
-
                 cursor.execute("""
                     UPDATE movies
                     SET properties_json=?
@@ -130,24 +130,64 @@ def import_excel():
         conn.commit()
     print("Import complete.")
 
+def ensure_columns_from_dataframe(conn, table_name, df):
+
+    cursor = conn.cursor()
+
+    existing = cursor.execute(f"""
+        PRAGMA table_info({table_name})
+    """).fetchall()
+    existing_names = {col[1] for col in existing}
+    for col in df.columns:
+        if col not in existing_names:
+            dtype = df[col].dtype
+
+            # map pandas dtype -> SQLite type
+            if pd.api.types.is_integer_dtype(dtype):
+                sql_type = "INTEGER"
+            elif pd.api.types.is_float_dtype(dtype):
+                sql_type = "REAL"
+            else:
+                sql_type = "TEXT"
+            print(f"Adding column: {col} ({sql_type})")
+
+            cursor.execute(f"""
+                ALTER TABLE {table_name}
+                ADD COLUMN "{col}" {sql_type}
+            """)
+
+    conn.commit()
+
 def process_movies():
-
     with sqlite3.connect(DB_FILE) as conn:
+
         df = pd.read_sql("SELECT * FROM movies", conn)
+
+        df_to_use=df.copy()
+        #loooots of analysis here------------------
+
+        #-------------------------------------
+
+        #define new columns made in dataframe df during processing
+        ensure_columns_from_dataframe(conn, "movies", df_to_use)
+        #then write to movies:
         cursor = conn.cursor()
-
-        for _, row in df.iterrows():
-
-            props = json.loads(row["properties_json"])
+        for _, row in df_to_use.iterrows():
             movie_id = row["id"]
-            print("Processing", movie_id)
-            object_count = len(props)  # placeholder
+            columns = [col for col in df_to_use.columns if col != "id"]
+            set_clause = ", ".join([
+                f'"{col}" = ?'
+                for col in columns
+            ])
+            values = [row[col] for col in columns]
 
-            cursor.execute("""
-                            SELECT *
-                            FROM movies
-                            WHERE id=?
-                        """, (movie_id,))
+            sql = f"""
+                UPDATE movies
+                SET {set_clause}
+                WHERE id = ?
+            """
+
+            cursor.execute(sql, values + [movie_id])
 
         conn.commit()
 
