@@ -1,7 +1,7 @@
 
 
 import platform
-import property_merger
+import vesicle_property_merger
 
 import sys
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QGridLayout, QTreeView, QApplication, QMainWindow, \
@@ -88,7 +88,7 @@ class MainWindow(QMainWindow):
         self.show()
 
     def update_button_color(self,button):
-        if property_merger.any_dirty():
+        if vesicle_property_merger.any_dirty():
             button.setStyleSheet("background-color: red;")
         else:
             button.setStyleSheet("background-color: lightgreen;")
@@ -105,17 +105,17 @@ class MainWindow(QMainWindow):
 
 
     def import_excel(self):
-        property_merger.import_excel()
+        vesicle_property_merger.import_excel()
         print("imported vesicle data:")
-        property_merger.show_movies_df()
+        vesicle_property_merger.show_movies_df()
 
     def update_movies(self):
-        property_merger.process_movies()
+        vesicle_property_merger.process_movies()
         #print("current data base contents:")
-        #property_merger.show_movies_df()
+        #vesicle_property_merger.show_movies_df()
 
     def export_vesicles(self):
-        property_merger.export_to_excel()
+        vesicle_property_merger.export_to_excel()
         print(f"exported vesicle data")
 
     def show_main_help(self):
