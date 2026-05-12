@@ -47,8 +47,7 @@ def init_db():
         conn.execute("""
         CREATE TABLE movies (
             id INTEGER PRIMARY KEY,
-            properties_json TEXT,
-            object_count INTEGER
+            properties_json TEXT
         )
         """)
     print("Database initialized.")
@@ -95,14 +94,17 @@ def export_to_excel():
 def import_excel():
     #pass a path here
     df = pd.read_excel(MOVIES_IN)
+    #TODO: here, somehow DB gets overwritten. We'd like to have the ones not used to be unconsidered
+    df_to_DB(df)
+    print("Import complete.")
 
+def df_to_DB(df):
     with sqlite3.connect(DB_FILE) as conn:
         cursor = conn.cursor()
 
         for _, row in df.iterrows():
-
             movie_id = int(row["id"])
-
+            #build col values in single json text
             props = build_properties(row, df.columns)
             props_json = json.dumps(props)
 
@@ -111,26 +113,23 @@ def import_excel():
                 FROM movies
                 WHERE id=?
             """, (movie_id,))
-
             result = cursor.fetchone()
-
-            if result is None:
-
+            if result is None:  #movie_id does not yet exist
+                print("insert!")
                 cursor.execute("""
                     INSERT INTO movies
                     (id, properties_json)
                     VALUES (?, ?)
                 """, (movie_id, props_json))
-
-            else:
+            else: #row exist, overwrite
+                print("overwrite!")
                 cursor.execute("""
                     UPDATE movies
                     SET properties_json=?
                     WHERE id=?
                 """, (props_json, movie_id))
-
         conn.commit()
-    print("Import complete.")
+
 
 def ensure_columns_from_dataframe(conn, table_name, df):
 
@@ -168,30 +167,32 @@ def process_movies():
 
         #loooots of analysis here------------------
         df_to_use = expand_df(df)
+        #currently, contains only 'use_it'=1 rows
         #-------------------------------------
 
         #define new columns made in dataframe df during processing
-        ensure_columns_from_dataframe(conn, "movies", df_to_use)
+        #ensure_columns_from_dataframe(conn, "movies", df_to_use)
+        df_to_DB(df_to_use)
         #then write to movies:
-        cursor = conn.cursor()
-        for _, row in df_to_use.iterrows():
-            movie_id = row["id"]
-            columns = [col for col in df_to_use.columns if col != "id"]
-            set_clause = ", ".join([
-                f'"{col}" = ?'
-                for col in columns
-            ])
-            values = [row[col] for col in columns]
-
-            sql = f"""
-                UPDATE movies
-                SET {set_clause}
-                WHERE id = ?
-            """
-
-            cursor.execute(sql, values + [movie_id])
-
-        conn.commit()
+        # cursor = conn.cursor()
+        # for _, row in df_to_use.iterrows():
+        #     movie_id = row["id"]
+        #     columns = [col for col in df_to_use.columns if col != "id"]
+        #     set_clause = ", ".join([
+        #         f'"{col}" = ?'
+        #         for col in columns
+        #     ])
+        #     values = [row[col] for col in columns]
+        #
+        #     sql = f"""
+        #         UPDATE movies
+        #         SET {set_clause}
+        #         WHERE id = ?
+        #     """
+        #
+        #     cursor.execute(sql, values + [movie_id])
+        #
+        # conn.commit()
 
     print("Processing done.")
 
@@ -214,10 +215,4 @@ def show_movies_df():
 # ---------------------------
 if __name__ == "__main__":
     if 0:  #Danger zone_will overwrite your table!
-        dum=0
         init_db()
-
-    else:  #regular use
-        # update & close your Excel first
-        #export_to_excel()
-        show_movies_df()

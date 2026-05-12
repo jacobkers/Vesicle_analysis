@@ -35,10 +35,13 @@ class MainWindow(QMainWindow):
         self.image = QWidget()
         self.image.setLayout(image_layout)
 
-
         #main buttons:
         main_help_button = QPushButton('Read me')
         main_help_button.clicked.connect(self.show_main_help)
+
+        show_vesicles_DB_button = QPushButton('show database')
+        show_vesicles_DB_button.setToolTip("display current database contents")
+        show_vesicles_DB_button.clicked.connect(self.show_database)
 
         import_vesicles_button = QPushButton('import excel')
         import_vesicles_button.setToolTip("press to re-import excel")
@@ -67,11 +70,11 @@ class MainWindow(QMainWindow):
         tabs.currentChanged.connect(self.setTabFocus)
 
         left_layout = QVBoxLayout()
-        left_layout.addWidget(main_help_button)
+        left_layout.addWidget(show_vesicles_DB_button)
         left_layout.addWidget(import_vesicles_button)
         left_layout.addWidget(process_vesicles_button)
         left_layout.addWidget(export_vesicles_button)
-
+        left_layout.addWidget(main_help_button)
 
         #build main panel
         right_layout = QHBoxLayout()
@@ -102,15 +105,22 @@ class MainWindow(QMainWindow):
             #self.traces.setFocus()
             dum=1
 
+
+
     def import_excel(self):
         gui_property_merger.import_excel()
-        print("imported vesicle data:")
+        print("imported vesicle data")
+        #gui_property_merger.show_movies_df()
+
+    def show_database(selfself):
+        print("current vesicle data:")
         gui_property_merger.show_movies_df()
+        print("<--current vesicle data")
 
     def update_movies(self):
         gui_property_merger.process_movies()
-        #print("current data base contents:")
-        #gui_property_merger.show_movies_df()
+        print("processed & updated database")
+
 
     def export_vesicles(self):
         gui_property_merger.export_to_excel()
