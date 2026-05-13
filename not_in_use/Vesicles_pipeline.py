@@ -2,19 +2,12 @@
 # This notebook contains a pipeline for analyzing GUV (Giant Unilamellar Vesicle) images. It processes both single-frame and time-trace data from .tif files.
 # (under construction)
 
-import csv
-import numpy as np
-from pathlib import Path
 import matplotlib.pyplot as plt
-from scipy.interpolate import make_interp_spline
-import vesicles as vs
+
 """ from vesicles import A00_init
 
  """
-from vesicles import A00_init
-from vesicles import A10_muscope_crop
-from vesicles import A20_process_rois
-from vesicles import A30_collect_processed_rois
+from vesicles.not_in_use import A10_muscope_crop, A30_collect_processed_rois, A20_process_rois, A00_init
 
 # ## Main Analysis Pipeline
 # The main analysis is divided in a few main steps. For historical reasons, these are labeled A00, A10 ...etc. These labels are also used for the organization of saved data (pictures, tables) so that one can backtrack this data to the generating code
@@ -36,7 +29,7 @@ if 0: A10_muscope_crop.main(initval)
     # NOTE: this step stores intermediates and therefore needs to be run only once
     # A20: First processing of regions-of-interest (ROIs)
     # In this step, we first isolate the area of the vesicle to obtain masks, but also some general geometry features such as radius, area and other shape characteristics. Next, we perfom detailed analysis of every color channel
-if 0: A20_process_rois.main(initval,1,1) #needs to be run only once
+if 0: A20_process_rois.main(initval, 1, 1) #needs to be run only once
     # NOTE: this step stores intermediates and therefore needs to be run only once
 
 # II. Multi-frame Data Processing and Visualization; saving to excel

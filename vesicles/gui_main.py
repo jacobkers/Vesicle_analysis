@@ -82,12 +82,13 @@ class MainWindow(QMainWindow):
         tabs.currentChanged.connect(self.setTabFocus)
 
         left_layout = QVBoxLayout()
+        left_layout.addWidget(main_help_button)
         left_layout.addWidget(show_vesicles_DB_button)
         left_layout.addWidget(import_vesicles_button)
         left_layout.addLayout(process_layout)
         left_layout.addLayout(export_layout)
 
-        left_layout.addWidget(main_help_button)
+
 
         #build main panel
         right_layout = QHBoxLayout()
@@ -149,7 +150,7 @@ class MainWindow(QMainWindow):
                     <h2>Welcome</h2>
 
                     <p>
-                      This gui syncs user-based Excel entries with an database and an analysis pipeline. 
+                      This gui syncs user-based Excel entries with a database and an analysis pipeline. 
                       It is intended to allow a user to adapt settings and annotate on various data levels,
                       for example, to select and deselect movies or vesicles
                     </p>
@@ -157,9 +158,12 @@ class MainWindow(QMainWindow):
                      <p>
 
                         <ul>
-                          <li>edit the various excel levels</li>
-                          <li>press the corresponding update button</li>
-                          <li></li>
+                          <li> Edit the various excel entries and set selection with 'use_it'=1</li>
+                          <li>'Show database' shows current contents of the 'DB' .db file </li>
+                          <li>'Import Excel' overwrites all selected DB rows  </li>
+                          <li>'Process' analyzes and stores data with all selected DB rows </li>
+                          <li> During processing, graphics are saved in the specified format field </li>
+                          <li> 'Export Excel' saves either all or the selected rows </li>
                         </ul>
                      </p>   
                     
@@ -180,7 +184,6 @@ class MainWindow(QMainWindow):
                     <p>
                       <ul>
                         <li>Hover over buttons for help notes.</li>
-                        <li>Find more detailed info under the 'Help' buttons per tab</li>
                     </ul>
 
                     </p>

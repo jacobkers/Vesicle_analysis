@@ -4,8 +4,7 @@ Work guv imagery
 @author: jkerssemakers
 """
 from vesicles.common_tools import guv_process_stacks
-from vesicles.common_tools import guv_io
-from vesicles.A00_init import get_exps
+
 
 def main(initval,a=0,b=0):
     for im_ori_name in initval.movienames:
