@@ -49,7 +49,7 @@ class MainWindow(QMainWindow):
 
         #process & diagnose
         process_layout=QHBoxLayout()
-        process_vesicles_button = QPushButton('Process')
+        process_vesicles_button = QPushButton('Process + Graphs')
         process_vesicles_button.setToolTip("press to update project data")
         process_vesicles_button.clicked.connect(self.update_movies)
         self.pic_format_button= QComboBox()
