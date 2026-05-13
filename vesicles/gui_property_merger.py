@@ -70,22 +70,13 @@ def backup_file(filepath):
         shutil.copy(path, backup_path)            # <-- copy the file
         print(f"Backup created: {backup_path}")
 
-def export_to_excel():
+def export_to_excel(export_option="all"):
     backup_file(VESICLES_OUT)
-
     with sqlite3.connect(DB_FILE) as conn:
         df = pd.read_sql("SELECT * FROM movies", conn)
-
-    # Expand properties JSON
-    props_df = df["properties_json"].apply(
-        lambda x: json.loads(x) if x else {}
-    ).apply(pd.Series)
-
-    df_out = pd.concat(
-        [df.drop(columns=["properties_json"]),
-         props_df],
-        axis=1
-    )
+    df_out=unpack_json_in_df(df)
+    if export_option=="selection":
+        df_out=df_out[df_out['use_it'] == 1]
 
     df_out.to_excel(VESICLES_OUT, index=False)
     print("Export complete.")
@@ -94,13 +85,24 @@ def export_to_excel():
 def import_excel():
     #pass a path here
     df = pd.read_excel(MOVIES_IN)
-    #TODO: here, somehow DB gets overwritten. We'd like to have the ones not used to be unconsidered
-    df_to_DB(df)
+    df_to_use = df[df['use_it'] == 1]
+    df_to_DB(df_to_use)
     print("Import complete.")
 
 def df_to_DB(df):
+    #write a flat dataframe (i.e., no json blobs inside) to a DB
+    #reset all 'use_it' to zero first - in the DB
+
+
     with sqlite3.connect(DB_FILE) as conn:
         cursor = conn.cursor()
+
+        cursor.execute("""
+                UPDATE movies
+                SET properties_json =
+                    json_set(properties_json, '$.use_it', 0)
+            """)
+
 
         for _, row in df.iterrows():
             movie_id = int(row["id"])
@@ -115,14 +117,14 @@ def df_to_DB(df):
             """, (movie_id,))
             result = cursor.fetchone()
             if result is None:  #movie_id does not yet exist
-                print("insert!")
+                print("inserted:" + str(movie_id))
                 cursor.execute("""
                     INSERT INTO movies
                     (id, properties_json)
                     VALUES (?, ?)
                 """, (movie_id, props_json))
             else: #row exist, overwrite
-                print("overwrite!")
+                print("overwritten:" + str(movie_id))
                 cursor.execute("""
                     UPDATE movies
                     SET properties_json=?
@@ -159,60 +161,29 @@ def ensure_columns_from_dataframe(conn, table_name, df):
 
     conn.commit()
 
+def unpack_json_in_df(df_in):
+    # Expand JSON into columns
+    props_df = df_in["properties_json"].apply(
+        lambda x: json.loads(x) if x else {}
+    ).apply(pd.Series)
+    df_out = pd.concat([df_in.drop(columns=["properties_json"]), props_df], axis=1)
+    return df_out
+
 def process_movies():
     with sqlite3.connect(DB_FILE) as conn:
-
         df = pd.read_sql("SELECT * FROM movies", conn)
-
-
-        #loooots of analysis here------------------
+        #loooots of analysis here, handle only 'use_it' rows:
         df_to_use = expand_df(df)
-        #currently, contains only 'use_it'=1 rows
-        #-------------------------------------
-
-        #define new columns made in dataframe df during processing
-        #ensure_columns_from_dataframe(conn, "movies", df_to_use)
         df_to_DB(df_to_use)
-        #then write to movies:
-        # cursor = conn.cursor()
-        # for _, row in df_to_use.iterrows():
-        #     movie_id = row["id"]
-        #     columns = [col for col in df_to_use.columns if col != "id"]
-        #     set_clause = ", ".join([
-        #         f'"{col}" = ?'
-        #         for col in columns
-        #     ])
-        #     values = [row[col] for col in columns]
-        #
-        #     sql = f"""
-        #         UPDATE movies
-        #         SET {set_clause}
-        #         WHERE id = ?
-        #     """
-        #
-        #     cursor.execute(sql, values + [movie_id])
-        #
-        # conn.commit()
-
     print("Processing done.")
 
 def show_movies_df():
     with sqlite3.connect(DB_FILE) as conn:
         df = pd.read_sql("SELECT * FROM movies", conn)
+    df_out=unpack_json_in_df(df)
+    print(df_out.to_string(index=False))
 
-    # Expand JSON into columns
-    props_df = df["properties_json"].apply(
-        lambda x: json.loads(x) if x else {}
-    ).apply(pd.Series)
-
-    df = pd.concat([df.drop(columns=["properties_json"]), props_df], axis=1)
-
-    print(df.to_string(index=False))
-
-
-# ---------------------------
-# Example workflow
-# ---------------------------
+#for initialization DB:
 if __name__ == "__main__":
-    if 0:  #Danger zone_will overwrite your table!
+    if 0:  #Danger zone: this will overwrite your Database!
         init_db()
