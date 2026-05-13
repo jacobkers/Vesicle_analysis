@@ -58,7 +58,8 @@ class GUV:
         self.notes = 'any note'
 
 
-def expand_df(df):
+def expand_df(df, pic_format='png'):
+
     # Read as DataFrame:
     #build a list of 'GUV' objects:
     Guv_list = []
@@ -72,7 +73,7 @@ def expand_df(df):
          props_df],
         axis=1
     )
-
+    # select the user-flagged ones:
     df_to_use=df_flat[df_flat['use_it'] == 1]
     for ix, guvrow in enumerate(df_to_use["id"]):
         Guv = GUV()
@@ -110,7 +111,10 @@ def expand_df(df):
     for Guv in Guv_list:
         print('working: ', str(Guv.id), ':',Guv.experiment_label)
         image_path = Guv.pathname + '\\' + Guv.filename
-        diagnosis_pathname = Guv.pathname + '\\' + 'diagnosis\\'
+        if pic_format != 'none':
+            diagnosis_pathname = Guv.pathname + '\\' + 'diagnosis\\'
+            if not Path(diagnosis_pathname).is_dir():
+                Path(diagnosis_pathname).mkdir()
 
         #if filename contains a template:
         if  '*' in Guv.filename: #OR: assemble from more
@@ -151,17 +155,18 @@ def expand_df(df):
 
         # EXPORT GRAPHICS: ---------------------------------------------------------
         #set up, show and save work plot:
-        fig, axs = plt.subplots(1, clrs +1)
-        #note that we assume that a picture is a single image of one or more channels, "CXY"
-        for color_i, chan in enumerate(roi):
-            axs[color_i].imshow(chan)
-            axs[color_i].set_title('channel'+str(color_i))
-        axs[color_i+1].imshow(roi_work)
-        axs[color_i+1].set_title('work image')
-        fig.tight_layout()
-        target = diagnosis_pathname + 'Guv' + str(Guv.id).zfill(3) + '_1_separate_channels.png'
-        fig.savefig(target)
-        plt.close('all')
+        if pic_format != 'none':
+            fig, axs = plt.subplots(1, clrs +1)
+            #note that we assume that a picture is a single image of one or more channels, "CXY"
+            for color_i, chan in enumerate(roi):
+                axs[color_i].imshow(chan)
+                axs[color_i].set_title('channel'+str(color_i))
+            axs[color_i+1].imshow(roi_work)
+            axs[color_i+1].set_title('work image')
+            fig.tight_layout()
+            target = diagnosis_pathname + 'Guv_' + str(Guv.id).zfill(3) + '_1_separate_channels.' + pic_format
+            fig.savefig(target, format=pic_format)
+            plt.close('all')
         #---------------------------------------------------------------------------------------------
 
 
@@ -185,30 +190,32 @@ def expand_df(df):
             #get some basic shape properties:
             labels, n_labels = measure.label(mask_5, return_num = True)
             regprops = measure.regionprops(labels)
+            if len(regprops) > 0:
+                xm, ym = regprops[0].centroid
 
             #EXPORT GRAPHICS: build a figure showing the masks:-------------------------------------
-            fig, axs = plt.subplots(2, 4)
-            axs[0,0].imshow(roi_work)
-            axs[0,1].imshow(mask_0)
-            axs[0,2].imshow(mask_1)
-            axs[0,3].imshow(mask_2)
-            axs[1,0].imshow(mask_3)
-            axs[1,1].imshow(mask_4)
-            axs[1,2].imshow(mask_5)
-            #if succesful, plot COM:
-            if len(regprops)>0:
-                xm,ym = regprops[0].centroid
-                #because later we obtain a more precise measure of the avarge radius,
-                # here we revert to relative values for minor and major ax-radii:
-                axs[1,2].plot(ym,xm, 'ro', markersize=5)
-                axs[1,3].imshow(roi_work*mask_5)
-                axs[1,3].plot(ym,xm, 'ro', markersize=5)
-            fig.tight_layout()
-            #plt.show()
-            #save this figure
-            target= diagnosis_pathname + str(Guv.id).zfill(3) +'_2_masking.png'
-            fig.savefig(target)
-            plt.close('all')
+            if pic_format != 'none':
+                fig, axs = plt.subplots(2, 4)
+                axs[0,0].imshow(roi_work)
+                axs[0,1].imshow(mask_0)
+                axs[0,2].imshow(mask_1)
+                axs[0,3].imshow(mask_2)
+                axs[1,0].imshow(mask_3)
+                axs[1,1].imshow(mask_4)
+                axs[1,2].imshow(mask_5)
+                #if succesful, plot COM:
+                if len(regprops)>0:
+                    #because later we obtain a more precise measure of the avarge radius,
+                    # here we revert to relative values for minor and major ax-radii:
+                    axs[1,2].plot(ym,xm, 'ro', markersize=5)
+                    axs[1,3].imshow(roi_work*mask_5)
+                    axs[1,3].plot(ym,xm, 'ro', markersize=5)
+                fig.tight_layout()
+                #plt.show()
+                #save this figure
+                target= diagnosis_pathname + 'Guv_'+ str(Guv.id).zfill(3) +'_2_masking.'+ pic_format
+                fig.savefig(target, format=pic_format)
+                plt.close('all')
             #-----------------------------------------------------------------------------
 
             if len(regprops) > 0:
@@ -286,60 +293,61 @@ def expand_df(df):
                     mean_value.append(np.mean(y_fit))
 
                     #EXPORT GRAPHICS: ---------------------------------------------------------
-                    if color_i== Guv.channel_of_interest:
-                        #1) show and save the results for the main channel-of interests:
-                        fig, axs = plt.subplots(1, 4)
-                        axs[0].imshow(mask_5)
-                        axs[1].imshow(inner_mask)
-                        axs[2].imshow(outer_mask)
-                        axs[3].imshow(edge_mask)
-                        fig.tight_layout()
-                        target=diagnosis_pathname + 'Guv_no' + str(Guv.id).zfill(3) +'_3_inner_outer_masks.png'
-                        fig.savefig(target)
-                        plt.close('all')
+                    if pic_format != 'none':
+                        if color_i== Guv.channel_of_interest:
+                            #1) show and save the results for the main channel-of interests:
+                            fig, axs = plt.subplots(1, 4)
+                            axs[0].imshow(mask_5)
+                            axs[1].imshow(inner_mask)
+                            axs[2].imshow(outer_mask)
+                            axs[3].imshow(edge_mask)
+                            fig.tight_layout()
+                            target=diagnosis_pathname + 'Guv_' + str(Guv.id).zfill(3) +'_3_inner_outer_masks.'+ pic_format
+                            fig.savefig(target, format=pic_format)
+                            plt.close('all')
 
-                        #2) radial mapping geometry:
-                        skips=5
-                        fig, axs = plt.subplots(1, 1)
-                        axs.imshow(roi_main)
-                        axs.plot(Ysamplinggrid[::skips,::skips], Xsamplinggrid[::skips,::skips], '-')
-                        fig.tight_layout()
-                        #save this figure
-                        target=diagnosis_pathname + 'Guv_no' + str(Guv.id).zfill(3) +'_4_radial_sampling.png'
-                        fig.savefig(target)
-                        plt.close('all')
-                        #plt.show()
+                            #2) radial mapping geometry:
+                            skips=5
+                            fig, axs = plt.subplots(1, 1)
+                            axs.imshow(roi_main)
+                            axs.plot(Ysamplinggrid[::skips,::skips], Xsamplinggrid[::skips,::skips], '-')
+                            fig.tight_layout()
+                            #save this figure
+                            target=diagnosis_pathname + 'Guv_' + str(Guv.id).zfill(3) +'_4_radial_sampling.' + pic_format
+                            fig.savefig(target, format=pic_format)
+                            plt.close('all')
+                            #plt.show()
 
-                        #3) polar maps from the radial mapping:
-                        fig, axs = plt.subplots(1, 3)
-                        axs[0].imshow(inner_map,extent=[0,360,r_max,0], aspect='auto')
-                        axs[0].set_title('inner')
-                        axs[0].set_xlabel('angle')
-                        axs[1].imshow(outer_map,extent=[0,360,r_max,0], aspect='auto')
-                        axs[1].set_title('outer')
-                        axs[1].set_xlabel('angle')
-                        axs[2].imshow(edge_map,extent=[0,360,r_max,0], aspect='auto')
-                        axs[2].set_title('edge')
-                        axs[2].set_xlabel('angle')
-                        fig.tight_layout()
-                        target=diagnosis_pathname +  '/Guv_no' + str(Guv.id).zfill(3) +'_5_radial_maps.png'
-                        fig.savefig(target)
-                        plt.close('all')
-                        #---------------------------------------------------------------------------
+                            #3) polar maps from the radial mapping:
+                            fig, axs = plt.subplots(1, 3)
+                            axs[0].imshow(inner_map,extent=[0,360,r_max,0], aspect='auto')
+                            axs[0].set_title('inner')
+                            axs[0].set_xlabel('angle')
+                            axs[1].imshow(outer_map,extent=[0,360,r_max,0], aspect='auto')
+                            axs[1].set_title('outer')
+                            axs[1].set_xlabel('angle')
+                            axs[2].imshow(edge_map,extent=[0,360,r_max,0], aspect='auto')
+                            axs[2].set_title('edge')
+                            axs[2].set_xlabel('angle')
+                            fig.tight_layout()
+                            target=diagnosis_pathname +  '/Guv_' + str(Guv.id).zfill(3) +'_5_radial_maps.' + pic_format
+                            fig.savefig(target, format=pic_format)
+                            plt.close('all')
+                            #---------------------------------------------------------------------------
 
-                        # 4) sine wave:-----------------------------------------------
-                        fig, axs = plt.subplots(1,1)
-                        axs.plot(x, profile, 'b-')
-                        axs.plot(cln_x, cln_profile, 'k-')
-                        axs.plot(cln_x, 0*cln_profile+max_value[color_i], 'r--')
-                        axs.plot(cln_x, 0*cln_profile+mean_value[color_i], '--')
-                        axs.plot(y_fit)
-                        fig.tight_layout()
-                        #save this figure
-                        target=diagnosis_pathname +  '/Guv_no' + str(Guv.id).zfill(3) +'_6_edge_fit.png'
-                        fig.savefig(target)
-                        plt.close('all')
-                        #--------------------------------------------------------------------------------
+                            # 4) sine wave:-----------------------------------------------
+                            fig, axs = plt.subplots(1,1)
+                            axs.plot(x, profile, 'b-')
+                            axs.plot(cln_x, cln_profile, 'k-')
+                            axs.plot(cln_x, 0*cln_profile+max_value[color_i], 'r--')
+                            axs.plot(cln_x, 0*cln_profile+mean_value[color_i], '--')
+                            axs.plot(y_fit)
+                            fig.tight_layout()
+                            #save this figure
+                            target=diagnosis_pathname +  '/Guv_' + str(Guv.id).zfill(3) +'_6_edge_fit.' + pic_format
+                            fig.savefig(target, format=pic_format)
+                            plt.close('all')
+                            #--------------------------------------------------------------------------------
 
                 if N_colors<3: #pad channels
                     for ii in range(3-N_colors):

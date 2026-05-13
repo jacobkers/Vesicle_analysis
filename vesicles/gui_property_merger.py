@@ -169,11 +169,14 @@ def unpack_json_in_df(df_in):
     df_out = pd.concat([df_in.drop(columns=["properties_json"]), props_df], axis=1)
     return df_out
 
-def process_movies():
+def process_movies(pic_format):
     with sqlite3.connect(DB_FILE) as conn:
         df = pd.read_sql("SELECT * FROM movies", conn)
+
+        #-------------------------------------------------
         #loooots of analysis here, handle only 'use_it' rows:
-        df_to_use = expand_df(df)
+        df_to_use = expand_df(df,pic_format = pic_format)
+        #-------------------------------------------
         df_to_DB(df_to_use)
     print("Processing done.")
 

@@ -39,20 +39,27 @@ class MainWindow(QMainWindow):
         main_help_button = QPushButton('Read me')
         main_help_button.clicked.connect(self.show_main_help)
 
-        show_vesicles_DB_button = QPushButton('show database')
+        show_vesicles_DB_button = QPushButton('Show database')
         show_vesicles_DB_button.setToolTip("display current database contents")
         show_vesicles_DB_button.clicked.connect(self.show_database)
 
-        import_vesicles_button = QPushButton('import excel')
+        import_vesicles_button = QPushButton('Import Excel')
         import_vesicles_button.setToolTip("press to re-import excel")
         import_vesicles_button.clicked.connect(self.import_excel)
 
-        process_vesicles_button = QPushButton('(re)process')
+        #process & diagnose
+        process_layout=QHBoxLayout()
+        process_vesicles_button = QPushButton('Process')
         process_vesicles_button.setToolTip("press to update project data")
         process_vesicles_button.clicked.connect(self.update_movies)
+        self.pic_format_button= QComboBox()
+        self.pic_format_button.addItems(['png', 'jpg', 'svg', 'none'])
+        process_layout.addWidget(process_vesicles_button)
+        process_layout.addWidget(self.pic_format_button)
 
+        #export of excel
         export_layout=QHBoxLayout()
-        export_vesicles_button = QPushButton('export excel')
+        export_vesicles_button = QPushButton('Export Excel')
         export_vesicles_button.setToolTip("press to save to vesicles.xls")
         export_vesicles_button.clicked.connect(self.export_vesicles)
         self.export_options_button = QComboBox()
@@ -77,7 +84,7 @@ class MainWindow(QMainWindow):
         left_layout = QVBoxLayout()
         left_layout.addWidget(show_vesicles_DB_button)
         left_layout.addWidget(import_vesicles_button)
-        left_layout.addWidget(process_vesicles_button)
+        left_layout.addLayout(process_layout)
         left_layout.addLayout(export_layout)
 
         left_layout.addWidget(main_help_button)
@@ -124,7 +131,8 @@ class MainWindow(QMainWindow):
         print("<--current vesicle data")
 
     def update_movies(self):
-        gui_property_merger.process_movies()
+        pic_format=self.pic_format_button.currentText()
+        gui_property_merger.process_movies(pic_format=pic_format)
         print("processed & updated database")
 
 
