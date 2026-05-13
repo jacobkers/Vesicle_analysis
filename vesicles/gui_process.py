@@ -25,7 +25,7 @@ import tifffile
 import sys
 import os
 
-#from vesicles.flat_vesicle_mapper import diagnosis_pathname
+#from vesicles.flat_vesicle_mapper import graphs_pathname
 
 # Get the current working directory
 current_directory = os.getcwd()
@@ -112,9 +112,9 @@ def expand_df(df, pic_format='png'):
         print('working: ', str(Guv.id), ':',Guv.experiment_label)
         image_path = Guv.pathname + '\\' + Guv.filename
         if pic_format != 'none':
-            diagnosis_pathname = Guv.pathname + '\\' + 'diagnosis\\'
-            if not Path(diagnosis_pathname).is_dir():
-                Path(diagnosis_pathname).mkdir()
+            graphs_pathname = Guv.pathname + '\\' + 'graphs\\'
+            if not Path(graphs_pathname).is_dir():
+                Path(graphs_pathname).mkdir()
 
         #if filename contains a template:
         if  '*' in Guv.filename: #OR: assemble from more
@@ -164,7 +164,7 @@ def expand_df(df, pic_format='png'):
             axs[color_i+1].imshow(roi_work)
             axs[color_i+1].set_title('work image')
             fig.tight_layout()
-            target = diagnosis_pathname + 'Guv_' + str(Guv.id).zfill(3) + '_1_separate_channels.' + pic_format
+            target = graphs_pathname + 'Guv_' + str(Guv.id).zfill(3) + '_1_separate_channels.' + pic_format
             fig.savefig(target, format=pic_format)
             plt.close('all')
         #---------------------------------------------------------------------------------------------
@@ -213,7 +213,7 @@ def expand_df(df, pic_format='png'):
                 fig.tight_layout()
                 #plt.show()
                 #save this figure
-                target= diagnosis_pathname + 'Guv_'+ str(Guv.id).zfill(3) +'_2_masking.'+ pic_format
+                target= graphs_pathname + 'Guv_'+ str(Guv.id).zfill(3) +'_2_masking.'+ pic_format
                 fig.savefig(target, format=pic_format)
                 plt.close('all')
             #-----------------------------------------------------------------------------
@@ -302,7 +302,7 @@ def expand_df(df, pic_format='png'):
                             axs[2].imshow(outer_mask)
                             axs[3].imshow(edge_mask)
                             fig.tight_layout()
-                            target=diagnosis_pathname + 'Guv_' + str(Guv.id).zfill(3) +'_3_inner_outer_masks.'+ pic_format
+                            target=graphs_pathname + 'Guv_' + str(Guv.id).zfill(3) +'_3_inner_outer_masks.'+ pic_format
                             fig.savefig(target, format=pic_format)
                             plt.close('all')
 
@@ -313,7 +313,7 @@ def expand_df(df, pic_format='png'):
                             axs.plot(Ysamplinggrid[::skips,::skips], Xsamplinggrid[::skips,::skips], '-')
                             fig.tight_layout()
                             #save this figure
-                            target=diagnosis_pathname + 'Guv_' + str(Guv.id).zfill(3) +'_4_radial_sampling.' + pic_format
+                            target=graphs_pathname + 'Guv_' + str(Guv.id).zfill(3) +'_4_radial_sampling.' + pic_format
                             fig.savefig(target, format=pic_format)
                             plt.close('all')
                             #plt.show()
@@ -330,7 +330,7 @@ def expand_df(df, pic_format='png'):
                             axs[2].set_title('edge')
                             axs[2].set_xlabel('angle')
                             fig.tight_layout()
-                            target=diagnosis_pathname +  '/Guv_' + str(Guv.id).zfill(3) +'_5_radial_maps.' + pic_format
+                            target=graphs_pathname +  '/Guv_' + str(Guv.id).zfill(3) +'_5_radial_maps.' + pic_format
                             fig.savefig(target, format=pic_format)
                             plt.close('all')
                             #---------------------------------------------------------------------------
@@ -344,7 +344,7 @@ def expand_df(df, pic_format='png'):
                             axs.plot(y_fit)
                             fig.tight_layout()
                             #save this figure
-                            target=diagnosis_pathname +  '/Guv_' + str(Guv.id).zfill(3) +'_6_edge_fit.' + pic_format
+                            target=graphs_pathname +  '/Guv_' + str(Guv.id).zfill(3) +'_6_edge_fit.' + pic_format
                             fig.savefig(target, format=pic_format)
                             plt.close('all')
                             #--------------------------------------------------------------------------------
