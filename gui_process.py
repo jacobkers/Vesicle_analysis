@@ -36,8 +36,7 @@ one_level_up = os.path.abspath(os.path.join(current_directory, ".."))
 sys.path.insert(0, one_level_up)
 sys.path.insert(0, two_levels_up)
 
-from common_tools import guv_binary_ops
-from common_tools import guv_tools
+from vesicles.common_tools import guv_binary_ops, guv_tools
 
 plt.rcParams['figure.figsize'] = [7, 5]
 

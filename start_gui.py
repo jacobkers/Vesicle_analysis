@@ -2,7 +2,8 @@ from PySide6.QtWidgets import QApplication
 import sys
 
 from multiprocessing import freeze_support
-
+import vesicles
+from gui_main import MainWindow
 
 def start_gui():
     freeze_support()
