@@ -196,12 +196,19 @@ def expand_df(df, pic_format='png'):
             if pic_format != 'none':
                 fig, axs = plt.subplots(2, 4)
                 axs[0,0].imshow(roi_work)
+                axs[0,0].set_title('1.work image')
                 axs[0,1].imshow(mask_0)
+                axs[0,1].set_title('2.tresholded')
                 axs[0,2].imshow(mask_1)
+                axs[0,2].set_title('3.filled')
                 axs[0,3].imshow(mask_2)
+                axs[0,3].set_title('4.cleaned')
                 axs[1,0].imshow(mask_3)
+                axs[1,0].set_title('5.eroded')
                 axs[1,1].imshow(mask_4)
+                axs[1,1].set_title('6.central object')
                 axs[1,2].imshow(mask_5)
+                axs[1,2].set_title('7.dilated')
                 #if succesful, plot COM:
                 if len(regprops)>0:
                     #because later we obtain a more precise measure of the avarge radius,
@@ -209,6 +216,7 @@ def expand_df(df, pic_format='png'):
                     axs[1,2].plot(ym,xm, 'ro', markersize=5)
                     axs[1,3].imshow(roi_work*mask_5)
                     axs[1,3].plot(ym,xm, 'ro', markersize=5)
+                    axs[1,3].set_title('8.masked work image')
                 fig.tight_layout()
                 #plt.show()
                 #save this figure
@@ -297,9 +305,13 @@ def expand_df(df, pic_format='png'):
                             #1) show and save the results for the main channel-of interests:
                             fig, axs = plt.subplots(1, 4)
                             axs[0].imshow(mask_5)
+                            axs[0].set_title('work mask')
                             axs[1].imshow(inner_mask)
+                            axs[1].set_title('inner mask')
                             axs[2].imshow(outer_mask)
+                            axs[2].set_title('outer mask')
                             axs[3].imshow(edge_mask)
+                            axs[3].set_title('edge mask')
                             fig.tight_layout()
                             target=graphs_pathname + 'Guv_' + str(Guv.id).zfill(3) +'_3_inner_outer_masks.'+ pic_format
                             fig.savefig(target, format=pic_format)

@@ -7,10 +7,7 @@ from gui_main import MainWindow
 
 def start_gui():
     freeze_support()
-
     app = QApplication(sys.argv)
-
-
     window = MainWindow()
     window.show()
     app.exec_()

@@ -11,6 +11,7 @@ import os
 from gui_process import expand_df
 
 #set paths and files here
+#todo: move these globals to a class
 PATH_IN =str("C:/Users/jkerssemakers/OneDrive - Delft University of Technology/CD_recent/BN_CD24_Bert/Joss paper/example_data_set/")
 MOVIES_IN = os.path.join(PATH_IN, "data_overview.xlsx")
 VESICLES_OUT = os.path.join(PATH_IN, "vesicles_out.xlsx")
@@ -172,11 +173,8 @@ def unpack_json_in_df(df_in):
 def process_movies(pic_format):
     with sqlite3.connect(DB_FILE) as conn:
         df = pd.read_sql("SELECT * FROM movies", conn)
-
-        #-------------------------------------------------
         #loooots of analysis here, handle only 'use_it' rows:
         df_to_use = expand_df(df,pic_format = pic_format)
-        #-------------------------------------------
         df_to_DB(df_to_use)
     print("Processing done.")
 
