@@ -140,7 +140,10 @@ def expand_df(df, pic_format='png'):
                     x_calibration = xres[0] / xres[1]
                     #print("resolution:", 100/x_calibration)
 
-        # extract other basic metadata
+        # handle single-channel images:
+        if roi.ndim == 2:
+            roi = np.expand_dims(roi, axis=0)
+
         clrs, rr,cc,=np.shape(roi)
 
         # setup a work image for edge detection etc, use a weight key for this
@@ -226,7 +229,7 @@ def expand_df(df, pic_format='png'):
             #-----------------------------------------------------------------------------
 
             if len(regprops) > 0:
-                r_eq = regprops[0].equivalent_diameter / 2
+                r_eq = regprops[0].equivalent_diameter_area / 2
                 rmin_rel = regprops[0].axis_minor_length / 2 / r_eq
                 rmaj_rel = regprops[0].axis_major_length / 2 / r_eq
                 area_rel = regprops[0].area / (r_eq ** 2)

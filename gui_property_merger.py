@@ -7,16 +7,17 @@ from pathlib import Path
 from datetime import datetime
 import shutil
 import os
+import gui_config_experiment as config
 
 from gui_process import expand_df
 
+
 #set paths and files here
-#todo: move these globals to a class
-PATH_IN =str("C:/Users/jkerssemakers/OneDrive - Delft University of Technology/CD_recent/BN_CD24_Bert/Joss paper/example_data_set/")
-MOVIES_IN = os.path.join(PATH_IN, "data_overview.xlsx")
-VESICLES_OUT = os.path.join(PATH_IN, "vesicles_out.xlsx")
-DB_FILE = os.path.join(PATH_IN, "project.db")
-CODE_VERSION = "v1.0-movies"
+PATH_IN =config.path_in
+MOVIES_IN = config.movies_in
+VESICLES_OUT = config.vesicles_out
+DB_FILE = config.database_file
+CODE_VERSION = config.code_version
 
 def canonical_value(v):
     import numpy as np

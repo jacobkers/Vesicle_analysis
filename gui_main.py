@@ -147,7 +147,7 @@ class MainWindow(QMainWindow):
                 <html>
                   <body style="font-family: sans-serif; font-size: 10pt;">
 
-                    <h2>Welcome</h2>
+                    <h2>VesicleTool</h2>
 
                     <p>
                       This gui syncs user-based Excel entries with a database and an analysis pipeline. 
@@ -158,6 +158,7 @@ class MainWindow(QMainWindow):
                      <p>
 
                         <ul>
+                          <li> Set up your paths and files in the 'gui_config_experiment' file</li>
                           <li> Edit the various excel entries and set selection with 'use_it'=1</li>
                           <li>'Show database' shows current contents of the 'DB' .db file </li>
                           <li>'Import Excel' overwrites all selected DB rows  </li>
@@ -168,13 +169,13 @@ class MainWindow(QMainWindow):
                      </p>   
                     
                     <p>   
-                    code will automatically add changes, re-analyze data if necessary
+                    VesicleTool will automatically add changes, re-analyze data if necessary
                     and export updated results back to the Excels
                     </p>
                     
                     <p>
-                      code is here:
-                      <a href="https://github.com/jacobkers/">
+                      Repository:
+                      <a href="https://github.com/jacobkers/CD23_vesicles/">
                         Vesicle code
                       </a>.
                     </p>
