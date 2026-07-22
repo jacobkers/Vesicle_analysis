@@ -27,6 +27,9 @@
 *.tif
 *.tiff
 
+# config
+gui_config_experiment.pyyyy
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
