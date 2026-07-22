@@ -28,7 +28,7 @@
 *.tiff
 
 # config
-gui_config_experiment.pyyyy
+gui_config_experiment.py
 
 
 # Byte-compiled / optimized / DLL files
