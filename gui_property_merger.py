@@ -6,18 +6,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 import shutil
-import os
-import gui_config_experiment as config
-
 from gui_process import expand_df
-
-
-#set paths and files here
-PATH_IN =config.path_in
-MOVIES_IN = config.movies_in
-VESICLES_OUT = config.vesicles_out
-DB_FILE = config.database_file
-CODE_VERSION = config.code_version
 
 def canonical_value(v):
     import numpy as np
@@ -29,7 +18,6 @@ def canonical_value(v):
         return v.item()
     if isinstance(v, pd.Timestamp):
         return v.isoformat()
-
     return v
 
 def build_properties(row, columns):
@@ -43,9 +31,9 @@ def build_properties(row, columns):
 def timestamp():
     return datetime.now().strftime("%y%m%d%H")
 
-def init_db():
+def init_db(db_file):
     #needs to be done only once: build first contents of database
-    with sqlite3.connect(DB_FILE) as conn:
+    with sqlite3.connect(db_file) as conn:
         conn.execute("""
         CREATE TABLE movies (
             id INTEGER PRIMARY KEY,
@@ -54,14 +42,14 @@ def init_db():
         """)
     print("Database initialized.")
 
-def add_movie(experiment_label):
-    with sqlite3.connect(DB_FILE) as conn:
-        conn.execute("""
-        INSERT OR IGNORE INTO movies
-        (experiment_label, properties_json, property_hash, last_run_hash, status)
-        VALUES (?, '{}', '', '', 'dirty')
-        """, (str(experiment_label),))
-    print(f"Added movie: {experiment_label}")
+# def add_movie(experiment_label,db_file):
+#     with sqlite3.connect(db_file) as conn:
+#         conn.execute("""
+#         INSERT OR IGNORE INTO movies
+#         (experiment_label, properties_json, property_hash, last_run_hash, status)
+#         VALUES (?, '{}', '', '', 'dirty')
+#         """, (str(experiment_label),))
+#     print(f"Added movie: {experiment_label}")
 
 def backup_file(filepath):
     path = Path(filepath)
@@ -72,31 +60,31 @@ def backup_file(filepath):
         shutil.copy(path, backup_path)            # <-- copy the file
         print(f"Backup created: {backup_path}")
 
-def export_to_excel(export_option="all"):
-    backup_file(VESICLES_OUT)
-    with sqlite3.connect(DB_FILE) as conn:
+def export_to_excel(db_file, vesicles_out, export_option="all"):
+    backup_file(vesicles_out)
+    with sqlite3.connect(db_file) as conn:
         df = pd.read_sql("SELECT * FROM movies", conn)
     df_out=unpack_json_in_df(df)
     if export_option=="selection":
         df_out=df_out[df_out['use_it'] == 1]
 
-    df_out.to_excel(VESICLES_OUT, index=False)
+    df_out.to_excel(vesicles_out, index=False)
     print("Export complete.")
 
 
-def import_excel():
+def import_excel(db_file,movies_in):
     #pass a path here
-    df = pd.read_excel(MOVIES_IN)
+    df = pd.read_excel(movies_in)
     df_to_use = df[df['use_it'] == 1]
-    df_to_DB(df_to_use)
+    df_to_DB(db_file,df_to_use)
     print("Import complete.")
 
-def df_to_DB(df):
+def df_to_DB(db_file,df):
     #write a flat dataframe (i.e., no json blobs inside) to a DB
     #reset all 'use_it' to zero first - in the DB
 
 
-    with sqlite3.connect(DB_FILE) as conn:
+    with sqlite3.connect(db_file) as conn:
         cursor = conn.cursor()
 
         cursor.execute("""
@@ -171,21 +159,21 @@ def unpack_json_in_df(df_in):
     df_out = pd.concat([df_in.drop(columns=["properties_json"]), props_df], axis=1)
     return df_out
 
-def process_movies(pic_format):
-    with sqlite3.connect(DB_FILE) as conn:
+def process_movies(db_file, pic_format):
+    with sqlite3.connect(db_file) as conn:
         df = pd.read_sql("SELECT * FROM movies", conn)
         #loooots of analysis here, handle only 'use_it' rows:
         df_to_use = expand_df(df,pic_format = pic_format)
-        df_to_DB(df_to_use)
+        df_to_DB(db_file,df_to_use)
     print("Processing done.")
 
-def show_movies_df():
-    with sqlite3.connect(DB_FILE) as conn:
+def show_movies_df(db_file):
+    with sqlite3.connect(db_file) as conn:
         df = pd.read_sql("SELECT * FROM movies", conn)
     df_out=unpack_json_in_df(df)
     print(df_out.to_string(index=False))
 
 #for initialization DB:
 if __name__ == "__main__":
-    if 0:  #Danger zone: this will overwrite your Database!
-        init_db()
+    if 1:  #Danger zone: this will overwrite your Database!
+        init_db(db_file)

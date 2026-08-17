@@ -25,7 +25,6 @@ import tifffile
 import sys
 import os
 
-#from vesicles.flat_vesicle_mapper import graphs_pathname
 
 # Get the current working directory
 current_directory = os.getcwd()
