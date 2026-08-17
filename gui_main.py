@@ -164,11 +164,11 @@ class MainWindow(QMainWindow):
                      <p>
 
                         <ul>
-                          <li> Set up your paths and files in the 'gui_config_experiment' file</li>
-                          <li> Edit the various excel entries and set selection with 'use_it'=1</li>
-                          <li>'Show database' shows current contents of the 'DB' .db file </li>
-                          <li>'Import Excel' overwrites all selected DB rows  </li>
-                          <li>'Process' analyzes and stores data with all selected DB rows </li>
+                          <li> 'Choose file' :Define your paths and overview file  file</li>
+                          <li> [extern] Edit the various excel entries and set selection with 'use_it'=1</li>
+                          <li> 'Show database' shows current contents of the 'DB' .db file </li>
+                          <li> 'Import Excel' overwrites all selected DB rows  </li>
+                          <li> 'Process' analyzes and stores data with all selected DB rows </li>
                           <li> During processing, graphics are saved in the specified format field </li>
                           <li> 'Export Excel' saves either all or the selected rows </li>
                         </ul>
@@ -203,6 +203,9 @@ class MainWindow(QMainWindow):
         self.help_dialog.show()
 
 if __name__ == '__main__':
+    import warnings
+    warnings.filterwarnings("error", category=RuntimeWarning)
+
     from multiprocessing import Process, freeze_support
     freeze_support()
     app = QApplication(sys.argv)

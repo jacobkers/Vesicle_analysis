@@ -672,6 +672,16 @@ def extract_subarray(array, x0, y0, z0, L, W, H):
     
     return sub_array, x_min, x_max, y_min, y_max, z_min, z_max
 
+def safe_mean(data):
+    if data.size == 0:
+        return np.nan
+    return np.mean(data)
+
+def safe_median(data):
+    if data.size == 0:
+        return np.nan
+    return np.median(data)
+
 def subpix_step(ys): #This function calculates a sub pixel step of a local maximum
         #This is achieved with again a parabolic fitting
         xs=np.arange(-1,2)#Here an array is made from 0 to the value of ld

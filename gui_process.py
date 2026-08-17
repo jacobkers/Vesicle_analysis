@@ -255,13 +255,13 @@ def expand_df(df, pic_format='png'):
                     #get values from the inner - and outer area. By buffering into an area, we can apply outlier detection on a later stage
                     inner_pixels = chan[inner_mask.astype(bool)]
                     inner_pixels, outliers, flags = guv_tools.outlier_flag(inner_pixels, tolerance=3, sig_change=0.7, how=1, sho=0, demo=0)
-                    I_inner_mean.append(np.mean(inner_pixels))
-                    I_inner_median.append(np.median(inner_pixels))
+                    I_inner_mean.append(guv_tools.safe_mean(inner_pixels))
+                    I_inner_median.append(guv_tools.safe_median(inner_pixels))
 
                     outer_pixels=chan[outer_mask.astype(bool)]
                     outer_pixels, outliers, flags = guv_tools.outlier_flag(outer_pixels, tolerance=3, sig_change=0.7, how=1, sho=0, demo=0)
-                    I_outer_mean.append(np.mean(outer_pixels))
-                    I_outer_median.append(np.median(outer_pixels))
+                    I_outer_mean.append(guv_tools.safe_mean(outer_pixels))
+                    I_outer_median.append(guv_tools.safe_median(outer_pixels))
 
                     # # Radial mapping for edge:
                     # Now we have the center-of mass, we resample the pattern on a radial mesh
@@ -286,7 +286,7 @@ def expand_df(df, pic_format='png'):
                     profile_max=np.argmax(edge_map, axis=0)
                     if color_i== Guv.channel_of_interest:
                         resolution=(x_calibration)
-                        radius_mean=(np.nanmean(profile_max)/2)  #corrects for oversampling
+                        radius_mean=(guv_tools.safe_mean(profile_max)/2)  #corrects for oversampling
 
                     # for a clean fit, we should remove the mean and remove the outliers ('buds')
                     x=np.arange(len(profile))
@@ -299,7 +299,7 @@ def expand_df(df, pic_format='png'):
                     # Generate the fitted curve (on original x)
                     y_fit = guv_tools.sine_function(np.arange(len(x)), *popt)
                     max_value.append(np.max(y_fit))
-                    mean_value.append(np.mean(y_fit))
+                    mean_value.append(guv_tools.safe_mean(y_fit))
 
                     #EXPORT GRAPHICS: ---------------------------------------------------------
                     if pic_format != 'none':
