@@ -2,7 +2,12 @@
 *.ppt*
 *.doc*
 *.pdf
-*.XXxls*
+
+# test data
+*.xls
+*.xlsx
+*.nc
+*.db
 
 *.mat
 *.zip
@@ -22,6 +27,9 @@
 *.tif
 *.tiff
 
+# config
+gui_config_experiment.py
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -29,4 +37,7 @@ __pycache__/
 *$py.class
 
 # Jupyter Notebook
-.ipynb_checkpoints
+.ipynb_checkpoints/
+
+# other
+.idea/*

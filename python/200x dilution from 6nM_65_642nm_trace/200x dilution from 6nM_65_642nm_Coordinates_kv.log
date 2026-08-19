@@ -1,6 +1,0 @@
-2025-07-01 16:43:32,900 INFO Starting KV on D:\jkerssemakers\Dropbox\CD_recent\BN_CD23_Rafael\analysis\CD23_vesicles\python\200x dilution from 6nM_65_642nm_trace\200x dilution from 6nM_65_642nm_Coordinates.csv
-2025-07-01 16:45:13,307 INFO Finished KV for 101 Traces
-2025-07-02 10:42:20,014 INFO Starting KV on M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Shuo\200x dilution from 6nM_65_642nm_trace\200x dilution from 6nM_65_642nm_Coordinates.csv
-2025-07-02 10:44:24,872 INFO Finished KV for 101 Traces
-2025-07-02 10:44:44,791 INFO Starting Step 2 on M:\tnw\bn\cd\Shared\Jacob\TESTdata_in\2025_Shuo\200x dilution from 6nM_65_642nm_trace/200x dilution from 6nM_65_642nm_Coordinates_kvout.csv
-2025-07-02 10:46:14,370 INFO Finished step 2 for 101 Traces 
