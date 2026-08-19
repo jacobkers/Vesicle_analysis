@@ -14,7 +14,6 @@ from matplotlib.backends.backend_qtagg import (
     FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
 
 from gui_commons import ImageCanvas,HelpDialog
-from gui_results_view_widget import ResultsWidget
 class MainWindow(QMainWindow):
 
     def __init__(self, main_path=None):
@@ -86,9 +85,6 @@ class MainWindow(QMainWindow):
         tab0 = QWidget(self)
         tab0.setLayout(start_tab_layout)
         tabs.addTab(tab0, 'Pictures')
-        kinetics = ResultsWidget(parent=self)
-        tabs.addTab(kinetics, 'Graphs')
-        #tabs.currentChanged.connect(self.setTabFocus)
 
         left_layout = QVBoxLayout()
         left_layout.addWidget(main_help_button)

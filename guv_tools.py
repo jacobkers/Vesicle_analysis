@@ -11,7 +11,6 @@ import cv2
 from scipy.optimize import curve_fit
 from scipy.ndimage import sobel
 from scipy.ndimage import map_coordinates   # for converting cartesian to circular coördinates in QI
-from not_in_use.qi_trak import QI_Tracker
 import matplotlib.pyplot as plt
 
 def outlier_flag(data=0, tolerance=2.5, sig_change=0.7, how=1, sho=1, demo=0):
@@ -223,50 +222,6 @@ def measure_perimeter(true_x, true_y):
         RC=np.nan
     return LC, LR, RC
 
-def track_radial_pattern(roi, runmodus=1, x0=0, y0=0, mapradius=0, demo=1):
-    """ perform QI-based tracking 
-    runmodus 0 = just map using x0 and y0
-    runmodus 1 = same, export final data
-    """
-    roi_array = np.array(roi)  #for tracking                
-    # QI_track on one channel, standard radius
-    rr=np.shape(roi)[0]
-    if runmodus==0:
-        r0=mapradius
-    else:
-        r0=rr/2
-    QI=QI_Tracker(roi_array)
-    preset=QI_Tracker.TrackXY_by_QI_Init(QI,roi_array) 
-    
-    if runmodus == 0:
-        #single run, forced mapping:
-        preset['maxradius']=mapradius
-        preset['iterations']=2
-        x_in = x0
-        y_in = y0
-    if runmodus == 1:
-        #iterative tracking:
-        x_in = rr/2
-        y_in = rr/2
-    xq, yq, allprofiles = QI_Tracker.TrackXY_by_QI(QI,roi_array, preset, x_in, y_in)    
-    
-    if demo:
-        fig, axs = plt.subplots(1,2)
-        plotgridy=preset["X0samplinggrid"]+xq
-        plotgridx=preset["Y0samplinggrid"]+yq
-        axs[0].imshow(roi)
-        lx=np.shape(plotgridx)
-        axs[0].plot(plotgridx[::10,::20],plotgridy[::10,::20],'r-',linewidth=0.3)
-        axs[0].set_title('tracked by QI') 
-        axs[1].imshow(allprofiles)
-        axs[1].set_title('polar map') 
-        fig.tight_layout()
-        
-        return fig,axs
-    else:
-        if runmodus ==1: return xq, yq, allprofiles,preset
-        if runmodus ==0: return x_in, y_in, allprofiles, preset
-
 
 def QI_map(im, QI, x0, y0, demo=0):
     #condensed QI mapping
@@ -295,30 +250,6 @@ def QI_map(im, QI, x0, y0, demo=0):
     else:
         return allprofiles, QI, Xsamplinggrid, Ysamplinggrid
 
-def QI_map_analyze(map, presets):
-    #condensed QI mapping: get  parameters from the polar map
-    #(since this map is non-cartesian, parameters as sum intnesity need to be adjusted)
-    #output values are as if the pattern had regular pixel sampling
-    rr, cc=np.shape(map)
-    rads_per_segment=2*mt.pi/cc
-    sum_profile=[]
-    for ci,X_section in enumerate(np.transpose(map)):
-        area_sm=[]
-        areaI_sm=[]
-        for ri, sample_val in enumerate(X_section):
-            area_i=rads_per_segment*ri/(presets['radialoversampling']**2)
-            area_sm.append(area_i)
-            areaI_sm.append(area_i*sample_val)
-        segment_area=np.sum( area_sm)
-        segment_areaI=np.sum(areaI_sm)
-        sum_profile.append(segment_areaI/segment_area)
-    if 0:
-        fig, axs = plt.subplots(1,1)
-        axs.plot(sum_profile)
-        fig.show()
-        plt.close('all')
-
-    return sum_profile
 
 def check_limits(x0,y0, dims):
     in_range=True
