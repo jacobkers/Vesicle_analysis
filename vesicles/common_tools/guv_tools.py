@@ -56,12 +56,17 @@ def outlier_flag(data=0, tolerance=2.5, sig_change=0.7, how=1, sho=1, demo=0):
     sig_ratio = 0
     sigma_nw = 1e20
     flags = 0 * data + 1
+    inliers=data
+    outliers=[]
     while sig_ratio < sig_change:
         sigma_old = sigma_nw
         ix_in = np.ndarray.nonzero(flags == 1)
         ix_out = np.ndarray.nonzero(flags == 0)
         inliers = data[ix_in]
         outliers = data[ix_out]
+        #health check:
+        if isempty(inliers) or isempty(outliers):
+            pass
         av = np.median(inliers)
         sigma_nw = np.std(inliers)
         sig_ratio = sigma_nw / sigma_old
