@@ -5,7 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="244be4b9-3068-4ba2-83d3-c419e962d81b" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/guv_binary_ops.py" beforeDir="false" afterPath="$PROJECT_DIR$/guv_binary_ops.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui_main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,6 +43,7 @@
     "Python.gui_main.executor": "Run",
     "Python.gui_process.executor": "Run",
     "Python.gui_property_merger.executor": "Run",
+    "Python.guv_binary_ops.executor": "Run",
     "Python.matlab_package_analyzer.executor": "Run",
     "Python.property_merger.executor": "Run",
     "Python.start_gui.executor": "Run",

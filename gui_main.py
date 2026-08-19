@@ -94,7 +94,6 @@ class MainWindow(QMainWindow):
         left_layout.addLayout(process_layout)
         left_layout.addLayout(export_layout)
 
-
         #build main panel
         right_layout = QHBoxLayout()
         #right_layout.addWidget(tabs)
