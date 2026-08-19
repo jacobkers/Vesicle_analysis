@@ -65,10 +65,8 @@ def outlier_flag(data=0, tolerance=2.5, sig_change=0.7, how=1, sho=1, demo=0):
         inliers = data[ix_in]
         outliers = data[ix_out]
         #health check:
-        if isempty(inliers) or isempty(outliers):
-            pass
-        av = np.median(inliers)
-        sigma_nw = np.std(inliers)
+        av = safe_median(inliers)
+        sigma_nw = safe_std(inliers)
         sig_ratio = sigma_nw / sigma_old
         if how == 1:
             flags = (data - av) < tolerance * sigma_nw
@@ -686,6 +684,11 @@ def safe_median(data):
     if data.size == 0:
         return np.nan
     return np.median(data)
+
+def safe_std(data):
+    if data.size == 0:
+        return np.nan
+    return np.std(data)
 
 def subpix_step(ys): #This function calculates a sub pixel step of a local maximum
         #This is achieved with again a parabolic fitting

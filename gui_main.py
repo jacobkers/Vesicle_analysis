@@ -203,8 +203,8 @@ class MainWindow(QMainWindow):
         self.help_dialog.show()
 
 if __name__ == '__main__':
-    import warnings
-    warnings.filterwarnings("error", category=RuntimeWarning)
+    #import warnings
+    #warnings.filterwarnings("error", category=RuntimeWarning)
 
     from multiprocessing import Process, freeze_support
     freeze_support()
