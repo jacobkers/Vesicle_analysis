@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="244be4b9-3068-4ba2-83d3-c419e962d81b" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/environment.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/environment_vesicles-H41ZCR2.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui_main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui_process.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui_process.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui_results_view_widget.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/not_in_use/#lif stuff.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/not_in_use/Vesicles_pipeline.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/not_in_use/Vesicles_pipeline.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/not_in_use/Vesicles_pipeline.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/not_in_use/guv_io.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/not_in_use/guv_process_stacks.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/not_in_use/nd2_splitter.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/not_in_use/notes on code structure.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/not_in_use/notes on code structure.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/not_in_use/qi_trak.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/not_in_use/setup.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/not_in_use/temp.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/not_in_use/tiff_processor.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/not_in_use/x_sand.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vesicles.egg-info/PKG-INFO" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vesicles.egg-info/PKG-INFO.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vesicles.egg-info/SOURCES.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vesicles.egg-info/SOURCES.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vesicles.egg-info/dependency_links.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vesicles.egg-info/dependency_links.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vesicles.egg-info/top_level.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vesicles.egg-info/top_level.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vesicles/common_tools/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vesicles/common_tools/guv_binary_ops.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vesicles/common_tools/guv_tools.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vesicles/not_in_use/A00_init.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vesicles/not_in_use/A10_muscope_crop.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vesicles/not_in_use/A20_process_rois.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vesicles/not_in_use/A30_collect_processed_rois.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vesicles/not_in_use/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vesicles/not_in_use/flat_vesicle_mapper.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vesicles/not_in_use/mains_Rafa.py" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/vesicles/gui_main.py" root0="SKIP_HIGHLIGHTING" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="DEPENDENCY_CHECKER_PROBLEMS_TAB" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="3C2G4SPiryw2zK7AmKAhEYWDS53" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.gui_main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.gui_process.executor&quot;: &quot;Run&quot;,
+    &quot;Python.gui_property_merger.executor&quot;: &quot;Run&quot;,
+    &quot;Python.matlab_package_analyzer.executor&quot;: &quot;Run&quot;,
+    &quot;Python.property_merger.executor&quot;: &quot;Run&quot;,
+    &quot;Python.start_gui.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Excel__UI__design&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/jkerssemakers/OneDrive - Delft University of Technology/Documents/GitHub/CD23_vesicles/vesicles&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\jkerssemakers\OneDrive - Delft University of Technology\Documents\GitHub\CD23_vesicles\not_in_use" />
+      <recent name="C:\Users\jkerssemakers\OneDrive - Delft University of Technology\Documents\GitHub\CD23_vesicles\vesicles\not_in_use" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-ce6832f46686-7b97d883f26b-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.25557.178" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="244be4b9-3068-4ba2-83d3-c419e962d81b" name="Changes" comment="" />
+      <created>1775576061767</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1775576061767</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/gui_process.py</url>
+          <line>256</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/gui_process.py</url>
+          <line>231</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
