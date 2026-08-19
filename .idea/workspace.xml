@@ -5,117 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="244be4b9-3068-4ba2-83d3-c419e962d81b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CD23_Vesicles.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gui_commons.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gui_main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gui_process.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gui_property_merger.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/start_gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.vscode/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/.vscode/settings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Fede/A000_BundleRatios.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Fede/A000_FF__ClickAndGo.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Fede/A000__WF_Get_FF_PathsandExperiments.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Fede/A001_ReadImageStacks.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Fede/A002_2DClusterAnalysis_SingleImage.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Fede/A010_FF_GetGeneralImageProps.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Fede/A_00000_ManualGenerator.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Fede/FF_ExperimentOverview.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Fede/FanalistaWorldMapper.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Fede/tools/Bleachcurvefit.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Fede/tools/F006_CleanSpots.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Fede/tools/FF_Basic_Fluorescence.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Fede/tools/FF_Get_Object_Areas.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Fede/tools/Get_local4max.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Fede/tools/PeelblobsFromImage.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Fede/tools/Plot_Save_stuff_A000_line116.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Fede/tools/Plot_ratio_per_pixel.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Fede/tools/Plot_stuffA000_163.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Fede/tools/Quickplot.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Fede/tools/Scroll_ImageDirs.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Rafa/A000_get_config.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Rafa/A10_guvalyzer_shell.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Rafa/A20_get_areas.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Rafa/A25_map_areas.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Rafa/A30_link_areas.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Rafa/A40_get_vesicle_lifes.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Rafa/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Rafa/tools/apply_Fiji_rois.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Rafa/tools/build_inner_mask.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Rafa/tools/calculate2Dmomentpoints.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Rafa/tools/clean_rim.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Rafa/tools/filament_it.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Rafa/tools/get_FWHM_mainpeak.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Rafa/tools/get_rim_by_radial_edge.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Rafa/tools/get_rois.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Rafa/tools/xy_equalize_along_contour.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Rafa/tools/xy_get_smooth_line_by_com.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Rafa/tools/xy_get_smooth_xyline.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Rafa/tools/xy_sample_grid_around_contour.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Rafa/tools/xy_sort_contour.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/Rafa/tools/xy_unitlength_contour.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/common_tools/Find_treshold_MD_V2020.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/common_tools/GSobel.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/common_tools/JKD1_PRF_smooth.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/common_tools/SymCenter.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/common_tools/TrackXY_by_COM_2Dmoment.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/common_tools/TrackXY_by_QI.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/common_tools/TrackXY_by_QI_Init.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/common_tools/matrix_blur_jk.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/common_tools/prf_outlier_flag.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/matlab/common_tools/swap_path.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/200x dilution from 6nM_65_642nm_trace/200x dilution from 6nM_65_642nm_Coordinates_kv.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/200x dilution from 6nM_65_642nm_trace/200x dilution from 6nM_65_642nm_Coordinates_kvout.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/200x dilution from 6nM_65_642nm_trace/200x dilution from 6nM_65_642nm_Coordinates_result.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/200x dilution from 6nM_65_642nm_trace/200x dilution from 6nM_65_642nm_output_plot.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/200x dilution from 6nM_65_642nm_trace/200x dilution from 6nM_65_642nm_output_plot.svg.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/200x dilution from 6nM_65_642nm_trace/200x dilution from 6nM_65_642nm_output_plot_example.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/Bert/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/Bert/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/Bert/notebooks/Bert_basic_pipeline_notebook.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/Bert/notebooks/tip_to_convert_notebook.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/Bert_pipeline_vesicle_mapping.py" beforeDir="false" afterPath="$PROJECT_DIR$/python/Bert_pipeline_vesicle_mapping.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/Rafa/A00_init.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/Rafa/A10_muscope_crop.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/Rafa/A20_process_rois.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/Rafa/A30_collect_processed_rois.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/Rafa/A30_collect_processed_rois.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/Rafa/B00_init.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/Rafa/B00_membrane_fusion_event_detector.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/Rafa/B10_membrane_fusion_kymograph_generator.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/Rafa/B20_membrane_fusion_analyzer.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/Rafa/B30_membrane_fusion_analyzer_user_additions.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/Rafa/B35_collect_all_and_user_additions.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/Rafa/B40_load_and_plot.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/Rafa/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/Rafa/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/Rafa/notebooks/Fusion_notebook.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/common_tools/#lif stuff.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/common_tools/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/common_tools/guv_binary_ops.py" beforeDir="false" afterPath="$PROJECT_DIR$/guv_binary_ops.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/common_tools/guv_io.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/common_tools/guv_process_stacks.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/common_tools/guv_tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/guv_tools.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/common_tools/nd2_splitter.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/common_tools/qi_trak.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/common_tools/tiff_processor.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/data_overview_Bert_test.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/data_overview_Rafa.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/environment.yml" beforeDir="false" afterPath="$PROJECT_DIR$/environment_vesicles.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/mains_Bert.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/mains_Rafa.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/trackmate/trackmate_read_exports.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/python/trackmate/trackmate_used_settings.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/guv_binary_ops.py" beforeDir="false" afterPath="$PROJECT_DIR$/guv_binary_ops.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -157,7 +47,7 @@
     "Python.start_gui.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "Merging master",
+    "git-widget-placeholder": "master",
     "junie.onboarding.icon.badge.shown": "true",
     "last_opened_file_path": "C:/Users/jkerssemakers/OneDrive - Delft University of Technology/Documents/GitHub/CD23_vesicles/vesicles",
     "to.speed.mode.migration.done": "true"

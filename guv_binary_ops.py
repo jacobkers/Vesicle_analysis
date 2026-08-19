@@ -257,18 +257,3 @@ def  work_binaries(roi_tr):
         roundness= 0
     return  msk, BW_edge, xc, yc, rmin, rmaj, area, perimeter, roundness
 
-
-# show:
-badcodinghabit = 0
-if badcodinghabit:
-    spotim=generate_spot(node_x=0.3,node_y=0.3,psf=2,amplitude=1) + generate_spot(node_x=-0.3,node_y=-0.3,psf=1) + generate_spot(psf=1)
-    msk = binary_actions(spotim)
-    fig, axs=plt.subplots(1,2)
-    axs[0].imshow(spotim)
-    axs[1].imshow(msk)
-    fig.show()
-    axs[0].set_title("spot")
-    fig.tight_layout()
-    print("Press any key to end demo")
-    input()
-    plt.close("all")
