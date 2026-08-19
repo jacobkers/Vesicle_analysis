@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="244be4b9-3068-4ba2-83d3-c419e962d81b" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui_main.py" afterDir="false" />
-    </list>
+    <list default="true" id="244be4b9-3068-4ba2-83d3-c419e962d81b" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -38,23 +35,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.gui_main.executor": "Run",
-    "Python.gui_process.executor": "Run",
-    "Python.gui_property_merger.executor": "Run",
-    "Python.guv_binary_ops.executor": "Run",
-    "Python.matlab_package_analyzer.executor": "Run",
-    "Python.property_merger.executor": "Run",
-    "Python.start_gui.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
-    "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "C:/Users/jkerssemakers/OneDrive - Delft University of Technology/Documents/GitHub/CD23_vesicles/vesicles",
-    "to.speed.mode.migration.done": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.gui_main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.gui_process.executor&quot;: &quot;Run&quot;,
+    &quot;Python.gui_property_merger.executor&quot;: &quot;Run&quot;,
+    &quot;Python.guv_binary_ops.executor&quot;: &quot;Run&quot;,
+    &quot;Python.matlab_package_analyzer.executor&quot;: &quot;Run&quot;,
+    &quot;Python.property_merger.executor&quot;: &quot;Run&quot;,
+    &quot;Python.start_gui.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/jkerssemakers/OneDrive - Delft University of Technology/Documents/GitHub/CD23_vesicles/vesicles&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\jkerssemakers\OneDrive - Delft University of Technology\Documents\GitHub\CD23_vesicles\not_in_use" />
