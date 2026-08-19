@@ -4,18 +4,14 @@
 
 
 import numpy as np
-import matplotlib.pyplot as plt
 import math as mt
 #import nd2reader
 #from readlif.reader import LifFile
-from pathlib import Path
 import cv2
-import csv
-from skimage import io
 from scipy.optimize import curve_fit
 from scipy.ndimage import sobel
 from scipy.ndimage import map_coordinates   # for converting cartesian to circular coördinates in QI
-from vesicles.common_tools.qi_trak import QI_Tracker
+from not_in_use.qi_trak import QI_Tracker
 import matplotlib.pyplot as plt
 
 def outlier_flag(data=0, tolerance=2.5, sig_change=0.7, how=1, sho=1, demo=0):

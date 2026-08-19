@@ -2,7 +2,6 @@
 Jacob Kers 2024
 
  """
-import time as tm
 import xarray as xr
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,11 +9,8 @@ from pathlib import Path
 from skimage import io
 from vesicles.common_tools import guv_tools
 from vesicles.common_tools import guv_binary_ops
-from vesicles.common_tools import guv_io
-import cv2
-import csv
-from scipy.ndimage import binary_opening, binary_closing, binary_fill_holes, binary_dilation, binary_erosion
-from skimage.morphology import ball, disk, square, diamond, ball
+from scipy.ndimage import binary_dilation, binary_erosion
+from skimage.morphology import disk
 
 
 def a20a_build_coordinates(im_ori_name,initval):

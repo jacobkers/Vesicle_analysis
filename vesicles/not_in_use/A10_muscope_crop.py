@@ -5,7 +5,7 @@ Work guv imagery, saves to standardized tiffs per guv
 """
 import numpy as np
 import xarray as xr
-from vesicles.common_tools import guv_io
+from not_in_use import guv_io
 
 """ 
 experiment indices (add 0.1 to run on K:):
@@ -37,12 +37,12 @@ def main(initval):
         csv_source = initval.mainpath_in + initval.subdir + str("Overlay Elements of ") + im_ori_name + str(".csv")
         #build list of GUVs:
         guv_xyr = []
-        XX0, YY0, RR0 = guv_io.get_roi_info(csv_source,initval)
+        XX0, YY0, RR0 = guv_io.get_roi_info(csv_source, initval)
 
 
         if initval.apply_drift_correction==1:
             csv_drift = initval.mainpath_in + initval.subdir + im_ori_name + str("_drift.csv")
-            driftX, driftY= guv_io.get_drift_info(csv_drift,initval)
+            driftX, driftY= guv_io.get_drift_info(csv_drift, initval)
 
         #build a list of crop info, just for passing on:
         for ii, X0 in enumerate(XX0):
@@ -57,13 +57,13 @@ def main(initval):
 
         # access microscope data and save to ROI-stacks per guv:
         if initval.suffix == ".nd2":
-            guv_io.cut_nd2_to_roi_tiffs(im_ori_name,guv_xyr,initval)
+            guv_io.cut_nd2_to_roi_tiffs(im_ori_name, guv_xyr, initval)
         if initval.suffix =='.lif': 
-            guv_io.cut_lif_to_roi_tiffs(im_ori_name,guv_xyr,initval)
+            guv_io.cut_lif_to_roi_tiffs(im_ori_name, guv_xyr, initval)
         if initval.suffix =='.tif' and initval.sequence=='time_trace':
-            guv_io.cut_tif_to_roi_tiffs_hardwired(im_ori_name,guv_xyr,initval)
+            guv_io.cut_tif_to_roi_tiffs_hardwired(im_ori_name, guv_xyr, initval)
         if initval.suffix =='.tif' and initval.sequence=='single_frame':
-            guv_io.cut_singletime_tif_to_roi_tiffs(im_ori_name,guv_xyr,initval)  # change this to a single frame operator
+            guv_io.cut_singletime_tif_to_roi_tiffs(im_ori_name, guv_xyr, initval)  # change this to a single frame operator
 
 if __name__ == "__main__":
     main()

@@ -3,11 +3,10 @@
 Work guv imagery
 @author: jkerssemakers
 """
-import csv
-from pathlib import Path
 import matplotlib.pyplot as plt
 import xarray as xr
-from vesicles.common_tools import guv_io
+from not_in_use import guv_io
+
 
 class GUV:
     """

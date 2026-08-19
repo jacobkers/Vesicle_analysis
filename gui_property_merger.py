@@ -1,7 +1,6 @@
 import sqlite3
 import pandas as pd
-import numpy as np
-import hashlib
+import os
 import json
 from pathlib import Path
 from datetime import datetime
@@ -175,5 +174,8 @@ def show_movies_df(db_file):
 
 #for initialization DB:
 if __name__ == "__main__":
-    if 1:  #Danger zone: this will overwrite your Database!
+    if 0:  #Danger zone: this will overwrite your Database file!
+        # For safety, switch to 'if 0' after run.
+        MyPath=r'C:\Users\jkerssemakers\OneDrive - Delft University of Technology\CD_recent\BN_CD24_Bert\Joss paper\example_data_set'
+        db_file = os.path.join(MyPath,'project.db')
         init_db(db_file)
